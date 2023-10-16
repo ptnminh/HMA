@@ -16,10 +16,12 @@ export class AuthController {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'Email already exists',
+        errors: true,
       };
     }
     const user = await this.authService.signUpByEmail(data);
     return {
+      message: 'Create user successfully',
       status: HttpStatus.CREATED,
       user,
     };

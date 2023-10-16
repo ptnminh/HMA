@@ -29,6 +29,7 @@ export class AuthService {
       select: {
         id: true,
         email: true,
+        roleId: true,
       },
     });
   }
