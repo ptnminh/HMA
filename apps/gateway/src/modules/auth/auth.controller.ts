@@ -20,6 +20,7 @@ export class AuthController {
     const createUserResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.USER_CREATE, body),
     );
+    console.log('hello');
     return createUserResponse;
   }
 }
