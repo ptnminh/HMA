@@ -11,6 +11,7 @@
     $ npm run start:dev
 
     ### Swagger
-    http://localhost:2000/api/v1/swagger
+    http://localhost:2222/api/v1/swagger
 
 ```
+Lưu ý: Mỗi service sẽ có file .env riêng => tạo .env theo .evv.example
