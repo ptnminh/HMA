@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db:generate": "npx prisma generate"
+    "db:generate": "npx prisma generate --schema=./node_modules/@hma/prisma/prisma/schema.prisma"
   },
   "dependencies": {
     "@hma/prisma": "git+https://github.com/ptnminh/hma-prisma",

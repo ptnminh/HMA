@@ -10,20 +10,29 @@ export class AuthController {
 
   @MessagePattern(AuthCommand.USER_CREATE)
   async register(data: RegisterDto) {
-    const { email } = data;
-    const exUser = await this.authService.findUserVerifiedByEmail(email);
-    if (exUser) {
+    try {
+      const { email } = data;
+      const exUser = await this.authService.findUserVerifiedByEmail(email);
+      if (exUser) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Email already exists',
+          errors: true,
+        };
+      }
+      const user = await this.authService.signUpByEmail(data);
       return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'Email already exists',
+        message: 'Create user successfully',
+        status: HttpStatus.CREATED,
+        user,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Internal server error',
         errors: true,
       };
     }
-    const user = await this.authService.signUpByEmail(data);
-    return {
-      message: 'Create user successfully',
-      status: HttpStatus.CREATED,
-      user,
-    };
   }
 }
