@@ -1,4 +1,4 @@
-export interface IRegisterResponse {
+export interface IUser {
   id: string;
   email: string;
   avatar?: string;

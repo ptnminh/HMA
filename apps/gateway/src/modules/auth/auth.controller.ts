@@ -13,6 +13,7 @@ import { RegisterDto, RegisterResponse } from './dto/create-user.dto';
 import { AuthCommand } from './command';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { LoginDto, LoginReponse } from './dto/login.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -55,6 +56,43 @@ export class AuthController {
       message: createUserResponse.message,
       data: {
         user: createUserResponse.user,
+        token: token,
+      },
+      success: true,
+    };
+  }
+
+  @Post('login')
+  @ApiCreatedResponse({
+    type: LoginReponse,
+  })
+  async login(@Body() body: LoginDto) {
+    const loginResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_LOGIN, body),
+    );
+    if (loginResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: loginResponse.message,
+          data: null,
+          errors: loginResponse.errors,
+        },
+        loginResponse.status,
+      );
+    }
+    const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
+    const token = await this.jwtService.signAsync(
+      {
+        ...loginResponse.user,
+      },
+      {
+        secret: jwtSercret,
+      },
+    );
+    return {
+      message: loginResponse.message,
+      data: {
+        user: loginResponse.user,
         token: token,
       },
       success: true,

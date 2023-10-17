@@ -1,8 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IUser } from '../interface/creath-auth.interface';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IUser } from '../interface/creath-auth.interface';
 
-export class RegisterResponse {
+export class LoginDto {
+  @ApiProperty({ example: 'test@gmail.com' })
+  @IsString()
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty({ example: '12345678' })
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+}
+
+export class LoginReponse {
   @ApiProperty({ example: 'success' })
   status: string;
   @ApiProperty({
@@ -23,25 +36,4 @@ export class RegisterResponse {
   };
   @ApiProperty({ example: null, nullable: true })
   errors: { [key: string]: any };
-}
-
-export class RegisterDto {
-  @ApiProperty({ example: 'test@gmail.com' })
-  @IsString()
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
-  @ApiProperty({ example: '12345678' })
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-
-  @ApiProperty({ example: 'ptnminh' })
-  @IsString()
-  firstName?: string;
-
-  @ApiProperty({ example: 'ptnminh' })
-  @IsString()
-  lastName?: string;
 }
