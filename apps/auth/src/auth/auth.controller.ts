@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { MessagePattern } from '@nestjs/microservices';
 import { AuthCommand } from './command';
 import { RegisterDto } from './dto/create-user.dto';
+import { comparePassword } from 'src/shared';
 
 @Controller('auth')
 export class AuthController {
@@ -24,7 +25,55 @@ export class AuthController {
       return {
         message: 'Create user successfully',
         status: HttpStatus.CREATED,
-        user,
+        user: {
+          ...user,
+          role: user.role.name,
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Internal server error',
+        errors: true,
+      };
+    }
+  }
+
+  @MessagePattern(AuthCommand.USER_LOGIN)
+  async login(data: { email: string; password: string }) {
+    try {
+      const { email, password } = data;
+      const user = await this.authService.findUserByEmail(email);
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Email does not exist',
+          errors: true,
+        };
+      }
+      if (!user.emailVerified) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Email is not verified',
+          errors: true,
+        };
+      }
+      const isMatch = await comparePassword(password, user.password);
+      if (!isMatch) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Password is not correct',
+          errors: true,
+        };
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Login successfully',
+        user: {
+          ...user,
+          role: user.role.name,
+        },
       };
     } catch (error) {
       console.log(error);

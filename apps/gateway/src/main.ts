@@ -2,12 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  ValidationPipe,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,7 +10,6 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const options = new DocumentBuilder()
     .setTitle('API docs')
-    .addTag('users')
     .setVersion('1.0')
     .build();
   app.useGlobalPipes(

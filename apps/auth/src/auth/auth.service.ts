@@ -17,6 +17,23 @@ export class AuthService {
     });
   }
 
+  async findUserByEmail(email: string): Promise<any> {
+    return this.prismaService.users.findFirst({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+        email: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
   async signUpByEmail(createUserDTO: RegisterDto) {
     const { password, ...rest } = createUserDTO;
     const encryptedPassword = await hashPassword(password);
@@ -29,7 +46,11 @@ export class AuthService {
       select: {
         id: true,
         email: true,
-        roleId: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
   }

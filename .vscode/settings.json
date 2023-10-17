@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5435,
+            "askForPassword": true,
+            "driver": "PostgreSQL",
+            "database": "hma",
+            "username": "ptnminh",
+            "name": "hma_db"
+        }
+    ]
+}
