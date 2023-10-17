@@ -42,7 +42,7 @@ export class AuthController {
         createUserResponse.status,
       );
     }
-    const jwtSercret = this.configService.get<string>('JWT_SECRET');
+    const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
     const token = await this.jwtService.signAsync(
       {
         ...createUserResponse.user,

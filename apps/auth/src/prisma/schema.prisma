@@ -12,7 +12,7 @@ datasource db {
 
 model users {
     id              String     @id @default(uuid())
-    email           String     @unique
+    email           String
     roleId          Int        @map(name: "role_id")
     name            String?
     firstName       String?    @map(name: "first_name")
