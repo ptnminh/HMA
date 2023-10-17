@@ -1,6 +1,20 @@
-FROM node:18-alpine
-RUN mkdir -p /var/www/gateway
-WORKDIR /var/www/gateway
-ADD . /var/www/gateway
+FROM node:18-alpine AS builder
+
+# Create app directory
+WORKDIR /app
+
+# Install app dependencies
 RUN npm install
-CMD npm run build && npm run start:prod
+
+COPY . .
+
+RUN npm run build
+
+FROM node:18-alpine
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3000
+CMD [ "npm", "run", "start:prod" ]
