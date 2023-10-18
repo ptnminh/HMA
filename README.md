@@ -20,5 +20,10 @@
     ### Swagger
     http://localhost:2222/api/v1/swagger
 
+
+    ### Chờ khoảng 5p để db start xong
+    docker compose up -d 
+
+
 ```
 Lưu ý: Mỗi service sẽ có file .env riêng => tạo .env theo .evv.example
