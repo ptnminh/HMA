@@ -9,6 +9,16 @@
             "database": "hma",
             "username": "ptnminh",
             "name": "hma_db"
+        },
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5440,
+            "askForPassword": true,
+            "driver": "PostgreSQL",
+            "name": "hma_db_docker",
+            "database": "hma",
+            "username": "ptnminh"
         }
     ]
 }

@@ -18,7 +18,7 @@ services:
       - .env
     networks:
       - backend
-    links:
+    depends_on:
       - postgres
   postgres:
     image: postgres
@@ -31,26 +31,24 @@ services:
     volumes:
       - "./db/data/db-files:/var/lib/postgresql/data"
     ports:
-      - 5435:5432
+      - 5440:5432
     networks:
       - backend
   prisma:
     build: ./shared/libs/prisma
     restart: always
     hostname: prisma
-    healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:9000"]
-        interval: 30s
-        timeout: 10s
-        retries: 5
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
     env_file:
       - .env
     ports:
       - "9000:9000"
     networks:
       - backend
+    depends_on:
+      - postgres
 networks:
   backend:
     driver: bridge
+volumes:
+  postgres:
+    name: nest-db
