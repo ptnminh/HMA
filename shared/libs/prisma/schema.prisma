@@ -12,9 +12,11 @@ datasource db {
 
 model users {
     id              String     @id @default(uuid())
-    email           String     @unique
-    roleId          Int        @unique @map(name: "role_id")
+    email           String
+    roleId          Int        @map(name: "role_id")
     name            String?
+    firstName       String?    @map(name: "first_name")
+    lastName        String?    @map(name: "last_name")
     password        String
     emailVerified   Boolean    @default(false) @map(name: "email_verified")
     emailVerifiedAt DateTime?  @map(name: "email_verified_at")
