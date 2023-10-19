@@ -22,6 +22,7 @@
     "db:migrate": "npx prisma migrate dev --schema=./src/prisma/schema.prisma"
   },
   "dependencies": {
+    "@golevelup/nestjs-rabbitmq": "^4.0.0",
     "@hma/prisma": "git+https://github.com/ptnminh/hma-prisma",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.1.1",

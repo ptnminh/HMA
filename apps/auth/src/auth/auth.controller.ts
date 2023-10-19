@@ -13,6 +13,7 @@ export class AuthController {
   async register(data: RegisterDto) {
     try {
       const { email } = data;
+
       const exUser = await this.authService.findUserVerifiedByEmail(email);
       if (exUser) {
         return {
@@ -22,6 +23,7 @@ export class AuthController {
         };
       }
       const user = await this.authService.signUpByEmail(data);
+
       return {
         message: 'Create user successfully',
         status: HttpStatus.CREATED,
@@ -44,6 +46,7 @@ export class AuthController {
   async login(data: { email: string; password: string }) {
     try {
       const { email, password } = data;
+
       const user = await this.authService.findUserByEmail(email);
       if (!user) {
         return {

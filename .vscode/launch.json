@@ -17,15 +17,22 @@
             "type": "node-terminal",
             "name": "gateway",
             "request": "launch",
-            "command": "npm run start:dev",
+            "command": "npm run dev",
             "cwd": "${workspaceFolder}/apps/gateway"
         },
         {
             "type": "node-terminal",
             "name": "auth",
             "request": "launch",
-            "command": "npm run start:dev",
+            "command": "npm run dev",
             "cwd": "${workspaceFolder}/apps/auth"
+        },
+        {
+            "type": "node-terminal",
+            "name": "mail",
+            "request": "launch",
+            "command": "npm run dev",
+            "cwd": "${workspaceFolder}/apps/mailer"
         }
     ]
 }

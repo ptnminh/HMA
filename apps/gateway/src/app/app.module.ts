@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { ClientProxyFactory } from '@nestjs/microservices';
+import {
+  ClientProxyFactory,
+  ClientsModule,
+  Transport,
+} from '@nestjs/microservices';
 import { AuthController } from 'src/modules/auth/auth.controller';
 
 @Module({
@@ -14,6 +18,19 @@ import { AuthController } from 'src/modules/auth/auth.controller';
         expiresIn: '5h',
       },
     }),
+    ClientsModule.register([
+      {
+        name: 'MAIL_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://user:password@localhost:5672'],
+          queue: 'mail',
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
   ],
   controllers: [AuthController],
   providers: [
