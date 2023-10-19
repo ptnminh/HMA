@@ -121,24 +121,28 @@ export class AuthController {
   }
 
   @Get('verify')
-  async verifyAccount(@Query('token') token) {
+  async verifyAccount(@Query('token') token: string) {
+    if (!token) {
+      throw new HttpException(
+        {
+          message: 'Lỗi xác thực',
+          data: null,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
     const decoded = await this.jwtService.verifyAsync(token, {
       secret: jwtSercret,
     });
-    const verifyResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.USER_VERIFY, {
-        id: decoded.id,
-      }),
-    );
     if (!decoded) {
       throw new HttpException(
         {
           message: 'Lỗi xác thực',
           data: null,
-          errors: verifyResponse.errors,
+          errors: null,
         },
-        verifyResponse.status,
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -149,11 +153,17 @@ export class AuthController {
         {
           message: 'Đường dẫn đã hết hạn. Vui lòng thử lại sau',
           data: null,
-          errors: verifyResponse.errors,
+          errors: null,
         },
-        verifyResponse.status,
+        HttpStatus.BAD_REQUEST,
       );
     }
+    const verifyResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_VERIFY, {
+        id: decoded.id,
+      }),
+    );
+
     if (verifyResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
@@ -164,10 +174,19 @@ export class AuthController {
         verifyResponse.status,
       );
     }
+    const accessToken = await this.jwtService.signAsync(
+      {
+        ...verifyResponse.user,
+      },
+      {
+        secret: jwtSercret,
+      },
+    );
     return {
       message: verifyResponse.message,
       data: {
         user: verifyResponse.user,
+        token: accessToken,
       },
       success: true,
     };

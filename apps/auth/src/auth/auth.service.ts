@@ -16,6 +16,25 @@ export class AuthService {
       },
     });
   }
+  async findUserVerifiedById(id: string): Promise<any> {
+    return this.prismaService.users.findFirst({
+      where: {
+        id,
+        emailVerified: true,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+  }
 
   async findUserByEmail(email: string): Promise<any> {
     return this.prismaService.users.findFirst({
@@ -53,6 +72,16 @@ export class AuthService {
             name: true,
           },
         },
+      },
+    });
+  }
+
+  async verifyEmail(id: string) {
+    return this.prismaService.users.update({
+      where: { id },
+      data: {
+        emailVerified: true,
+        emailVerifiedAt: new Date().toISOString(),
       },
     });
   }

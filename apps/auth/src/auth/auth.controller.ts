@@ -87,4 +87,29 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.USER_VERIFY)
+  async verfiyAccount(data: { id: string }) {
+    try {
+      const { id } = data;
+      await this.authService.verifyEmail(id);
+      const user = await this.authService.findUserVerifiedById(id);
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Verify account successfully',
+        user: {
+          ...user,
+          role: user.role.name,
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Internal server error',
+        errors: true,
+      };
+    }
+  }
 }
