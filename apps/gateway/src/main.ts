@@ -7,6 +7,11 @@ import { HttpException, HttpStatus, ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
+  app.enableCors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  });
   const configService = app.get(ConfigService);
   const options = new DocumentBuilder()
     .setTitle('API docs')
