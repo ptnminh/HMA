@@ -9,7 +9,6 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
   app.enableCors({
     origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   });
   const configService = app.get(ConfigService);
