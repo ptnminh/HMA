@@ -17,13 +17,13 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto, LoginReponse } from './dto/login.dto';
 import { EVENTS } from 'src/shared';
+import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(
     @Inject('AUTH_SERVICE') private readonly authServiceClient: ClientProxy,
-    @Inject('MAIL_SERVICE') private readonly mailService: ClientProxy,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -48,12 +48,6 @@ export class AuthController {
       );
     }
 
-    await lastValueFrom(
-      this.mailService.emit(EVENTS.AUTH_REGISTER, {
-        email: createUserResponse.user.email,
-        link: createUserResponse.linkComfirm,
-      }),
-    );
     return {
       message: createUserResponse.message,
       data: {
@@ -174,10 +168,10 @@ export class AuthController {
   }
 
   @ApiCreatedResponse({
-    type: LoginReponse,
+    type: ConfirmReponse,
   })
   @Post('confirm')
-  async confirmAccount(@Body() body: { email: string }) {
+  async confirmAccount(@Body() body: ConfirmDTO) {
     const confirmResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.USER_CONFIRM, body),
     );
