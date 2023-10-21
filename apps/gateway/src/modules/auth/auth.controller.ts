@@ -172,4 +172,29 @@ export class AuthController {
       success: true,
     };
   }
+
+  @ApiCreatedResponse({
+    type: LoginReponse,
+  })
+  @Post('confirm')
+  async confirmAccount(@Body() body: { email: string }) {
+    const confirmResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_CONFIRM, body),
+    );
+    if (confirmResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: confirmResponse.message,
+          data: null,
+          errors: confirmResponse.errors,
+        },
+        confirmResponse.status,
+      );
+    }
+    return {
+      message: confirmResponse.message,
+      data: null,
+      success: true,
+    };
+  }
 }
