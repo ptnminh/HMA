@@ -4,10 +4,16 @@ import { MessagePattern } from '@nestjs/microservices';
 import { AuthCommand } from './command';
 import { RegisterDto } from './dto/create-user.dto';
 import { comparePassword, hashPassword } from 'src/shared';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   @MessagePattern(AuthCommand.USER_CREATE)
   async register(data: RegisterDto) {
@@ -22,21 +28,37 @@ export class AuthController {
           ...rest,
           password: encryptedPassword,
         });
-        const user = await this.authService.findUserByEmail(email);
-        return {
-          message: 'Create user successfully',
-          status: HttpStatus.CREATED,
-          user: {
-            ...data,
-            id: user.id,
-          },
-        };
+      } else {
+        await this.authService.signUpByEmail(data);
       }
-      const user = await this.authService.signUpByEmail(data);
+      const user = await this.authService.findUserByEmail(email);
 
+      const backendUrl = this.configService.get<string>('BACKEND_URL');
+      const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
+      const token = await this.jwtService.signAsync(
+        {
+          ...user,
+        },
+        {
+          secret: jwtSercret,
+        },
+      );
+      const registerToken = await this.jwtService.signAsync(
+        {
+          id: user.id,
+        },
+        {
+          secret: jwtSercret,
+          expiresIn: '30d',
+        },
+      );
+      const linkComfirm =
+        backendUrl + '/api/auth/verify?token=' + registerToken;
       return {
         message: 'Create user successfully',
         status: HttpStatus.CREATED,
+        linkComfirm,
+        token,
         user: {
           ...user,
           role: user.role.name,
@@ -80,6 +102,16 @@ export class AuthController {
           errors: true,
         };
       }
+
+      const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
+      const token = await this.jwtService.signAsync(
+        {
+          ...user,
+        },
+        {
+          secret: jwtSercret,
+        },
+      );
       return {
         status: HttpStatus.OK,
         message: 'Login successfully',
@@ -87,6 +119,7 @@ export class AuthController {
           ...user,
           role: user.role.name,
         },
+        token,
         errors: null,
       };
     } catch (error) {

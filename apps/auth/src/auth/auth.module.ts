@@ -5,11 +5,17 @@ import { ConfigModule } from '@nestjs/config';
 import { config } from '../configs';
 import { PrismaService } from '../prisma.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
+    }),
+    JwtModule.register({
+      signOptions: {
+        expiresIn: '5h',
+      },
     }),
     ClientsModule.register([
       {
