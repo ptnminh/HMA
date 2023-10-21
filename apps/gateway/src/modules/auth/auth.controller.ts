@@ -47,37 +47,18 @@ export class AuthController {
         createUserResponse.status,
       );
     }
-    const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
-    const token = await this.jwtService.signAsync(
-      {
-        ...createUserResponse.user,
-      },
-      {
-        secret: jwtSercret,
-      },
-    );
-    const registerToken = await this.jwtService.signAsync(
-      {
-        id: createUserResponse.user.id,
-      },
-      {
-        secret: jwtSercret,
-        expiresIn: '30d',
-      },
-    );
-    const linkComfirm =
-      process.env.BACKEND_URL + '/api/auth/verify?token=' + registerToken;
+
     await lastValueFrom(
       this.mailService.emit(EVENTS.AUTH_REGISTER, {
         email: createUserResponse.user.email,
-        link: linkComfirm,
+        link: createUserResponse.linkComfirm,
       }),
     );
     return {
       message: createUserResponse.message,
       data: {
         user: createUserResponse.user,
-        token: token,
+        token: createUserResponse.token,
       },
       success: true,
     };
