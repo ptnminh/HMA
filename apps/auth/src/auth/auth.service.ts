@@ -16,6 +16,7 @@ export class AuthService {
       },
     });
   }
+
   async findUserVerifiedById(id: string): Promise<any> {
     return this.prismaService.users.findFirst({
       where: {
@@ -52,6 +53,14 @@ export class AuthService {
           },
         },
       },
+    });
+  }
+  async updateUserByEmail(email: string, data): Promise<any> {
+    return this.prismaService.users.updateMany({
+      where: {
+        email,
+      },
+      data,
     });
   }
 

@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { MessagePattern } from '@nestjs/microservices';
 import { AuthCommand } from './command';
 import { RegisterDto } from './dto/create-user.dto';
-import { comparePassword } from 'src/shared';
+import { comparePassword, hashPassword } from 'src/shared';
 
 @Controller('auth')
 export class AuthController {
@@ -12,14 +12,24 @@ export class AuthController {
   @MessagePattern(AuthCommand.USER_CREATE)
   async register(data: RegisterDto) {
     try {
-      const { email } = data;
+      const { email, ...rest } = data;
 
-      const exUser = await this.authService.findUserVerifiedByEmail(email);
+      const exUser = await this.authService.findUserByEmail(email);
       if (exUser) {
+        const encryptedPassword = await hashPassword(rest.password);
+
+        await this.authService.updateUserByEmail(email, {
+          ...rest,
+          password: encryptedPassword,
+        });
+        const user = await this.authService.findUserByEmail(email);
         return {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Email already exists',
-          errors: true,
+          message: 'Create user successfully',
+          status: HttpStatus.CREATED,
+          user: {
+            ...data,
+            id: user.id,
+          },
         };
       }
       const user = await this.authService.signUpByEmail(data);
@@ -77,6 +87,7 @@ export class AuthController {
           ...user,
           role: user.role.name,
         },
+        errors: null,
       };
     } catch (error) {
       console.log(error);
@@ -102,6 +113,7 @@ export class AuthController {
           ...user,
           role: user.role.name,
         },
+        errors: null,
       };
     } catch (error) {
       console.log(error);

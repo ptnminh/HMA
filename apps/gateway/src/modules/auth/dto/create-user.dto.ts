@@ -23,6 +23,8 @@ export class RegisterResponse {
   };
   @ApiProperty({ example: null, nullable: true })
   errors: { [key: string]: any };
+  @ApiProperty({ example: 'Đăng ký thành công', nullable: true })
+  message: { [key: string]: any };
 }
 
 export class RegisterDto {
