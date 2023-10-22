@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, IsString } from 'class-validator';
 
 export class ConfirmDTO {
   @ApiProperty({ example: 'test@gmail.com' })
@@ -8,11 +8,14 @@ export class ConfirmDTO {
   @IsNotEmpty()
   email: string;
 
-  // @ApiProperty({ roleId: 'test@gmail.com' })
-  // @IsString()
-  // @IsEmail()
-  // @IsNotEmpty()
-  // role: string;
+  @ApiProperty({
+    example: 'user',
+    enum: ['user', 'admin', 'manager', 'doctor'],
+  })
+  @IsString()
+  @IsIn(['user', 'admin', 'manager', 'doctor'])
+  @IsNotEmpty()
+  role: string;
 }
 export class ConfirmReponse {
   @ApiProperty({ example: 'success' })

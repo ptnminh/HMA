@@ -27,7 +27,7 @@ async function bootstrap() {
           {
             message: result[0].message,
             data: null,
-            errors: true,
+            status: 'error',
           },
           HttpStatus.BAD_REQUEST,
         );

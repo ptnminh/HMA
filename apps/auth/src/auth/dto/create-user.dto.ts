@@ -6,4 +6,6 @@ export class RegisterDto {
   firstName?: string;
 
   lastName?: string;
+
+  roleId?: number;
 }

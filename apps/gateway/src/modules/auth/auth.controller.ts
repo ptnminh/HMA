@@ -42,7 +42,7 @@ export class AuthController {
         {
           message: createUserResponse.message,
           data: null,
-          errors: createUserResponse.errors,
+          success: false,
         },
         createUserResponse.status,
       );
@@ -71,7 +71,7 @@ export class AuthController {
         {
           message: loginResponse.message,
           data: null,
-          errors: loginResponse.errors,
+          success: false,
         },
         loginResponse.status,
       );
@@ -115,7 +115,6 @@ export class AuthController {
         {
           message: 'Lỗi xác thực',
           data: null,
-          errors: null,
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -128,7 +127,6 @@ export class AuthController {
         {
           message: 'Đường dẫn đã hết hạn. Vui lòng thử lại sau',
           data: null,
-          errors: null,
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -144,7 +142,7 @@ export class AuthController {
         {
           message: verifyResponse.message,
           data: null,
-          errors: verifyResponse.errors,
+          success: false,
         },
         verifyResponse.status,
       );
@@ -180,7 +178,7 @@ export class AuthController {
         {
           message: confirmResponse.message,
           data: null,
-          errors: confirmResponse.errors,
+          success: false,
         },
         confirmResponse.status,
       );

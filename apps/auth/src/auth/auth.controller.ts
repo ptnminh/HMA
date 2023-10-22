@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { AuthCommand } from './command';
 import { RegisterDto } from './dto/create-user.dto';
-import { EVENTS, comparePassword, hashPassword } from 'src/shared';
+import { EVENTS, ROLES, comparePassword, hashPassword } from 'src/shared';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom } from 'rxjs';
@@ -23,6 +23,12 @@ export class AuthController {
       const { email, ...rest } = data;
 
       const exUser = await this.authService.findUserByEmail(email);
+      if (exUser?.emailVerified) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tài khoản đã tồn tại',
+        };
+      }
       if (exUser) {
         const encryptedPassword = await hashPassword(rest.password);
 
@@ -77,7 +83,6 @@ export class AuthController {
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Internal server error',
-        errors: true,
       };
     }
   }
@@ -92,14 +97,12 @@ export class AuthController {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Email does not exist',
-          errors: true,
         };
       }
       if (!user.emailVerified) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Email is not verified',
-          errors: true,
         };
       }
       const isMatch = await comparePassword(password, user.password);
@@ -107,7 +110,6 @@ export class AuthController {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Password is not correct',
-          errors: true,
         };
       }
 
@@ -128,14 +130,12 @@ export class AuthController {
           role: user.role.name,
         },
         token,
-        errors: null,
       };
     } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Internal server error',
-        errors: true,
       };
     }
   }
@@ -154,14 +154,12 @@ export class AuthController {
           ...user,
           role: user.role.name,
         },
-        errors: null,
       };
     } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Internal server error',
-        errors: true,
       };
     }
   }
@@ -172,22 +170,29 @@ export class AuthController {
       // create user with email and password is email
       const backendUrl = this.configService.get<string>('BACKEND_URL');
       const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
-      const { email } = data;
+      const { email, role } = data;
+      const roleId = ROLES[role.toUpperCase()];
       const password = email;
       const exUser = await this.authService.findUserByEmail(email);
+      if (exUser?.emailVerified) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tài khoản đã tồn tại',
+        };
+      }
       if (exUser) {
         const encryptedPassword = await hashPassword(password);
 
         await this.authService.updateUserByEmail(email, {
-          roleId: 4,
+          roleId,
           password: encryptedPassword,
         });
       } else {
-        await this.authService.signUpByEmail({ password, email });
+        await this.authService.signUpByEmail({ password, email, roleId });
       }
       const user = await this.authService.findUserByEmail(email);
 
-      const registerToken = await this.jwtService.signAsync(
+      const confirmToken = await this.jwtService.signAsync(
         {
           id: user.id,
         },
@@ -196,8 +201,7 @@ export class AuthController {
           expiresIn: '30d',
         },
       );
-      const linkComfirm =
-        backendUrl + '/api/auth/verify?token=' + registerToken;
+      const linkComfirm = backendUrl + '/api/auth/verify?token=' + confirmToken;
 
       await lastValueFrom(
         this.mailService.emit(EVENTS.AUTH_REGISTER, {
@@ -209,14 +213,12 @@ export class AuthController {
         status: HttpStatus.OK,
         message: 'Gửi mail thành công',
         link: linkComfirm,
-        errors: null,
       };
     } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Internal server error',
-        errors: true,
       };
     }
   }

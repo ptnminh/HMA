@@ -80,7 +80,7 @@ export const enum ErrorMessageEnum {
   CONFLICT = 'Conflict', // 409
   UNPROCESSABLE_ENTITY = 'Unprocessable Entity', // 422
   TOO_MANY_REQUESTS = 'Too Many Requests', // 429
-  INTERNAL_SERVER_ERROR = 'Internal Server Error', // 500
+  INTERNAL_SERVER_ERROR = 'Lỗi hệ thống', // 500
   BAD_GATEWAY = 'Bad Gateway', // 502
   GATEWAY_TIMEOUT = 'Gateway Timeout', // 504
 }
