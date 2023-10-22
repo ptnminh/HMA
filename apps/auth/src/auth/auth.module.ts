@@ -24,6 +24,7 @@ import { JwtModule } from '@nestjs/jwt';
         options: {
           urls: ['amqp://user:password@localhost:5672'],
           queue: 'mail',
+          noAck: false,
           queueOptions: {
             durable: false,
           },

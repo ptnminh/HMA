@@ -16,7 +16,7 @@ export class LoginDto {
 }
 
 export class LoginReponse {
-  @ApiProperty({ example: 'success' })
+  @ApiProperty({ example: 'true', type: Boolean })
   status: string;
   @ApiProperty({
     example: {

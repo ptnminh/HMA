@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { users } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { RegisterDto } from './dto/create-user.dto';
-import { hashPassword } from '../shared/';
+import { ROLES, hashPassword } from '../shared/';
 
 @Injectable()
 export class AuthService {
@@ -70,7 +70,7 @@ export class AuthService {
     return this.prismaService.users.create({
       data: {
         password: encryptedPassword as string,
-        roleId: roleId as number,
+        roleId: roleId ? roleId : (ROLES.USER as number),
         ...rest,
       },
       select: {

@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (isTokenExpired) {
       throw new HttpException(
         {
-          status: 'error',
+          status: false,
           message: 'Token has expired',
         },
         HttpStatus.BAD_REQUEST,

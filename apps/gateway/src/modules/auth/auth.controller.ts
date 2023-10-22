@@ -18,6 +18,7 @@ import { ConfigService } from '@nestjs/config';
 import { LoginDto, LoginReponse } from './dto/login.dto';
 import { EVENTS } from 'src/shared';
 import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
+import { userInfo } from 'os';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -42,19 +43,20 @@ export class AuthController {
         {
           message: createUserResponse.message,
           data: null,
-          success: false,
+          status: false,
         },
         createUserResponse.status,
       );
     }
+    const { password, ...rest } = createUserResponse.user;
 
     return {
       message: createUserResponse.message,
       data: {
-        user: createUserResponse.user,
+        user: rest,
         token: createUserResponse.token,
       },
-      success: true,
+      status: true,
     };
   }
 
@@ -71,7 +73,7 @@ export class AuthController {
         {
           message: loginResponse.message,
           data: null,
-          success: false,
+          status: false,
         },
         loginResponse.status,
       );
@@ -85,13 +87,15 @@ export class AuthController {
         secret: jwtSercret,
       },
     );
+    const { password, ...rest } = loginResponse.user;
+
     return {
       message: loginResponse.message,
       data: {
-        user: loginResponse.user,
+        user: rest,
         token: token,
       },
-      success: true,
+      status: true,
     };
   }
 
@@ -142,7 +146,7 @@ export class AuthController {
         {
           message: verifyResponse.message,
           data: null,
-          success: false,
+          status: false,
         },
         verifyResponse.status,
       );
@@ -155,13 +159,14 @@ export class AuthController {
         secret: jwtSercret,
       },
     );
+    const { password, ...rest } = verifyResponse.user;
     return {
       message: verifyResponse.message,
       data: {
-        user: verifyResponse.user,
+        user: rest,
         token: accessToken,
       },
-      success: true,
+      status: true,
     };
   }
 
@@ -178,7 +183,7 @@ export class AuthController {
         {
           message: confirmResponse.message,
           data: null,
-          success: false,
+          status: false,
         },
         confirmResponse.status,
       );
@@ -186,7 +191,7 @@ export class AuthController {
     return {
       message: confirmResponse.message,
       data: null,
-      success: true,
+      status: true,
     };
   }
 }

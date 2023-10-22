@@ -19,14 +19,14 @@ export class AllExceptionFilter implements ExceptionFilter {
         ErrorMessageEnum.INTERNAL_SERVER_ERROR;
 
       return response.status(status).json({
-        status: 'error',
+        status: false,
         message,
         data: null,
       });
     } catch (error) {
       console.log(error);
       return response.status(HttpStatusCodeEnum.InternalServerError).json({
-        status: 'error',
+        status: false,
         message: ErrorMessageEnum.INTERNAL_SERVER_ERROR,
         data: null,
       });

@@ -3,7 +3,7 @@ import { IUser } from '../interface/creath-auth.interface';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class RegisterResponse {
-  @ApiProperty({ example: 'success' })
+  @ApiProperty({ example: 'true', type: Boolean })
   status: string;
   @ApiProperty({
     example: {

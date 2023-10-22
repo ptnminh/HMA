@@ -18,7 +18,7 @@ export class ConfirmDTO {
   role: string;
 }
 export class ConfirmReponse {
-  @ApiProperty({ example: 'success' })
+  @ApiProperty({ example: 'true', type: Boolean })
   status: string;
   @ApiProperty({
     example: {

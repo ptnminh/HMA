@@ -19,19 +19,6 @@ import { AuthController } from 'src/modules/auth/auth.controller';
         expiresIn: '5h',
       },
     }),
-    ClientsModule.register([
-      {
-        name: 'MAIL_SERVICE',
-        transport: Transport.RMQ,
-        options: {
-          urls: ['amqp://user:password@localhost:5672'],
-          queue: 'mail',
-          queueOptions: {
-            durable: false,
-          },
-        },
-      },
-    ]),
   ],
   controllers: [AuthController],
   providers: [
