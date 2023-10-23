@@ -22,9 +22,11 @@ import { JwtModule } from '@nestjs/jwt';
         name: 'MAIL_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://user:password@localhost:5672'],
+          urls: [
+            'amqps://zwhbnmku:w_XDp3N5qASxWXSmz6O8_sE3flzQMrYf@octopus.rmq3.cloudamqp.com/zwhbnmku',
+          ],
           queue: 'mail',
-          noAck: false,
+          noAck: true,
           queueOptions: {
             durable: false,
           },

@@ -43,14 +43,6 @@ export class AuthController {
 
       const backendUrl = this.configService.get<string>('BACKEND_URL');
       const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
-      const token = await this.jwtService.signAsync(
-        {
-          ...user,
-        },
-        {
-          secret: jwtSercret,
-        },
-      );
       const registerToken = await this.jwtService.signAsync(
         {
           id: user.id,
@@ -72,7 +64,6 @@ export class AuthController {
       return {
         message: 'Create user successfully',
         status: HttpStatus.CREATED,
-        token,
         user: {
           ...user,
           role: user.role.name,
