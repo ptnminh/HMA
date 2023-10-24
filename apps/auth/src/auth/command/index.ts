@@ -3,4 +3,5 @@ export enum AuthCommand {
   USER_LOGIN = 'user_login',
   USER_VERIFY = 'user_verify',
   USER_CONFIRM = 'user_confirm',
+  USER_OAUTH_LOGIN = 'user_oauth_login',
 }

@@ -8,4 +8,12 @@ export class RegisterDto {
   lastName?: string;
 
   roleId?: number;
+
+  emailVerified?: boolean;
+}
+
+export class GoogleOauthDTO {
+  email: string;
+  avatar: string;
+  userId: string;
 }

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/microservices';
 import { AllExceptionFilter } from 'src/filters/all-exception.filter';
 import { AuthController } from 'src/modules/auth/auth.controller';
+import { GoogleStrategy } from 'src/stategies/google.strategy';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { AuthController } from 'src/modules/auth/auth.controller';
       provide: 'APP_FILTER',
       useClass: AllExceptionFilter,
     },
-
+    GoogleStrategy,
     {
       provide: 'AUTH_SERVICE',
       useFactory: (configService: ConfigService) => {

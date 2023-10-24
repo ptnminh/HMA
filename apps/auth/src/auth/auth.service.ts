@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { users } from '@prisma/client';
+import { Prisma, users } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { RegisterDto } from './dto/create-user.dto';
 import { ROLES, hashPassword } from '../shared/';
@@ -91,6 +91,21 @@ export class AuthService {
       data: {
         emailVerified: true,
         emailVerifiedAt: new Date().toISOString(),
+      },
+    });
+  }
+
+  async createAccount(data: Prisma.accountsUncheckedCreateInput) {
+    return this.prismaService.accounts.create({
+      data,
+    });
+  }
+
+  async findAccountByUserId(userId: string, provider: string) {
+    return this.prismaService.accounts.findFirst({
+      where: {
+        userId,
+        provider,
       },
     });
   }

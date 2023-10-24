@@ -7,6 +7,8 @@ import {
   HttpStatus,
   Get,
   Query,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
@@ -19,6 +21,7 @@ import { LoginDto, LoginReponse } from './dto/login.dto';
 import { EVENTS } from 'src/shared';
 import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
 import { userInfo } from 'os';
+import { GoogleOAuthGuard } from 'src/guards/google-oauth.guard';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -191,6 +194,38 @@ export class AuthController {
     return {
       message: confirmResponse.message,
       data: null,
+      status: true,
+    };
+  }
+
+  @Get()
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuth(@Request() req) {}
+
+  @Get('google-redirect')
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuthRedirect(@Request() req) {
+    const { user } = req;
+    if (!user) {
+      throw new HttpException(
+        {
+          message: 'Lỗi xác thực',
+          data: null,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const oauthResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_OAUTH_LOGIN, {
+        user,
+      }),
+    );
+    return {
+      message: oauthResponse.message,
+      data: {
+        user: oauthResponse.user,
+        token: oauthResponse.token,
+      },
       status: true,
     };
   }
