@@ -9,7 +9,7 @@ services:
     ports:
       - "2222:2222"
     networks:
-      - backend
+      - some-network
   auth:
     build: ./apps/auth
     restart: always
@@ -17,7 +17,7 @@ services:
     env_file:
       - .env
     networks:
-      - backend
+      - some-network
   mailer:
     build: ./apps/mailer
     restart: always
@@ -25,7 +25,8 @@ services:
     env_file:
       - .env
     networks:
-      - backend
+      - some-network
 networks:
-  backend:
-    driver: bridge
+  some-network:
+    external:
+      name: some-network
