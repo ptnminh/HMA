@@ -16,7 +16,7 @@ export class LoginDto {
 }
 
 export class LoginReponse {
-  @ApiProperty({ example: 'success' })
+  @ApiProperty({ example: 'true', type: Boolean })
   status: string;
   @ApiProperty({
     example: {
@@ -36,4 +36,6 @@ export class LoginReponse {
   };
   @ApiProperty({ example: null, nullable: true })
   errors: { [key: string]: any };
+  @ApiProperty({ example: 'Đăng nhập thành công', nullable: true })
+  message: { [key: string]: any };
 }

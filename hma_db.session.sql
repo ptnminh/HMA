@@ -1,1 +1,1 @@
-SELECT * FROM users
+delete  FROM users

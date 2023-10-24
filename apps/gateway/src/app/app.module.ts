@@ -1,7 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { ClientProxyFactory } from '@nestjs/microservices';
+import {
+  ClientProxyFactory,
+  ClientsModule,
+  Transport,
+} from '@nestjs/microservices';
+import { AllExceptionFilter } from 'src/filters/all-exception.filter';
 import { AuthController } from 'src/modules/auth/auth.controller';
 
 @Module({
@@ -18,6 +23,10 @@ import { AuthController } from 'src/modules/auth/auth.controller';
   controllers: [AuthController],
   providers: [
     ConfigService,
+    {
+      provide: 'APP_FILTER',
+      useClass: AllExceptionFilter,
+    },
 
     {
       provide: 'AUTH_SERVICE',

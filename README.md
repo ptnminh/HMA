@@ -26,4 +26,19 @@
 
 
 ```
+
+
+### Run with docker
+
+```
+    - Trường hợp lần đàu tiên chạy
+    $ sudo chmod +x build.dev.sh
+    $ ./build.dev.sh
+    $ docker compose up -d
+
+    - Trường hợp lần chạy thứ 2
+    $ ./build.dev.sh
+    $ docker compose up -d
+
+```
 Lưu ý: Mỗi service sẽ có file .env riêng => tạo .env theo .evv.example

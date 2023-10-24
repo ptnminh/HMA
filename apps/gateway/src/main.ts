@@ -6,7 +6,7 @@ import { HttpException, HttpStatus, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api');
   app.enableCors({
     origin: '*',
     credentials: true,
@@ -27,7 +27,7 @@ async function bootstrap() {
           {
             message: result[0].message,
             data: null,
-            errors: true,
+            status: false,
           },
           HttpStatus.BAD_REQUEST,
         );
@@ -37,8 +37,8 @@ async function bootstrap() {
     }),
   );
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('api/v1/swagger', app, document);
+  SwaggerModule.setup('api/swagger', app, document);
   await app.listen(configService.get('PORT'));
-  console.log(`Swagger is running on: ${await app.getUrl()}/api/v1/swagger`);
+  console.log(`Swagger is running on: ${await app.getUrl()}/api/swagger`);
 }
 bootstrap();

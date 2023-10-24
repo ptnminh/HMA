@@ -3,22 +3,11 @@
         {
             "previewLimit": 50,
             "server": "localhost",
-            "port": 5435,
-            "askForPassword": true,
+            "port": 5555,
             "driver": "PostgreSQL",
-            "database": "hma",
-            "username": "ptnminh",
-            "name": "hma_db"
-        },
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5440,
-            "askForPassword": true,
-            "driver": "PostgreSQL",
-            "name": "hma_db_docker",
-            "database": "hma",
-            "username": "ptnminh"
+            "name": "hma_db",
+            "username": "admin",
+            "database": "hma"
         }
     ]
 }
