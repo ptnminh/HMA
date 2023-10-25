@@ -32,6 +32,8 @@
 
 ```
     - Trường hợp lần đàu tiên chạy
+    $ cd shared/libs/prisma
+    $ npm install
     $ sudo chmod +x build.dev.sh
     $ ./build.dev.sh
     $ docker compose up -d
