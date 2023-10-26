@@ -74,6 +74,7 @@ export class AuthController {
         user: {
           ...user,
           role: user.role.name,
+          emailVerified: false,
         },
       };
     } catch (error) {
