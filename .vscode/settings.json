@@ -6,8 +6,8 @@
             "port": 5555,
             "driver": "PostgreSQL",
             "name": "hma_db",
-            "username": "admin",
-            "database": "hma"
+            "database": "hma",
+            "username": "admin"
         }
     ]
 }
