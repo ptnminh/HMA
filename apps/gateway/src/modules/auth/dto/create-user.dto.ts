@@ -20,6 +20,7 @@ export class RegisterResponse {
   })
   data: {
     user: IUser;
+    token: string;
   };
   @ApiProperty({ example: 'Đăng ký thành công', nullable: true })
   message: { [key: string]: any };
