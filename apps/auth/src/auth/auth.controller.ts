@@ -69,7 +69,7 @@ export class AuthController {
         }),
       );
       return {
-        message: 'Create user successfully',
+        message: 'Tạo tài khoản thành công',
         status: HttpStatus.CREATED,
         user: {
           ...user,
@@ -81,7 +81,7 @@ export class AuthController {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Internal server error',
+        message: 'Lỗi hệ thống',
       };
     }
   }
@@ -123,7 +123,7 @@ export class AuthController {
       );
       return {
         status: HttpStatus.OK,
-        message: 'Login successfully',
+        message: 'Đăng nhập thành công',
         user: {
           ...user,
           role: user.role.name,
@@ -134,7 +134,7 @@ export class AuthController {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Internal server error',
+        message: 'Lỗi hệ thống',
       };
     }
   }
@@ -148,7 +148,7 @@ export class AuthController {
 
       return {
         status: HttpStatus.OK,
-        message: 'Verify account successfully',
+        message: 'Xác thực email thành công',
         user: {
           ...user,
           role: user.role.name,
@@ -158,7 +158,7 @@ export class AuthController {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Internal server error',
+        message: 'Lỗi hệ thống',
       };
     }
   }
@@ -217,7 +217,7 @@ export class AuthController {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Internal server error',
+        message: 'Lỗi hệ thống',
       };
     }
   }
@@ -273,7 +273,7 @@ export class AuthController {
         },
       );
       return {
-        message: 'Create user successfully',
+        message: 'Tạo tài khoản thành công',
         status: HttpStatus.CREATED,
         user: {
           ...user,
@@ -286,7 +286,7 @@ export class AuthController {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Internal server error',
+        message: 'Lỗi hệ thống',
       };
     }
   }

@@ -28,6 +28,7 @@ export class AuthService {
         email: true,
         firstName: true,
         lastName: true,
+        emailVerified: true,
         role: {
           select: {
             name: true,
