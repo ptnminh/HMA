@@ -1,6 +1,8 @@
 {
     "version": "0.2.0",
     "configurations": [
+
+
         {
             "type": "node",
             "request": "launch",
@@ -33,6 +35,13 @@
             "request": "launch",
             "command": "npm run dev",
             "cwd": "${workspaceFolder}/apps/mailer"
+        },
+        {
+            "type": "node-terminal",
+            "name": "file",
+            "request": "launch",
+            "command": "npm run dev",
+            "cwd": "${workspaceFolder}/apps/files"
         }
     ]
 }

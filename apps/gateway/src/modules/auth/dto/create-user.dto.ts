@@ -45,3 +45,22 @@ export class RegisterDto {
   @IsString()
   lastName?: string;
 }
+export class AccountDto {
+  @ApiProperty({ example: 'test@gmail.com' })
+  @IsString()
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty({ example: 'ptnminh' })
+  @IsString()
+  firstName?: string;
+
+  @ApiProperty({ example: 'ptnminh' })
+  @IsString()
+  lastName?: string;
+
+  @ApiProperty({ example: 'ptnminh' })
+  @IsString()
+  picture?: string;
+}

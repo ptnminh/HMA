@@ -9,12 +9,15 @@ import {
   Query,
   UseGuards,
   Request,
-  Redirect,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
-import { RegisterDto, RegisterResponse } from './dto/create-user.dto';
+import {
+  RegisterDto,
+  RegisterResponse,
+  AccountDto,
+} from './dto/create-user.dto';
 import { AuthCommand } from './command';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -217,6 +220,26 @@ export class AuthController {
     const oauthResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.USER_OAUTH_LOGIN, {
         user,
+      }),
+    );
+    return {
+      message: oauthResponse.message,
+      data: {
+        user: oauthResponse.user,
+        token: oauthResponse.token,
+      },
+      status: true,
+    };
+  }
+
+  @Post('account')
+  @ApiCreatedResponse({
+    type: LoginReponse,
+  })
+  async createAccount(@Body() body: AccountDto) {
+    const oauthResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_OAUTH_LOGIN, {
+        user: body,
       }),
     );
     return {
