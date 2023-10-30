@@ -6,6 +6,7 @@ import { config } from '../configs';
 import { PrismaService } from '../prisma.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { JwtModule } from '@nestjs/jwt';
+import { AllExceptionFilter } from 'src/filters/all-exception.filter';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -35,6 +36,13 @@ import { JwtModule } from '@nestjs/jwt';
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService],
+  providers: [
+    {
+      provide: 'APP_FILTER',
+      useClass: AllExceptionFilter,
+    },
+    AuthService,
+    PrismaService,
+  ],
 })
 export class AuthModule {}

@@ -1,7 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport, TcpOptions } from '@nestjs/microservices';
 import { AuthModule } from './auth/auth.module';
-import { Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
 import { config } from './configs';
 async function bootstrap() {
   const configs = config();
@@ -12,6 +17,26 @@ async function bootstrap() {
       port: configs.app.port,
     },
   } as TcpOptions);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      exceptionFactory: (errors) => {
+        const result = errors.map((error) => ({
+          property: error.property,
+          message: error.constraints[Object.keys(error.constraints)[0]],
+        }));
+        throw new HttpException(
+          {
+            message: result[0].message,
+            data: null,
+            status: false,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      },
+      transform: true,
+      stopAtFirstError: true,
+    }),
+  );
   Logger.log(`Service is running on PORT ${configs.app.port}`);
   await app.listen();
 }

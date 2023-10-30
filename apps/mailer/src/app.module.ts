@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { SendgridService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
+import { AllExceptionFilter } from './filters/all-exception.filter';
 
 @Module({
   imports: [
@@ -10,6 +11,12 @@ import { ConfigModule } from '@nestjs/config';
     }),
   ],
   controllers: [AppController],
-  providers: [SendgridService],
+  providers: [
+    SendgridService,
+    {
+      provide: 'APP_FILTER',
+      useClass: AllExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

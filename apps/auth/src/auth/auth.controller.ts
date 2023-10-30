@@ -1,4 +1,4 @@
-import { Controller, HttpStatus, Inject } from '@nestjs/common';
+import { Controller, HttpStatus, Inject, Redirect } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { AuthCommand } from './command';
@@ -223,6 +223,10 @@ export class AuthController {
   }
 
   @MessagePattern(AuthCommand.USER_OAUTH_LOGIN)
+  @Redirect(
+    'https://7a92-2402-800-63a8-8e84-41af-c3d0-a2c9-2165.ngrok-free.app/login',
+    301,
+  )
   async loginWithGoogle(data: any) {
     try {
       const { user: oauthUser } = data;
