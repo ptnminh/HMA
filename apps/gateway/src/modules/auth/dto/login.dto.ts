@@ -25,9 +25,9 @@ export class LoginReponse {
         id: '5d987c3bfb881ec86b476bcc',
         firstName: 'ptnminh',
         lastName: 'ptnminh',
-        token: 'token',
         avatar: 'https://avatars.githubusercontent.com/u/47259054?v=4',
       },
+      token: 'token',
     },
     nullable: true,
   })
@@ -36,5 +36,28 @@ export class LoginReponse {
     token: string;
   };
   @ApiProperty({ example: 'Đăng nhập thành công', nullable: true })
+  message: { [key: string]: any };
+}
+export class AccountCreateReponse {
+  @ApiProperty({ example: 'true', type: Boolean })
+  status: string;
+  @ApiProperty({
+    example: {
+      user: {
+        email: 'test@denrox.com',
+        id: '5d987c3bfb881ec86b476bcc',
+        firstName: 'ptnminh',
+        lastName: 'ptnminh',
+        avatar: 'https://avatars.githubusercontent.com/u/47259054?v=4',
+      },
+      token: 'token',
+    },
+    nullable: true,
+  })
+  data: {
+    user: IUser;
+    token: string;
+  };
+  @ApiProperty({ example: 'Đăng ký thành công', nullable: true })
   message: { [key: string]: any };
 }

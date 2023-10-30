@@ -12,9 +12,9 @@ export class RegisterResponse {
         id: '5d987c3bfb881ec86b476bcc',
         firstName: 'ptnminh',
         lastName: 'ptnminh',
-        token: 'token',
         avatar: 'https://avatars.githubusercontent.com/u/47259054?v=4',
       },
+      token: 'token',
     },
     nullable: true,
   })
