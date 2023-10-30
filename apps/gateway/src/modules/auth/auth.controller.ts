@@ -18,9 +18,7 @@ import { AuthCommand } from './command';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto, LoginReponse } from './dto/login.dto';
-import { EVENTS } from 'src/shared';
 import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
-import { userInfo } from 'os';
 import { GoogleOAuthGuard } from 'src/guards/google-oauth.guard';
 
 @Controller('auth')

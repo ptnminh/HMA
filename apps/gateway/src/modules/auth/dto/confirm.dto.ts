@@ -29,8 +29,6 @@ export class ConfirmReponse {
   data: {
     link: string;
   };
-  @ApiProperty({ example: null, nullable: true })
-  errors: { [key: string]: any };
-  @ApiProperty({ example: 'Đăng nhập thành công', nullable: true })
+  @ApiProperty({ example: 'Gửi mail thành công.', nullable: true })
   message: { [key: string]: any };
 }
