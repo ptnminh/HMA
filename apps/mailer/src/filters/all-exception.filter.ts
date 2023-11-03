@@ -11,8 +11,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     try {
-      const status =
-        exception.getStatus() || HttpStatusCodeEnum.InternalServerError;
+      const status = HttpStatusCodeEnum.InternalServerError;
       const message =
         exception?.response?.message ||
         exception?.message ||

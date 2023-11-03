@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   Request,
+  Render,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
@@ -104,6 +105,7 @@ export class AuthController {
     };
   }
 
+  @Render('index')
   @Get('verify')
   async verifyAccount(@Query('token') token: string) {
     if (!token) {
@@ -156,23 +158,7 @@ export class AuthController {
         verifyResponse.status,
       );
     }
-    const accessToken = await this.jwtService.signAsync(
-      {
-        ...verifyResponse.user,
-      },
-      {
-        secret: jwtSercret,
-      },
-    );
-    const { password, ...rest } = verifyResponse.user;
-    return {
-      message: verifyResponse.message,
-      data: {
-        user: rest,
-        token: accessToken,
-      },
-      status: true,
-    };
+    return { name: verifyResponse.user.firstName };
   }
 
   @ApiCreatedResponse({
@@ -250,5 +236,14 @@ export class AuthController {
       },
       status: true,
     };
+  }
+
+  @Get('test')
+  test() {
+    try {
+      return { name: 'Minh' };
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
