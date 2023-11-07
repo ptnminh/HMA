@@ -276,4 +276,24 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.USER_DELETE_ACCOUNT)
+  async deleteUserAccount(data: { accountId: string; userId: string }) {
+    try {
+      const { accountId } = data;
+      await this.authService.deleteAccount(accountId);
+      const accounts = await this.authService.getAllAccounts(data.userId);
+      return {
+        status: HttpStatus.OK,
+        data: accounts,
+        message: 'Xóa tài khoản thành công',
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }

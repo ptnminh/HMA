@@ -5,4 +5,5 @@ export enum AuthCommand {
   USER_CONFIRM = 'user_confirm',
   USER_OAUTH_LOGIN = 'user_oauth_login',
   USER_GET_ACCOUNTS = 'user_get_accounts',
+  USER_DELETE_ACCOUNT = 'user_delete_account',
 }

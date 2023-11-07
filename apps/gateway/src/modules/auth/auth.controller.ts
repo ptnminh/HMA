@@ -11,6 +11,7 @@ import {
   Request,
   Render,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
@@ -262,6 +263,39 @@ export class AuthController {
   async getAllAccounts(@Param('userId') userId: string) {
     const accountsResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.USER_GET_ACCOUNTS, {
+        userId,
+      }),
+    );
+    if (accountsResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: accountsResponse.message,
+          data: null,
+          status: false,
+        },
+        accountsResponse.status,
+      );
+    }
+    return {
+      message: accountsResponse.message,
+      data: accountsResponse.data,
+      status: true,
+    };
+  }
+
+  @Delete(':userId/accounts/:accountId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
+  @ApiCreatedResponse({
+    type: GetUserAccountsResponse,
+  })
+  async deleteAccounts(
+    @Param('accountId') accountId: string,
+    @Param('userId') userId: string,
+  ) {
+    const accountsResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_DELETE_ACCOUNT, {
+        accountId,
         userId,
       }),
     );

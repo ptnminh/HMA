@@ -134,4 +134,16 @@ export class AuthService {
       },
     });
   }
+
+  async deleteAccount(accountId: string) {
+    return this.prismaService.accounts.update({
+      where: {
+        id: accountId,
+      },
+      data: {
+        isDisabled: true,
+        disabledAt: new Date().toISOString(),
+      },
+    });
+  }
 }
