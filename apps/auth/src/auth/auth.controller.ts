@@ -13,7 +13,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom } from 'rxjs';
-import { isEmpty } from 'lodash';
 
 @Controller('auth')
 export class AuthController {
@@ -226,61 +225,29 @@ export class AuthController {
   async loginWithGoogle(data: any) {
     try {
       const { user: oauthUser } = data;
-      let userId: string = '';
-      let user: any;
-      const exUser = await this.authService.findUserByEmail(oauthUser.email);
-      if (exUser) {
+      const exAccount = await this.authService.findAccountByProvider(
+        oauthUser.key,
+        oauthUser.provider,
+      );
+      if (exAccount) {
         // if this user has no account then create one else do nothing
-        const account = await this.authService.findAccountByUserId(
-          exUser.id,
-          PROVIDERS.GOOGLE,
-        );
-        if (isEmpty(account)) {
-          // link user to provider account
-          await this.authService.createAccount({
-            userId: exUser.id,
-            provider: PROVIDERS.GOOGLE,
-            avatar: oauthUser.picture,
-          });
-        }
-
-        userId = exUser.id;
-        user = exUser;
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tài khoản đã tồn tại',
+        };
       } else {
-        const createdUser = await this.authService.signUpByEmail({
-          email: oauthUser.email,
-          password: oauthUser.email,
-          firstName: oauthUser.firstName,
-          lastName: oauthUser.lastName,
-          emailVerified: true,
-        });
         await this.authService.createAccount({
-          userId: createdUser.id,
-          provider: 'google',
+          provider: oauthUser.provider || PROVIDERS.GOOGLE,
+          key: oauthUser.key,
+          userId: oauthUser.userId,
           avatar: oauthUser.picture,
         });
-        userId = createdUser.id;
-        user = createdUser;
       }
-      const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
-      const registerToken = await this.jwtService.signAsync(
-        {
-          id: userId,
-        },
-        {
-          secret: jwtSercret,
-          expiresIn: '30d',
-        },
-      );
+      const accounts = await this.authService.getAllAccounts();
       return {
-        message: 'Tạo tài khoản thành công',
-        status: HttpStatus.CREATED,
-        user: {
-          ...user,
-          emailVerified: true,
-          role: user.role.name,
-        },
-        token: registerToken,
+        status: HttpStatus.OK,
+        data: accounts,
+        message: 'Tạo liên kết thành công',
       };
     } catch (error) {
       console.log(error);

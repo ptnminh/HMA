@@ -25,6 +25,7 @@ import { ConfigService } from '@nestjs/config';
 import { LoginDto, LoginReponse } from './dto/login.dto';
 import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
 import { GoogleOAuthGuard } from 'src/guards/google-oauth.guard';
+import { LinkAccountResponse } from './dto/link-account.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -186,41 +187,41 @@ export class AuthController {
     };
   }
 
-  @Get()
-  @UseGuards(GoogleOAuthGuard)
-  async googleAuth(@Request() req) {}
+  // @Get()
+  // @UseGuards(GoogleOAuthGuard)
+  // async googleAuth(@Request() req) {}
 
-  @Get('google-redirect')
-  @UseGuards(GoogleOAuthGuard)
-  async googleAuthRedirect(@Request() req) {
-    const { user } = req;
-    if (!user) {
-      throw new HttpException(
-        {
-          message: 'Lỗi xác thực',
-          data: null,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const oauthResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.USER_OAUTH_LOGIN, {
-        user,
-      }),
-    );
-    return {
-      message: oauthResponse.message,
-      data: {
-        user: oauthResponse.user,
-        token: oauthResponse.token,
-      },
-      status: true,
-    };
-  }
+  // @Get('google-redirect')
+  // @UseGuards(GoogleOAuthGuard)
+  // async googleAuthRedirect(@Request() req) {
+  //   const { user } = req;
+  //   if (!user) {
+  //     throw new HttpException(
+  //       {
+  //         message: 'Lỗi xác thực',
+  //         data: null,
+  //       },
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+  //   const oauthResponse = await firstValueFrom(
+  //     this.authServiceClient.send(AuthCommand.USER_OAUTH_LOGIN, {
+  //       user,
+  //     }),
+  //   );
+  //   return {
+  //     message: oauthResponse.message,
+  //     data: {
+  //       user: oauthResponse.user,
+  //       token: oauthResponse.token,
+  //     },
+  //     status: true,
+  //   };
+  // }
 
-  @Post('account')
+  @Post('link-account')
   @ApiCreatedResponse({
-    type: LoginReponse,
+    type: LinkAccountResponse,
   })
   async createAccount(@Body() body: AccountDto) {
     const oauthResponse = await firstValueFrom(
@@ -228,22 +229,20 @@ export class AuthController {
         user: body,
       }),
     );
+    if (oauthResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: oauthResponse.message,
+          data: null,
+          status: false,
+        },
+        oauthResponse.status,
+      );
+    }
     return {
       message: oauthResponse.message,
-      data: {
-        user: oauthResponse.user,
-        token: oauthResponse.token,
-      },
+      data: oauthResponse.data,
       status: true,
     };
-  }
-
-  @Get('test')
-  test() {
-    try {
-      return { name: 'Minh' };
-    } catch (error) {
-      console.log(error);
-    }
   }
 }

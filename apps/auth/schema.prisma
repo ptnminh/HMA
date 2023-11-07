@@ -33,6 +33,7 @@ model accounts {
     userId     String    @map(name: "user_id")
     provider   String
     avatar     String?
+    key        String?
     disabledAt DateTime? @map(name: "disabled_at")
     isDisabled Boolean   @default(false) @map(name: "is_disabled")
     updatedAt  DateTime  @default(now()) @updatedAt @map(name: "updated_at")

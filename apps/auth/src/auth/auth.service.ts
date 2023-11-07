@@ -110,4 +110,27 @@ export class AuthService {
       },
     });
   }
+
+  async findAccountByProvider(provider: string, key: string) {
+    return this.prismaService.accounts.findFirst({
+      where: {
+        provider,
+        key,
+      },
+    });
+  }
+
+  async getAllAccounts() {
+    return this.prismaService.accounts.findMany({
+      where: {
+        isDisabled: false,
+      },
+      select: {
+        id: true,
+        key: true,
+        provider: true,
+        avatar: true,
+      },
+    });
+  }
 }

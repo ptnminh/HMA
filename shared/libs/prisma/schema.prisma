@@ -32,6 +32,7 @@ model accounts {
     id         String    @id @default(uuid())
     userId     String    @map(name: "user_id")
     provider   String
+    key        String?
     avatar     String?
     disabledAt DateTime? @map(name: "disabled_at")
     isDisabled Boolean   @default(false) @map(name: "is_disabled")

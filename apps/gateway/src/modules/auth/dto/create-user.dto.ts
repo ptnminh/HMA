@@ -51,7 +51,13 @@ export class AccountDto {
   @IsString()
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  key: string;
+
+  @ApiProperty({ example: '12344-345435-34534534s' })
+  @IsString()
+  @IsEmail()
+  @IsNotEmpty()
+  userId: string;
 
   @ApiProperty({ example: 'ptnminh' })
   @IsString()
@@ -64,4 +70,10 @@ export class AccountDto {
   @ApiProperty({ example: 'ptnminh' })
   @IsString()
   picture?: string;
+
+  @ApiProperty({ example: 'test@gmail.com' })
+  @IsString()
+  @IsEmail()
+  @IsNotEmpty()
+  provider: string;
 }
