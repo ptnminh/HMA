@@ -10,9 +10,10 @@ import {
   UseGuards,
   Request,
   Render,
+  Param,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import {
   RegisterDto,
@@ -25,7 +26,11 @@ import { ConfigService } from '@nestjs/config';
 import { LoginDto, LoginReponse } from './dto/login.dto';
 import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
 import { GoogleOAuthGuard } from 'src/guards/google-oauth.guard';
-import { LinkAccountResponse } from './dto/link-account.dto';
+import {
+  GetUserAccountsResponse,
+  LinkAccountResponse,
+} from './dto/link-account.dto';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -223,6 +228,8 @@ export class AuthController {
   @ApiCreatedResponse({
     type: LinkAccountResponse,
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   async createAccount(@Body() body: AccountDto) {
     const oauthResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.USER_OAUTH_LOGIN, {
@@ -242,6 +249,35 @@ export class AuthController {
     return {
       message: oauthResponse.message,
       data: oauthResponse.data,
+      status: true,
+    };
+  }
+
+  @Get(':userId/accounts')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
+  @ApiCreatedResponse({
+    type: GetUserAccountsResponse,
+  })
+  async getAllAccounts(@Param('userId') userId: string) {
+    const accountsResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_GET_ACCOUNTS, {
+        userId,
+      }),
+    );
+    if (accountsResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: accountsResponse.message,
+          data: null,
+          status: false,
+        },
+        accountsResponse.status,
+      );
+    }
+    return {
+      message: accountsResponse.message,
+      data: accountsResponse.data,
       status: true,
     };
   }

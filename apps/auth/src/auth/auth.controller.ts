@@ -243,11 +243,30 @@ export class AuthController {
           avatar: oauthUser.picture,
         });
       }
-      const accounts = await this.authService.getAllAccounts();
+      const accounts = await this.authService.getAllAccounts(oauthUser.userId);
       return {
         status: HttpStatus.OK,
         data: accounts,
         message: 'Tạo liên kết thành công',
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(AuthCommand.USER_GET_ACCOUNTS)
+  async getUserAccounts(data: { userId: string }) {
+    try {
+      const { userId } = data;
+      const accounts = await this.authService.getAllAccounts(userId);
+      return {
+        status: HttpStatus.OK,
+        data: accounts,
+        message: 'Lấy danh sách tài khoản thành công',
       };
     } catch (error) {
       console.log(error);

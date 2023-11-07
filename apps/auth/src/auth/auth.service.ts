@@ -120,10 +120,11 @@ export class AuthService {
     });
   }
 
-  async getAllAccounts() {
+  async getAllAccounts(userId) {
     return this.prismaService.accounts.findMany({
       where: {
         isDisabled: false,
+        userId,
       },
       select: {
         id: true,
