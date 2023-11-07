@@ -10,6 +10,8 @@ export class RegisterDto {
   roleId?: number;
 
   emailVerified?: boolean;
+
+  role?: string;
 }
 
 export class GoogleOauthDTO {

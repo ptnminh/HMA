@@ -28,6 +28,7 @@ import { LoginDto, LoginReponse } from './dto/login.dto';
 import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
 import { GoogleOAuthGuard } from 'src/guards/google-oauth.guard';
 import {
+  DeleteAccountsResponse,
   GetUserAccountsResponse,
   LinkAccountResponse,
 } from './dto/link-account.dto';
@@ -171,7 +172,7 @@ export class AuthController {
   @ApiCreatedResponse({
     type: ConfirmReponse,
   })
-  @Post('confirm')
+  @Post('invite')
   async confirmAccount(@Body() body: ConfirmDTO) {
     const confirmResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.USER_CONFIRM, body),
@@ -287,7 +288,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
   @ApiCreatedResponse({
-    type: GetUserAccountsResponse,
+    type: DeleteAccountsResponse,
   })
   async deleteAccounts(
     @Param('accountId') accountId: string,

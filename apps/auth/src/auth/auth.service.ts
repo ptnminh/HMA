@@ -66,12 +66,13 @@ export class AuthService {
   }
 
   async signUpByEmail(createUserDTO: RegisterDto) {
-    const { password, roleId, ...rest } = createUserDTO;
+    const { password, role, ...rest } = createUserDTO;
+    const roleId = ROLES[role?.toUpperCase() || 'USER'];
     const encryptedPassword = await hashPassword(password);
     return this.prismaService.users.create({
       data: {
         password: encryptedPassword as string,
-        roleId: roleId ? roleId : (ROLES.USER as number),
+        roleId: roleId ? roleId : (ROLES.USER as number as number),
         ...rest,
       },
       select: {

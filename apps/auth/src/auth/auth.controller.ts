@@ -3,13 +3,7 @@ import { AuthService } from './auth.service';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { AuthCommand } from './command';
 import { RegisterDto } from './dto/create-user.dto';
-import {
-  EVENTS,
-  PROVIDERS,
-  ROLES,
-  comparePassword,
-  hashPassword,
-} from 'src/shared';
+import { EVENTS, PROVIDERS, comparePassword, hashPassword } from 'src/shared';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom } from 'rxjs';
@@ -166,40 +160,21 @@ export class AuthController {
   async confirmAccount(data: { email: string; role: string }) {
     try {
       // create user with email and password is email
-      const backendUrl = this.configService.get<string>('BACKEND_URL');
+      const frontEndUrl = this.configService.get<string>('FRONTEND_URL');
       const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
       const { email, role } = data;
-      const roleId = ROLES[role.toUpperCase()];
-      const password = email;
-      const exUser = await this.authService.findUserByEmail(email);
-      if (exUser?.emailVerified) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Tài khoản đã tồn tại',
-        };
-      }
-      if (exUser) {
-        const encryptedPassword = await hashPassword(password);
-
-        await this.authService.updateUserByEmail(email, {
-          roleId,
-          password: encryptedPassword,
-        });
-      } else {
-        await this.authService.signUpByEmail({ password, email, roleId });
-      }
-      const user = await this.authService.findUserByEmail(email);
 
       const confirmToken = await this.jwtService.signAsync(
         {
-          id: user.id,
+          email,
+          role,
         },
         {
           secret: jwtSercret,
           expiresIn: '30d',
         },
       );
-      const linkComfirm = backendUrl + '/api/auth/verify?token=' + confirmToken;
+      const linkComfirm = frontEndUrl + '/verify-account?token=' + confirmToken;
 
       await lastValueFrom(
         this.mailService.emit(EVENTS.AUTH_REGISTER, {
