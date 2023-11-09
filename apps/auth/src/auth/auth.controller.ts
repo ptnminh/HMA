@@ -3,7 +3,13 @@ import { AuthService } from './auth.service';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { AuthCommand } from './command';
 import { RegisterDto } from './dto/create-user.dto';
-import { EVENTS, PROVIDERS, comparePassword, hashPassword } from 'src/shared';
+import {
+  EVENTS,
+  PROVIDERS,
+  ROLES,
+  comparePassword,
+  hashPassword,
+} from 'src/shared';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom } from 'rxjs';
@@ -31,10 +37,13 @@ export class AuthController {
       }
       if (exUser) {
         const encryptedPassword = await hashPassword(rest.password);
-
+        const role = rest?.role;
+        const roleId = ROLES[role?.toUpperCase() || 'USER'];
         await this.authService.updateUserByEmail(email, {
           ...rest,
+          ...(roleId && { roleId }), // if roleId is not undefined then add roleId to data
           password: encryptedPassword,
+          role: undefined,
         });
       } else {
         await this.authService.signUpByEmail(data);
@@ -55,19 +64,21 @@ export class AuthController {
       const linkComfirm =
         backendUrl + '/api/auth/verify?token=' + registerToken;
 
-      await lastValueFrom(
-        this.mailService.emit(EVENTS.AUTH_REGISTER, {
-          email,
-          link: linkComfirm,
-        }),
-      );
+      if (!rest.emailVerified) {
+        await lastValueFrom(
+          this.mailService.emit(EVENTS.AUTH_REGISTER, {
+            email,
+            link: linkComfirm,
+          }),
+        );
+      }
       return {
         message: 'Tạo tài khoản thành công',
         status: HttpStatus.CREATED,
         user: {
           ...user,
           role: user.role.name,
-          emailVerified: false,
+          emailVerified: !rest.emailVerified ? false : true,
         },
       };
     } catch (error) {
