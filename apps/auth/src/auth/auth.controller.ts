@@ -99,20 +99,20 @@ export class AuthController {
       if (!user) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: 'Email does not exist',
+          message: 'Email không tồn tại',
         };
       }
       if (!user.emailVerified) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: 'Email is not verified',
+          message: 'Email chưa được xác thực',
         };
       }
       const isMatch = await comparePassword(password, user.password);
       if (!isMatch) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: 'Password is not correct',
+          message: 'Mật khẩu không chính xác',
         };
       }
 

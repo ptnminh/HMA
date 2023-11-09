@@ -17,24 +17,20 @@ export class AppController {
       const dynamic_template_data = {
         link: data.link,
       };
-      // const msg = this.mailService.messageSignUpGenerate(
-      //   [data.email as string],
-      //   MAIL_TEMPLATE_ID.REGISTER as string,
-      //   dynamic_template_data,
-      // );
+      const msg = this.mailService.messageSignUpGenerate(
+        [data.email as string],
+        MAIL_TEMPLATE_ID.REGISTER as string,
+        dynamic_template_data,
+      );
 
+      await this.mailService.send(msg);
       const channel = context.getChannelRef();
       const originalMessage = context.getMessage();
       channel.ack(originalMessage);
-      await this.mailService.send({
-        from: process.env.FROM_EMAIL as string,
-        templateId: MAIL_TEMPLATE_ID.REGISTER as string,
-        dynamicTemplateData: dynamic_template_data,
-        to: data.email as string,
-      });
       return true;
     } catch (error) {
       console.log(
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         require('util').inspect(error, {
           showHidden: false,
           depth: null,
