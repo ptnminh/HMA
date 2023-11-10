@@ -310,8 +310,8 @@ export class AuthController {
 
   async getAllPermission() {
     try {
-      const user = await this.authService.getAllPermission();
-      if (!user) {
+      const permission = await this.authService.getAllPermission();
+      if (!permission) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Không tìm thấy quyền',
@@ -319,7 +319,7 @@ export class AuthController {
       }
       return {
         status: HttpStatus.OK,
-        data: user,
+        data: permission,
         message: 'Lấy danh sách quyền thành công',
       }
     }
