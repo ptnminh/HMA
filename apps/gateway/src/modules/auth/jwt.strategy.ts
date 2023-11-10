@@ -4,17 +4,23 @@ import { PassportStrategy } from '@nestjs/passport';
 import {
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { AuthCommand } from './command';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(
+    @Inject('AUTH_SERVICE') private readonly authServiceClient: ClientProxy,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true,
-      secretOrKey: process.env.SECRET_KEY,
+      secretOrKey: 'thisisverysecretkey',
     });
   }
 
@@ -29,19 +35,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         HttpStatus.BAD_REQUEST,
       );
     }
-    // const user = await this.prismaService.users.findUnique({
-    //   where: { id: payload.id },
-    //   include: {
-    //     userRoles: {
-    //       select: {
-    //         roleId: true,
-    //       },
-    //     },
-    //   },
-    // });
-    // if (!user) {
-    //   throw new UnauthorizedException();
-    // }
-    // return { ...user, roles: user?.userRoles };
+    const result = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_GET, { userId: payload.id }),
+    );
+    if (result.status !== HttpStatus.OK) {
+      throw new UnauthorizedException({
+        status: false,
+        message: 'Unauthorized',
+      });
+    }
+    return { ...result.data };
   }
 }

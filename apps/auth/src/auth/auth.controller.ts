@@ -282,4 +282,28 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.USER_GET)
+  async getUserInfo(data: { userId: string }) {
+    try {
+      const user = await this.authService.findUserById(data.userId);
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tài khoản không tồn tại',
+        };
+      }
+      return {
+        status: HttpStatus.OK,
+        data: user,
+        message: 'Lấy thông tin tài khoản thành công',
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }
