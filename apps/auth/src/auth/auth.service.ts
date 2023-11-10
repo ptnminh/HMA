@@ -147,4 +147,21 @@ export class AuthService {
       },
     });
   }
+
+  async findUserById(id: string) {
+    return this.prismaService.users.findUnique({
+      where: {
+        id,
+        emailVerified: true,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        emailVerified: true,
+        roleId: true,
+      },
+    });
+  }
 }
