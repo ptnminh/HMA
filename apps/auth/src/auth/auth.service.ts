@@ -147,4 +147,33 @@ export class AuthService {
       },
     });
   }
+  async getAllUsers() {
+    return this.prismaService.users.findMany({
+      where: {
+        isDisabled: false,
+      },
+      select: {
+        id: true,
+        email: true,
+        createdAt: true,
+        name: true,
+        firstName: true,
+        lastName: true,
+      }
+    })
+  }
+
+  async getAllPermission() {
+    return this.prismaService.permissions.findMany({
+      where: {
+        isDisabled: false,
+      },
+      select: {
+        id: true,
+        permission: true,
+        description: true,
+        createdAt: true,
+      }
+    })
+  }
 }

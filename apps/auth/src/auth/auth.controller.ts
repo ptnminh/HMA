@@ -282,4 +282,54 @@ export class AuthController {
       };
     }
   }
+  
+  @MessagePattern(AuthCommand.GET_ALL_USERS)
+  async getAllUsers() {
+    try {
+      const user = await this.authService.getAllUsers();
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Không tìm thấy nguuời dùng',
+        }
+      }
+      return {
+        status: HttpStatus.OK,
+        data: user,
+        message: 'Lấy danh sách người dùng thành công',
+      }
+    }
+    catch ( error ) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống'
+      }
+    }
+  }
+
+  async getAllPermission() {
+    try {
+      const user = await this.authService.getAllPermission();
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Không tìm thấy quyền',
+        }
+      }
+      return {
+        status: HttpStatus.OK,
+        data: user,
+        message: 'Lấy danh sách quyền thành công',
+      }
+    }
+    catch ( error ) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống'
+      }
+    }
+
+  }
 }

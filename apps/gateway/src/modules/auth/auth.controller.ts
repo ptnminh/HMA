@@ -316,4 +316,49 @@ export class AuthController {
       status: true,
     };
   }
+  @Get('all-users')
+  async getAllUsers()
+  {
+    const Response = await firstValueFrom (
+      this.authServiceClient.send(AuthCommand.GET_ALL_USERS, {})
+    );
+    if (Response.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: Response.message,
+          data: null,
+          status: false,
+        },
+        Response.status,
+      )
+    }
+    return {
+      message: Response.message,
+      data: Response.data,
+      status: true,
+    }
+  }
+
+  @Get('all-permissions')
+  async getAllPermissions()
+  {
+    const Response = await firstValueFrom (
+      this.authServiceClient.send(AuthCommand.GET_ALL_PERMISSIONS, {})
+    );
+    if (Response.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: Response.message,
+          data: null,
+          status: false,
+        },
+        Response.status,
+      )
+    }
+    return {
+      message: Response.message,
+      data: Response.data,
+      status: true,
+    }
+  }
 }
