@@ -361,4 +361,27 @@ export class AuthController {
       status: true,
     }
   }
+
+  @Get('all-roles')
+  async getAllRoles()
+  {
+    const Response = await firstValueFrom (
+      this.authServiceClient.send(AuthCommand.GET_ALL_ROLES, {})
+    )
+    if (Response.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: Response.message,
+          data: null,
+          status: false,
+        },
+        Response.status,
+      )
+    }
+    return {
+      message: Response.message,
+      data: Response.data,
+      status: true,
+    }
+  }
 }

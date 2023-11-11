@@ -287,12 +287,6 @@ export class AuthController {
   async getAllUsers() {
     try {
       const user = await this.authService.getAllUsers();
-      if (!user) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Không tìm thấy nguuời dùng',
-        }
-      }
       return {
         status: HttpStatus.OK,
         data: user,
@@ -308,15 +302,10 @@ export class AuthController {
     }
   }
 
+  @MessagePattern(AuthCommand.GET_ALL_PERMISSIONS)
   async getAllPermission() {
     try {
       const permission = await this.authService.getAllPermission();
-      if (!permission) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Không tìm thấy quyền',
-        }
-      }
       return {
         status: HttpStatus.OK,
         data: permission,
@@ -331,5 +320,23 @@ export class AuthController {
       }
     }
 
+  }
+
+  @MessagePattern(AuthCommand.GET_ALL_ROLES)
+  async getAllRoles() {
+    try {
+      const role = await this.authService.getAllRoles();
+      return {
+        status: HttpStatus.OK,
+        data: role,
+        message: 'Lấy danh sách vai trò thành công',
+      }
+    }
+    catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
   }
 }

@@ -176,4 +176,18 @@ export class AuthService {
       }
     })
   }
+
+  async getAllRoles() {
+    return this.prismaService.roles.findMany({
+      where: {
+        isDisabled: false,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        createdAt: true,
+      }
+    })
+  }
 }
