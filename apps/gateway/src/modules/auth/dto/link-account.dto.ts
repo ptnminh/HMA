@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IUser } from '../interface/creath-auth.interface';
 
 class Accounts {
   id: string;
@@ -22,6 +23,12 @@ export class LinkAccountResponse {
     nullable: true,
   })
   data: Accounts;
+  @ApiProperty({ example: 'Liên kết thành công', nullable: true })
+  message: { [key: string]: any };
+}
+export class LinkAccountWithEmailResponse {
+  @ApiProperty({ example: 'true', type: Boolean })
+  status: string;
   @ApiProperty({ example: 'Liên kết thành công', nullable: true })
   message: { [key: string]: any };
 }
@@ -66,5 +73,43 @@ export class DeleteAccountsResponse {
     example: 'Xóa tài khoản thành công',
     nullable: true,
   })
+  message: { [key: string]: any };
+}
+export class GetAccountsResponse {
+  @ApiProperty({ example: 'true', type: Boolean })
+  status: string;
+  @ApiProperty({
+    example: {
+      user: {
+        email: 'test@denrox.com',
+        id: '5d987c3bfb881ec86b476bcc',
+        firstName: 'ptnminh',
+        lastName: 'ptnminh',
+        avatar: 'https://avatars.githubusercontent.com/u/47259054?v=4',
+      },
+      token: 'token',
+    },
+    nullable: true,
+  })
+  data: {
+    user: IUser;
+    token: string;
+  };
+  @ApiProperty({
+    example: 'Đăng nhập bằng tài khoản thành công.',
+    nullable: true,
+  })
+  message: { [key: string]: any };
+}
+
+export class VerifyUserReponse {
+  @ApiProperty({ example: 'true', type: Boolean })
+  status: string;
+  @ApiProperty({
+    example: null,
+    nullable: true,
+  })
+  data: string;
+  @ApiProperty({ example: 'Gửi mail thành công.', nullable: true })
   message: { [key: string]: any };
 }

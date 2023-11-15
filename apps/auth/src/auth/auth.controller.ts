@@ -306,4 +306,125 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.USER_FIND_ACCOUNT)
+  async getAccount(data: { key: string; provider: string }) {
+    try {
+      const { key, provider } = data;
+      const account = await this.authService.findAccountByProvider(
+        provider,
+        key,
+      );
+      if (!account) {
+        return {
+          status: HttpStatus.OK,
+          message: 'Tài khoản không tồn tại',
+          data: {
+            user: null,
+          },
+        };
+      }
+      const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
+      const user = await this.authService.findUserById(account.userId);
+      const token = await this.jwtService.signAsync(
+        {
+          ...user,
+        },
+        {
+          secret: jwtSercret,
+        },
+      );
+      return {
+        status: HttpStatus.OK,
+        data: {
+          user,
+          token,
+        },
+        message: 'Lấy thông tin tài khoản thành công',
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(AuthCommand.USER_CHECK_VERIFY)
+  async checkVerify(data: { email: string; provider: string; key: string }) {
+    try {
+      const { email, provider, key } = data;
+      const frontEndUrl = this.configService.get<string>('FRONTEND_URL');
+      const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
+      const token = await this.jwtService.signAsync(
+        {
+          email,
+          provider,
+          key,
+        },
+        {
+          secret: jwtSercret,
+          expiresIn: '30d',
+        },
+      );
+      const linkComfirm = frontEndUrl + '/verify-user?token=' + token;
+
+      await lastValueFrom(
+        this.mailService.emit(EVENTS.AUTH_REGISTER, {
+          email,
+          link: linkComfirm,
+        }),
+      );
+      return {
+        status: HttpStatus.OK,
+        message: 'Gửi mail thành công',
+        link: linkComfirm,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(AuthCommand.LINK_ACCOUNT_WITH_EMAIL)
+  async linkAccountWithEmail(data: {
+    email: string;
+    provider: string;
+    key: string;
+  }) {
+    try {
+      const { email, provider, key } = data;
+      let user: any = await this.authService.findUserVerifiedByEmail(email);
+      if (!user) {
+        const data = {
+          password: email,
+          email,
+          isInutPassword: false,
+        };
+        user = await this.authService.signUpByEmail(data);
+      }
+      let account = await this.authService.findAccountByProvider(provider, key);
+      if (!account) {
+        account = await this.authService.createAccount({
+          userId: user.id,
+          provider,
+          key,
+        });
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Liên kết tài khoản thành công',
+        data: null,
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }

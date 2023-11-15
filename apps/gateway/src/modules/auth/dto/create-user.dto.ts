@@ -80,3 +80,21 @@ export class AccountDto {
   @IsNotEmpty()
   provider: string;
 }
+
+export class LinkAccountWithEmail {
+  @ApiProperty({ example: 'test@gmail.com' })
+  @IsString()
+  @IsEmail()
+  @IsNotEmpty()
+  key: string;
+
+  @ApiProperty({ example: 'example@gmail.com' })
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty({ example: 'google' })
+  @IsString()
+  @IsNotEmpty()
+  provider: string;
+}

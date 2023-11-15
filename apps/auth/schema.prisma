@@ -18,6 +18,7 @@ model users {
     firstName       String?    @map(name: "first_name")
     lastName        String?    @map(name: "last_name")
     password        String
+    isInputPassword Boolean    @default(true) @map(name: "is_input_password")
     emailVerified   Boolean    @default(false) @map(name: "email_verified")
     emailVerifiedAt DateTime?  @map(name: "email_verified_at")
     isDisabled      Boolean    @default(false) @map(name: "is_disabled")

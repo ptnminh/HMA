@@ -12,6 +12,8 @@ export class RegisterDto {
   emailVerified?: boolean;
 
   role?: string;
+
+  isInputPassword?: boolean;
 }
 
 export class GoogleOauthDTO {

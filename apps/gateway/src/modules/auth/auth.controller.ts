@@ -14,12 +14,20 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiProperty,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import {
   RegisterDto,
   RegisterResponse,
   AccountDto,
+  LinkAccountWithEmail,
 } from './dto/create-user.dto';
 import { AuthCommand } from './command';
 import { JwtService } from '@nestjs/jwt';
@@ -29,8 +37,11 @@ import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
 import { GoogleOAuthGuard } from 'src/guards/google-oauth.guard';
 import {
   DeleteAccountsResponse,
+  GetAccountsResponse,
   GetUserAccountsResponse,
   LinkAccountResponse,
+  LinkAccountWithEmailResponse,
+  VerifyUserReponse,
 } from './dto/link-account.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
@@ -313,6 +324,106 @@ export class AuthController {
     return {
       message: accountsResponse.message,
       data: accountsResponse.data,
+      status: true,
+    };
+  }
+
+  @Get('account')
+  @ApiOkResponse({
+    type: GetAccountsResponse,
+  })
+  @ApiQuery({
+    name: 'key',
+    example: '123456789',
+  })
+  @ApiQuery({
+    name: 'provider',
+    example: 'google',
+  })
+  async findAccount(@Query() query: { key: string; provider: string }) {
+    const { key, provider } = query;
+    const accountResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_FIND_ACCOUNT, {
+        key,
+        provider,
+      }),
+    );
+    if (accountResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: accountResponse.message,
+          data: null,
+          status: false,
+        },
+        accountResponse.status,
+      );
+    }
+    return {
+      message: accountResponse.message,
+      data: accountResponse.data,
+      status: true,
+    };
+  }
+  @ApiQuery({
+    name: 'key',
+    example: '123456789',
+  })
+  @ApiQuery({
+    name: 'provider',
+    example: 'google',
+  })
+  @ApiQuery({
+    name: 'email',
+    example: 'email@gmail.com',
+  })
+  @ApiOkResponse({
+    type: VerifyUserReponse,
+  })
+  @Get('user/send-email-verify-user')
+  async verifyUser(
+    @Query() query: { email: string; provider: string; key: string },
+  ) {
+    const verifyResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.USER_CHECK_VERIFY, query),
+    );
+    if (verifyResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: verifyResponse.message,
+          data: null,
+          status: false,
+        },
+        verifyResponse.status,
+      );
+    }
+    return {
+      message: verifyResponse.message,
+      data: verifyResponse.data,
+      status: true,
+    };
+  }
+
+  @Post('link-account-email')
+  @ApiCreatedResponse({
+    type: LinkAccountWithEmailResponse,
+  })
+  async linkAccountEmail(@Body() body: LinkAccountWithEmail) {
+    const oauthResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.LINK_ACCOUNT_WITH_EMAIL, body),
+    );
+    if (oauthResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: oauthResponse.message,
+          data: null,
+          status: false,
+        },
+        oauthResponse.status,
+      );
+    }
+    return {
+      message: oauthResponse.message,
+      data: oauthResponse.data,
       status: true,
     };
   }

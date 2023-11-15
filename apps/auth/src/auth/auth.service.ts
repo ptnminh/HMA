@@ -47,6 +47,7 @@ export class AuthService {
         id: true,
         email: true,
         password: true,
+        isInputPassword: true,
         emailVerified: true,
         role: {
           select: {
@@ -77,6 +78,7 @@ export class AuthService {
       },
       select: {
         id: true,
+        isInputPassword: true,
         email: true,
         role: {
           select: {

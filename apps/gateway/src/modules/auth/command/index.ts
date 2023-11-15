@@ -7,4 +7,7 @@ export enum AuthCommand {
   USER_GET_ACCOUNTS = 'user_get_accounts',
   USER_DELETE_ACCOUNT = 'user_delete_account',
   USER_GET = 'user_get',
+  USER_FIND_ACCOUNT = 'user_find_account',
+  USER_CHECK_VERIFY = 'user_check_verify',
+  LINK_ACCOUNT_WITH_EMAIL = 'link_account_with_email',
 }
