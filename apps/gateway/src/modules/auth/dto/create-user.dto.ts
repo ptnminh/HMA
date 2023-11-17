@@ -54,7 +54,6 @@ export class RegisterDto {
 export class AccountDto {
   @ApiProperty({ example: 'test@gmail.com' })
   @IsString()
-  @IsEmail()
   @IsNotEmpty()
   key: string;
 
