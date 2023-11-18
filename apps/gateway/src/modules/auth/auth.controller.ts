@@ -12,9 +12,11 @@ import {
   Render,
   Param,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -44,6 +46,7 @@ import {
   VerifyUserReponse,
 } from './dto/link-account.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { ChangePasswordDto, ChangePasswordReponse, ResetPasswordVerifyResponse } from './dto/reset-password.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -427,4 +430,57 @@ export class AuthController {
       status: true,
     };
   }
+
+  @Post('change-password')
+  /*@UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')*/
+  @ApiCreatedResponse({
+    type: ChangePasswordReponse
+  })
+  async ChangePassword(@Body() dto: ChangePasswordDto) {
+    const ChangePasswordReponse = await firstValueFrom (
+      this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, dto),
+    );
+    if (ChangePasswordReponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: ChangePasswordReponse.message,
+          data: null,
+          status: false,
+        },
+        ChangePasswordReponse.status
+      );
+    }
+    return {
+      message: ChangePasswordReponse.message,
+      data: ChangePasswordReponse.data,
+      status: true,
+    }
+  }
+
+  @ApiCreatedResponse({
+    type: ResetPasswordVerifyResponse
+  })
+  @Post('reset-password')
+  async ResetPasswordVerify(@Body() email: string) {
+    const ResetPasswordVerifyResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, email),
+    );
+    if (ResetPasswordVerifyResponse.status !== HttpStatus.OK) {
+      throw new HttpException (
+        {
+          message: ResetPasswordVerifyResponse.message,
+          data: ResetPasswordVerifyResponse.data,
+          status: false,
+        },
+        ResetPasswordVerifyResponse.status
+      );
+    }
+    return {
+      message: ResetPasswordVerifyResponse.message,
+      data: ResetPasswordVerifyResponse.data,
+      status: false,
+    }
+  }
+  
 }

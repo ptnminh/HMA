@@ -427,4 +427,91 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.CHANGE_PASSWORD)
+  async changePassword(data: {id: string, currentPassword: string, newPassword: string,}) {
+    try {
+      const {id, currentPassword, newPassword} = data;
+      const user = await this.authService.findPasswordByUserID(id)
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Người dùng không tồn tại',
+        }
+      }
+      const isMatch = comparePassword(currentPassword, user.password)
+      if (!isMatch) {
+        return  {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Mật khẩu không chính xác',
+        }
+      }
+      const encryptedPassword = await hashPassword(newPassword);
+      await this.authService.updatePassword(id, encryptedPassword)
+      const newUser = await this.authService.findPasswordByUserID(id)
+      if(newUser.password != encryptedPassword) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Không thể thay đổi mật khẩu',
+        }
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Thay đổi mật khẩu thành công',
+        data: newUser,
+      }
+    }
+    catch(error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  
+
+  @MessagePattern(AuthCommand.RESET_PASSWORD_VERIFY)
+  async resetPassword(data: {email: string}) {
+    try {
+      const user = await this.authService.findUserByEmail(data.email)
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Email không tồn tại',
+        }
+      }
+      const frontEndUrl = this.configService.get<string>('FRONTEND_URL');
+      const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
+      const backEndUrl = this.configService.get<string>('BACKEND_URL');
+      const Token = await this.jwtService.signAsync(
+        {
+          id: user.id,
+        },
+        {
+          secret: jwtSercret,
+          expiresIn: '30d',
+        },
+      );
+      const linkResetPassword = backEndUrl + '/api/auth/reset_password?token=' + Token;
+      await lastValueFrom(
+        this.mailService.emit(EVENTS. AUTH_RESET_PASSWORD, {
+          email: data.email,
+          link: linkResetPassword,
+        }),
+      );
+      return {
+        data: null,
+        status: HttpStatus.OK,
+        message: 'Gửi email thành công',
+      }
+
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }

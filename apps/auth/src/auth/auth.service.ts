@@ -47,7 +47,7 @@ export class AuthService {
         id: true,
         email: true,
         password: true,
-        isInputPassword: true,
+        //isInputPassword: true,
         emailVerified: true,
         role: {
           select: {
@@ -78,7 +78,7 @@ export class AuthService {
       },
       select: {
         id: true,
-        isInputPassword: true,
+        //isInputPassword: true,
         email: true,
         role: {
           select: {
@@ -166,4 +166,32 @@ export class AuthService {
       },
     });
   }
+
+
+
+  async updatePassword(id: string, newPassword: string){
+    return this.prismaService.users.update({
+      where: {
+        id,
+        emailVerified: true
+      },
+      data: {
+        password: newPassword,
+      }
+    })
+  }
+
+  async findPasswordByUserID(userID: string){
+    return this.prismaService.users.findFirst({
+      where: {
+        id: userID,
+        emailVerified: true
+      },
+      select: {
+        id: true,
+        password: true
+      }
+    })
+  }
+
 }
