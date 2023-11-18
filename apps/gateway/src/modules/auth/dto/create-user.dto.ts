@@ -83,7 +83,6 @@ export class AccountDto {
 export class LinkAccountWithEmail {
   @ApiProperty({ example: 'test@gmail.com' })
   @IsString()
-  @IsEmail()
   @IsNotEmpty()
   key: string;
 
