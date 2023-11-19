@@ -47,7 +47,7 @@ import {
   VerifyUserReponse,
 } from './dto/link-account.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { ChangePasswordDto, ChangePasswordReponse, ResetPasswordVerifyResponse } from './dto/reset-password.dto';
+import { ChangePasswordDto, ChangePasswordReponse, ResetPasswordVerifyDto, ResetPasswordVerifyResponse } from './dto/reset-password.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -438,7 +438,7 @@ export class AuthController {
   @ApiCreatedResponse({
     type: ChangePasswordReponse
   })
-  async ChangePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
+  async ChangePassword(@Body() dto: ChangePasswordDto) {
     const ChangePasswordReponse = await firstValueFrom (
       this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, dto),
     );
@@ -463,9 +463,10 @@ export class AuthController {
     type: ResetPasswordVerifyResponse
   })
   @Post('reset-password')
-  async ResetPasswordVerify(@Body() email: string) {
+  async ResetPasswordVerify(@Body() dto: ResetPasswordVerifyDto) {
+    const email = dto.email
     const ResetPasswordVerifyResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, email),
+      this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, dto.email),
     );
     if (ResetPasswordVerifyResponse.status !== HttpStatus.OK) {
       throw new HttpException (

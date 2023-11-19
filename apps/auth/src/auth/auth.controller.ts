@@ -458,7 +458,10 @@ export class AuthController {
       return {
         status: HttpStatus.OK,
         message: 'Thay đổi mật khẩu thành công',
-        data: newUser,
+        data: {
+          id: newUser.id,
+          password: newPassword
+        },
       }
     }
     catch(error) {
@@ -486,7 +489,7 @@ export class AuthController {
       const backEndUrl = this.configService.get<string>('BACKEND_URL');
       const Token = await this.jwtService.signAsync(
         {
-          id: user.id,
+          ...user,
         },
         {
           secret: jwtSercret,
@@ -501,7 +504,10 @@ export class AuthController {
         }),
       );
       return {
-        data: user,
+        data: {
+          user: user,
+          token: Token,
+        },
         status: HttpStatus.OK,
         message: 'Gửi email thành công',
       }
