@@ -501,7 +501,7 @@ export class AuthController {
         }),
       );
       return {
-        data: null,
+        data: user,
         status: HttpStatus.OK,
         message: 'Gửi email thành công',
       }

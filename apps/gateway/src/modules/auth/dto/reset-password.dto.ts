@@ -19,7 +19,9 @@ export class ChangePasswordDto {
 }
 
 export class ResetPasswordVerifyDto{
-  @ApiProperty({example: 'nsonbao1206@gmail.com'})
+  @ApiProperty({example: {
+    email : 'nsonbao1206@gmail.com',
+  }})
   @IsNotEmpty()
   @IsEmail()
   email: string
