@@ -13,6 +13,7 @@ import {
   Param,
   Delete,
   Patch,
+  Req,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -432,12 +433,12 @@ export class AuthController {
   }
 
   @Post('change-password')
-  /*@UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')*/
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @ApiCreatedResponse({
     type: ChangePasswordReponse
   })
-  async ChangePassword(@Body() dto: ChangePasswordDto) {
+  async ChangePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
     const ChangePasswordReponse = await firstValueFrom (
       this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, dto),
     );
