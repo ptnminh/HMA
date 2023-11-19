@@ -8,7 +8,6 @@ import {
   Get,
   Query,
   UseGuards,
-  Request,
   Render,
   Param,
   Delete,
@@ -48,6 +47,7 @@ import {
 } from './dto/link-account.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { ChangePasswordDto, ChangePasswordReponse, ResetPasswordVerifyDto, ResetPasswordVerifyResponse } from './dto/reset-password.dto';
+import { Request } from 'express';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -438,9 +438,15 @@ export class AuthController {
   @ApiCreatedResponse({
     type: ChangePasswordReponse
   })
-  async ChangePassword(@Body() dto: ChangePasswordDto) {
+  async ChangePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
+    const user = req.user
+    const _dto = {
+      id: user['id'],
+      currentPassword: dto.currentPassword,
+      newPassword: dto.newPassword,
+    }
     const ChangePasswordReponse = await firstValueFrom (
-      this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, dto),
+      this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, _dto),
     );
     if (ChangePasswordReponse.status !== HttpStatus.OK) {
       throw new HttpException(
