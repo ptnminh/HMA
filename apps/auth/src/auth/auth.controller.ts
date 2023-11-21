@@ -496,7 +496,7 @@ export class AuthController {
           expiresIn: '30d',
         },
       );
-      const linkResetPassword = backEndUrl + '/api/auth/reset_password?token=' + Token;
+      const linkResetPassword = frontEndUrl + '/api/auth/reset_password?token=' + Token;
       await lastValueFrom(
         this.mailService.emit(EVENTS.AUTH_REGISTER, {
           email: data.email,
