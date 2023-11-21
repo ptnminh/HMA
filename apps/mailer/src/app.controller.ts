@@ -40,33 +40,3 @@ export class AppController {
     }
   }
 
-  @EventPattern(EVENTS.AUTH_RESET_PASSWORD)
-  async handleSendEmailResetPassword(@Payload() data: any, @Ctx() context: RmqContext ) {
-    try {
-      const dynamic_template_data = {
-        link: data.link,
-      };
-      const msg = this.mailService.messageForgotPasswordGenerate(
-        [data.email as string],
-        MAIL_TEMPLATE_ID.RESET_PASSWORD as string,
-        dynamic_template_data,
-      );
-
-      await this.mailService.send(msg);
-      const channel = context.getChannelRef();
-      const originalMessage = context.getMessage();
-      channel.ack(originalMessage);
-      return true;
-    } catch (error) {
-      console.log(
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        require('util').inspect(error, {
-          showHidden: false,
-          depth: null,
-          colors: true,
-        }),
-      );
-    }
-
-  }
-}

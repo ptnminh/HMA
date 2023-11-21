@@ -498,7 +498,7 @@ export class AuthController {
       );
       const linkResetPassword = backEndUrl + '/api/auth/reset_password?token=' + Token;
       await lastValueFrom(
-        this.mailService.emit(EVENTS.AUTH_RESET_PASSWORD, {
+        this.mailService.emit(EVENTS.AUTH_REGISTER, {
           email: data.email,
           link: linkResetPassword,
         }),
