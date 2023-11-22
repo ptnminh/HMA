@@ -10,4 +10,7 @@ export enum AuthCommand {
   USER_FIND_ACCOUNT = 'user_find_account',
   USER_CHECK_VERIFY = 'user_check_verify',
   LINK_ACCOUNT_WITH_EMAIL = 'link_account_with_email',
+  CHANGE_PASSWORD = 'change_password',
+  RESET_PASSWORD = 'reset_password',
+  RESET_PASSWORD_VERIFY = 'reset_password_verify'
 }

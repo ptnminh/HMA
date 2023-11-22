@@ -8,13 +8,15 @@ import {
   Get,
   Query,
   UseGuards,
-  Request,
   Render,
   Param,
   Delete,
+  Patch,
+  Req,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -44,6 +46,8 @@ import {
   VerifyUserReponse,
 } from './dto/link-account.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { ChangePasswordDto, ChangePasswordReponse, ResetPasswordVerifyDto, ResetPasswordVerifyResponse } from './dto/reset-password.dto';
+import { Request } from 'express';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -427,4 +431,64 @@ export class AuthController {
       status: true,
     };
   }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
+  @ApiCreatedResponse({
+    type: ChangePasswordReponse
+  })
+  async ChangePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
+    const user = req.user
+    const _dto = {
+      id: user['id'],
+      currentPassword: dto.currentPassword,
+      newPassword: dto.newPassword,
+    }
+    const ChangePasswordReponse = await firstValueFrom (
+      this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, _dto),
+    );
+    if (ChangePasswordReponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: ChangePasswordReponse.message,
+          data: null,
+          status: false,
+        },
+        ChangePasswordReponse.status
+      );
+    }
+    return {
+      message: ChangePasswordReponse.message,
+      data: ChangePasswordReponse.data,
+      status: true,
+    }
+  }
+
+  @ApiCreatedResponse({
+    type: ResetPasswordVerifyResponse
+  })
+  @Post('reset-password')
+  async ResetPasswordVerify(@Body() dto: ResetPasswordVerifyDto) {
+    const email = dto.email
+    const ResetPasswordVerifyResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, dto.email),
+    );
+    if (ResetPasswordVerifyResponse.status !== HttpStatus.OK) {
+      throw new HttpException (
+        {
+          message: ResetPasswordVerifyResponse.message,
+          data: ResetPasswordVerifyResponse.data,
+          status: false,
+        },
+        ResetPasswordVerifyResponse.status
+      );
+    }
+    return {
+      message: ResetPasswordVerifyResponse.message,
+      data: ResetPasswordVerifyResponse.data,
+      status: false,
+    }
+  }
+  
 }
