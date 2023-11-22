@@ -442,7 +442,7 @@ export class AuthController {
     const user = req.user
     const _dto = {
       id: user['id'],
-      currentPassword: dto.currentPassword,
+      currentPassword: user['password'],
       newPassword: dto.newPassword,
     }
     const ChangePasswordReponse = await firstValueFrom (
@@ -470,9 +470,9 @@ export class AuthController {
   })
   @Post('reset-password')
   async ResetPasswordVerify(@Body() dto: ResetPasswordVerifyDto) {
-    const email = dto.email
+    const email = dto
     const ResetPasswordVerifyResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, dto.email),
+      this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, dto),
     );
     if (ResetPasswordVerifyResponse.status !== HttpStatus.OK) {
       throw new HttpException (

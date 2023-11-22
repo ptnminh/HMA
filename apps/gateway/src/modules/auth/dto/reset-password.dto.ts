@@ -7,10 +7,10 @@ export class ChangePasswordDto {
   @IsNotEmpty()
   id: string;*/
 
-  @ApiProperty({ example: '12345678' })
+  /*@ApiProperty({ example: '12345678' })
   @IsString()
   @IsNotEmpty()
-  currentPassword: string;
+  currentPassword: string;*/
 
   @ApiProperty({ example: '1234' })
   @IsString()

@@ -476,8 +476,9 @@ export class AuthController {
 
   @MessagePattern(AuthCommand.RESET_PASSWORD_VERIFY)
   async resetPassword(data: {email: string}) {
+    const {email} = data
     try {
-      const user = await this.authService.findUserVerifiedByEmail(data.email)
+      const user = await this.authService.findUserVerifiedByEmail(email)
       if (!user) {
         return {
           status: HttpStatus.BAD_REQUEST,
