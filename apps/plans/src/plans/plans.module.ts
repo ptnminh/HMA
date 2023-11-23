@@ -4,6 +4,7 @@ import { PlanService } from './plans.service';
 import { AllExceptionFilter } from 'src/filters/all-exception.filter';
 import { ConfigModule } from '@nestjs/config';
 import { config } from 'src/configs';
+import { PrismaService } from 'src/prisma.service';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { config } from 'src/configs';
       provide: 'APP_FILTER',
       useClass: AllExceptionFilter,
     },
+    PrismaService,
   ],
 })
 export class PlanModule {}
