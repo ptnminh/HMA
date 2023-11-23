@@ -46,7 +46,12 @@ import {
   VerifyUserReponse,
 } from './dto/link-account.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { ChangePasswordDto, ChangePasswordReponse, ResetPasswordVerifyDto, ResetPasswordVerifyResponse } from './dto/reset-password.dto';
+import {
+  ChangePasswordDto,
+  ChangePasswordReponse,
+  ResetPasswordVerifyDto,
+  ResetPasswordVerifyResponse,
+} from './dto/reset-password.dto';
 import { Request } from 'express';
 
 @Controller('auth')
@@ -436,16 +441,16 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
   @ApiCreatedResponse({
-    type: ChangePasswordReponse
+    type: ChangePasswordReponse,
   })
   async ChangePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
-    const user = req.user
+    const user = req.user;
     const _dto = {
       id: user['id'],
       currentPassword: dto.currentPassword,
       newPassword: dto.newPassword,
-    }
-    const ChangePasswordReponse = await firstValueFrom (
+    };
+    const ChangePasswordReponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, _dto),
     );
     if (ChangePasswordReponse.status !== HttpStatus.OK) {
@@ -455,40 +460,39 @@ export class AuthController {
           data: null,
           status: false,
         },
-        ChangePasswordReponse.status
+        ChangePasswordReponse.status,
       );
     }
     return {
       message: ChangePasswordReponse.message,
       data: ChangePasswordReponse.data,
       status: true,
-    }
+    };
   }
 
   @ApiCreatedResponse({
-    type: ResetPasswordVerifyResponse
+    type: ResetPasswordVerifyResponse,
   })
   @Post('reset-password')
   async ResetPasswordVerify(@Body() dto: ResetPasswordVerifyDto) {
-    const email = dto.email
+    const email = dto.email;
     const ResetPasswordVerifyResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, dto.email),
     );
     if (ResetPasswordVerifyResponse.status !== HttpStatus.OK) {
-      throw new HttpException (
+      throw new HttpException(
         {
           message: ResetPasswordVerifyResponse.message,
           data: ResetPasswordVerifyResponse.data,
           status: false,
         },
-        ResetPasswordVerifyResponse.status
+        ResetPasswordVerifyResponse.status,
       );
     }
     return {
       message: ResetPasswordVerifyResponse.message,
       data: ResetPasswordVerifyResponse.data,
       status: false,
-    }
+    };
   }
-  
 }
