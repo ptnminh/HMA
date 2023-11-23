@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id              String     @id @default(uuid())
+  email           String
+  roleId          Int        @map(name: "role_id")
+  name            String?
+  firstName       String?    @map(name: "first_name")
+  lastName        String?    @map(name: "last_name")
+  isInputPassword Boolean    @default(true) @map(name: "is_input_password")
+  password        String
+  emailVerified   Boolean    @default(false) @map(name: "email_verified")
+  emailVerifiedAt DateTime?  @map(name: "email_verified_at")
+  isDisabled      Boolean    @default(false) @map(name: "is_disabled")
+  disabledAt      DateTime?  @map(name: "disabled_at")
+  updatedAt       DateTime   @default(now()) @updatedAt @map(name: "updated_at")
+  createdAt       DateTime   @default(now()) @map(name: "created_at")
+  accounts        accounts[]
+  role            roles      @relation(fields: [roleId], references: [id])
+}
+
+model accounts {
+  id         String    @id @default(uuid())
+  userId     String    @map(name: "user_id")
+  provider   String
+  key        String?
+  avatar     String?
+  disabledAt DateTime? @map(name: "disabled_at")
+  isDisabled Boolean   @default(false) @map(name: "is_disabled")
+  updatedAt  DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+  createdAt  DateTime  @default(now()) @map(name: "created_at")
+
+  user users @relation(fields: [userId], references: [id])
+}
+
+model roles {
+  id              Int               @id @default(autoincrement())
+  name            String
+  description     String?
+  isDisabled      Boolean           @default(false) @map(name: "is_disabled")
+  disabledAt      DateTime?         @map(name: "disabled_at")
+  updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
+  createdAt       DateTime          @default(now()) @map(name: "created_at")
+  users           users[]
+  rolePermissions rolePermissions[]
+}
+
+model permissions {
+  id              Int               @id @default(autoincrement())
+  permission      String
+  description     String?
+  isDisabled      Boolean           @default(false) @map(name: "is_disabled")
+  disabledAt      DateTime?         @map(name: "disabled_at")
+  updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
+  createdAt       DateTime          @default(now()) @map(name: "created_at")
+  rolePermissions rolePermissions[]
+}
+
+model rolePermissions {
+  id           Int         @id @default(autoincrement())
+  roleId       Int         @map(name: "role_id")
+  permissionId Int         @map(name: "permission_id")
+  role         roles       @relation(fields: [roleId], references: [id])
+  permission   permissions @relation(fields: [permissionId], references: [id])
+
+  @@map(name: "role_permissions")
+}
+
+model plans {
+  id           Int           @id @default(autoincrement())
+  planName     String        @map(name: "plan_name")
+  currentPrice Float?        @map(name: "current_price")
+  duration     Float?
+  description  String?       @db.Text
+  isActive     Boolean       @default(true) @map(name: "is_activated")
+  updatedAt    DateTime      @default(now()) @updatedAt @map(name: "updated_at")
+  createdAt    DateTime      @default(now()) @map(name: "created_at")
+  planOptions  planOptions[]
+}
+
+model options {
+  id          Int           @id @default(autoincrement())
+  optionName  String        @map(name: "option_name")
+  description String?       @db.Text
+  isActive    Boolean       @default(true) @map(name: "is_activated")
+  createdAt   DateTime      @default(now()) @map(name: "created_at")
+  updatedAt   DateTime      @default(now()) @updatedAt @map(name: "updated_at")
+  planOptions planOptions[]
+}
+
+model planOptions {
+  id        Int      @id @default(autoincrement())
+  planId    Int      @map(name: "plan_id")
+  optionId  Int      @map(name: "option_id")
+  plan      plans    @relation(fields: [planId], references: [id])
+  option    options  @relation(fields: [optionId], references: [id])
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map(name: "updated_at")
+
+  @@map(name: "plan_options")
+}
