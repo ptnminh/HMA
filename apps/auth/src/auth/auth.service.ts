@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, users } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { RegisterDto } from './dto/create-user.dto';
 import { ROLES, hashPassword } from '../shared/';
@@ -8,7 +7,7 @@ import { ROLES, hashPassword } from '../shared/';
 export class AuthService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findUserVerifiedByEmail(email: string): Promise<users | null> {
+  async findUserVerifiedByEmail(email: string): Promise<any> {
     return this.prismaService.users.findFirst({
       where: {
         email,
@@ -99,7 +98,7 @@ export class AuthService {
     });
   }
 
-  async createAccount(data: Prisma.accountsUncheckedCreateInput) {
+  async createAccount(data) {
     return this.prismaService.accounts.create({
       data,
     });
