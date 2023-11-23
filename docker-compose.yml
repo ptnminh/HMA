@@ -18,6 +18,14 @@ services:
       - .env
     networks:
       - some-network
+  plan:
+    build: ./apps/plans
+    restart: always
+    hostname: plan
+    env_file:
+      - .env
+    networks:
+      - some-network
   mailer:
     build: ./apps/mailer
     restart: always
