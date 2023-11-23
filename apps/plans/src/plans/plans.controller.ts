@@ -49,8 +49,8 @@ export class PlanController {
     try {
       const plan = await this.planService.createOption(data);
       return {
-        status: HttpStatus.OK,
-        message: 'Cập nhật thành công',
+        status: HttpStatus.CREATED,
+        message: 'Tạo option thành công',
         data: plan,
       };
     } catch (error) {

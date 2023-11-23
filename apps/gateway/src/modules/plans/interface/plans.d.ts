@@ -8,3 +8,12 @@ export interface IPlans {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IPlanOption {
+  id: string;
+  optionName: string;
+  description: string;
+  isActive: number;
+  createdAt: Date;
+  updatedAt: Date;
+}

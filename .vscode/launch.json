@@ -3,6 +3,7 @@
     "configurations": [
 
 
+
         {
             "type": "node",
             "request": "launch",
@@ -21,6 +22,13 @@
             "request": "launch",
             "command": "npm run dev",
             "cwd": "${workspaceFolder}/apps/gateway"
+        },
+        {
+            "type": "node-terminal",
+            "name": "plans",
+            "request": "launch",
+            "command": "npm run dev",
+            "cwd": "${workspaceFolder}/apps/plans"
         },
         {
             "type": "node-terminal",

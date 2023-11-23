@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { IPlans } from '../interface/plans';
+import { IPlanOption, IPlans } from '../interface/plans';
 
 export class CreatePlanDto {
   @ApiProperty({ example: 'Plan 1', description: 'The name of the Plan' })
@@ -16,7 +16,10 @@ export class CreatePlanDto {
   @IsNumber()
   duration: number;
 
-  @ApiProperty({ example: 1, description: 'The number of the plan' })
+  @ApiProperty({
+    example: 'Description',
+    description: 'The Description of the plan',
+  })
   @IsString()
   description: string;
 }
@@ -39,5 +42,38 @@ export class CreatePlanResponse {
   })
   data: IPlans;
   @ApiProperty({ example: 'Tạo plan thành công.', nullable: true })
+  message: { [key: string]: any };
+}
+
+export class CreatePlanOptionDto {
+  @ApiProperty({ example: 'Option 1', description: 'The name of the option' })
+  @IsString()
+  @IsNotEmpty()
+  optionName: string;
+
+  @ApiProperty({
+    example: 'Description',
+    description: 'The Description of the option',
+  })
+  @IsString()
+  description: string;
+}
+
+export class CreatePlanOptionResponse {
+  @ApiProperty({ example: 'true', type: Boolean })
+  status: string;
+  @ApiProperty({
+    example: {
+      id: '1',
+      optionName: 'Option 1',
+      description: 'The name of the option',
+      isActive: true,
+      createdAt: '2021-09-27T07:45:16.000Z',
+      updatedAt: '2021-09-27T07:45:16.000Z',
+    },
+    nullable: false,
+  })
+  data: IPlanOption;
+  @ApiProperty({ example: 'Tạo option thành công.', nullable: true })
   message: { [key: string]: any };
 }

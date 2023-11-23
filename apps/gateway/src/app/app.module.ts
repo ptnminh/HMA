@@ -7,6 +7,7 @@ import { AuthController } from 'src/modules/auth/auth.controller';
 import { JwtStrategy } from 'src/modules/auth/jwt.strategy';
 import { CloudinaryController } from 'src/modules/files/cloudinary.controller';
 import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
+import { PlansController } from 'src/modules/plans/plans.controller';
 import { GoogleStrategy } from 'src/stategies/google.strategy';
 
 @Module({
@@ -22,7 +23,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
     }),
     CloudinaryModule,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, PlansController],
   providers: [
     ConfigService,
     {
@@ -41,6 +42,20 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
           },
         });
       },
+
+      inject: [ConfigService],
+    },
+    {
+      provide: 'PLAN_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          options: {
+            host: configService.get('PLAN_SERVICE_HOST'),
+            port: configService.get('PLAN_SERVICE_PORT'),
+          },
+        });
+      },
+
       inject: [ConfigService],
     },
   ],

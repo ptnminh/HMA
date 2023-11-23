@@ -5,31 +5,107 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
-  UseGuards,
   Put,
+  Inject,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
-import { PlansService } from './plans.service';
-import { CreatePlanDto, CreatePlanResponse } from './dto/create-plan.dto';
+import {
+  CreatePlanDto,
+  CreatePlanOptionDto,
+  CreatePlanOptionResponse,
+  CreatePlanResponse,
+} from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { PlanCommand } from './command';
 
 @Controller('plans')
 @ApiTags('Plans')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('Bearer')
+// @UseGuards(JwtAuthGuard)
+// @ApiBearerAuth('Bearer')
 export class PlansController {
-  constructor(private readonly plansService: PlansService) {}
+  constructor(
+    @Inject('PLAN_SERVICE') private readonly planServiceClient: ClientProxy,
+  ) {}
 
   @Post()
   @ApiCreatedResponse({ type: CreatePlanResponse })
-  create(@Body() createPlanDto: CreatePlanDto) {
-    return this.plansService.create(createPlanDto);
+  async create(@Body() createPlanDto: CreatePlanDto) {
+    const planServiceResponse = await firstValueFrom(
+      this.planServiceClient.send(PlanCommand.PLAN_CREATE, createPlanDto),
+    );
+    if (planServiceResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: planServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        planServiceResponse.status,
+      );
+    }
+    return {
+      message: planServiceResponse.message,
+      data: planServiceResponse.data,
+      status: true,
+    };
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updatePlanDto: UpdatePlanDto) {
-    return this.plansService.update(+id, updatePlanDto);
+  @ApiOkResponse({ type: CreatePlanResponse })
+  async update(@Param('id') id: string, @Body() updatePlanDto: UpdatePlanDto) {
+    const planServiceResponse = await firstValueFrom(
+      this.planServiceClient.send(PlanCommand.PLAN_UPDATE, {
+        id: parseInt(id),
+        ...updatePlanDto,
+      }),
+    );
+    if (planServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: planServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        planServiceResponse.status,
+      );
+    }
+    return {
+      message: planServiceResponse.message,
+      data: planServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Post('option')
+  @ApiOkResponse({ type: CreatePlanOptionResponse })
+  async createOption(@Body() createOptionDto: CreatePlanOptionDto) {
+    const planServiceResponse = await firstValueFrom(
+      this.planServiceClient.send(PlanCommand.CREATE_OPTION, createOptionDto),
+    );
+    if (planServiceResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: planServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        planServiceResponse.status,
+      );
+    }
+    return {
+      message: planServiceResponse.message,
+      data: planServiceResponse.data,
+      status: true,
+    };
   }
 }
