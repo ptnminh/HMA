@@ -433,9 +433,10 @@ export class AuthController {
     id: string;
     currentPassword: string;
     newPassword: string;
+    isReset: any;
   }) {
     try {
-      const { id, currentPassword, newPassword } = data;
+      const { id, currentPassword, newPassword, isReset } = data;
       const user = await this.authService.findPasswordByUserID(id);
       if (!user) {
         return {
@@ -443,16 +444,19 @@ export class AuthController {
           message: 'Người dùng không tồn tại',
         };
       }
-      const isMatch = await comparePassword(currentPassword, user.password);     
-      if (!isMatch) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          data: {
-            user: user,
-          },
-          message: 'Mật khẩu không chính xác',
-        };
+      if (isReset != true) {
+        const isMatch = await comparePassword(currentPassword, user.password);     
+        if (!isMatch) {
+          return {
+            status: HttpStatus.BAD_REQUEST,
+            data: {
+              user: user,
+            },
+            message: 'Mật khẩu không chính xác',
+          };
+        }
       }
+
       const encryptedPassword = await hashPassword(newPassword);
       await this.authService.updatePassword(id, encryptedPassword);
       const newUser = await this.authService.findPasswordByUserID(id);
