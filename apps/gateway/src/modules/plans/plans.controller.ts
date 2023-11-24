@@ -139,7 +139,7 @@ export class PlansController {
   async getPlanByID(@Param('id') id: string) {
     const getPlanResponse = await firstValueFrom(
       this.planServiceClient.send(PlanCommand.GET_PLAN_BY_ID, {
-        id: parseInt(id),
+        id: parseInt(id)
       }),
     );
     if (getPlanResponse.status !== HttpStatus.OK) {

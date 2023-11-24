@@ -81,9 +81,10 @@ export class PlanController {
     }
   }
 
-  async getPlanById(data: {id: string}) {
+  async getPlanById(data: any) {
     try {
-      const plan =  await this.planService.findPlanById(parseInt(data.id));
+      const id = {...data}
+      const plan =  await this.planService.findPlanById(id);
       if(!plan) {
         return {
           status: HttpStatus.BAD_REQUEST,

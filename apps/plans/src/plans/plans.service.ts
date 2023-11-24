@@ -35,8 +35,8 @@ export class PlanService {
     })
   }
 
-  async findPlanById(id: number) {
-    return await this.prismaService.plans.findUnique({
+  async findPlanById(id) {
+    return await this.prismaService.plans.findFirst({
       where: {
         id,
       }
