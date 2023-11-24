@@ -44,11 +44,10 @@ export class PlanService {
   }
 
   async findAllPlan() {
-    return this.prismaService.plans.findMany( {
+    return this.prismaService.plans.findMany({
       include: {
-        planOptions: true
-        }
+        planOptions: true,
       }
-    )
+    })
   }
 }
