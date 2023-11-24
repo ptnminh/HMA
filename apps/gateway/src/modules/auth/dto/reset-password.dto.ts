@@ -17,7 +17,7 @@ export class ChangePasswordDto {
   @IsNotEmpty()
   newPassword: string;
 
-  @ApiProperty({example: true})
+  @ApiProperty({example: "true"})
   isReset: string;
 }
 

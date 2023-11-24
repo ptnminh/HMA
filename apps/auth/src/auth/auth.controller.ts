@@ -444,14 +444,12 @@ export class AuthController {
           message: 'Người dùng không tồn tại',
         };
       }
-      if (isReset != true) {
+      if (data.isReset != "true") {
         const isMatch = await comparePassword(currentPassword, user.password);     
         if (!isMatch) {
           return {
             status: HttpStatus.BAD_REQUEST,
-            data: {
-              user: user,
-            },
+            data: null,
             message: 'Mật khẩu không chính xác',
           };
         }
@@ -469,10 +467,7 @@ export class AuthController {
       return {
         status: HttpStatus.OK,
         message: 'Thay đổi mật khẩu thành công',
-        data: {
-          id: newUser.id,
-          password: newPassword,
-        },
+        data: null
       };
     } catch (error) {
       return {
@@ -520,7 +515,6 @@ export class AuthController {
           user: {
             id: user.id,
             email: user.email,
-            password: user.password
           },
           token: Token,
         },

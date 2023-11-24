@@ -47,17 +47,41 @@ export class PlanService {
       where: {
         id,
       },
+      select: {
+        id: true,
+        planName: true,
+        currentPrice: true,
+        description: true,
+        isActive: true,
+        updatedAt: true,
+        createdAt: true,
+        planOptions: {
+          select: {
+            plan: true,
+          },
+        },
+      },
     });
   }
 
   async findAllPlan() {
     return this.prismaService.plans.findMany({
-      include: {
-        planOptions: true,
+      select: {
+        id: true,
+        planName: true,
+        currentPrice: true,
+        description: true,
+        isActive: true,
+        updatedAt: true,
+        createdAt: true,
+        planOptions: {
+          select: {
+            plan: true,
+          },
+        },
       },
     });
   }
-
   async createPlanOption(planId: number, optionIds: number[]) {
     const data = optionIds.map((optionId) => ({
       planId,

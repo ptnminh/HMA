@@ -449,6 +449,7 @@ export class AuthController {
       id: user['id'],
       currentPassword: dto.currentPassword,
       newPassword: dto.newPassword,
+      isReset: dto.isReset,
     };
     const ChangePasswordReponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, _dto),
