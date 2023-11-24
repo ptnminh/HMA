@@ -429,9 +429,9 @@ export class AuthController {
   }
 
   @MessagePattern(AuthCommand.CHANGE_PASSWORD)
-  async changePassword(data: {id: string, currentPassword: string ,newPassword: string}) {
+  async changePassword(data: {id: string, currentPassword: string ,newPassword: string, isReset: any}) {
     try {
-      const {id, currentPassword, newPassword} = data;
+      const {id, currentPassword, newPassword, isReset} = data;
       const user = await this.authService.findPasswordByUserID(id)
       if (!user) {
         return {
@@ -439,11 +439,13 @@ export class AuthController {
           message: 'Người dùng không tồn tại',
         }
       }
-      const isMatch = comparePassword(currentPassword, user['password'])
-      if (!isMatch) {
-        return  {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Mật khẩu không chính xác',
+      if (isReset !== true) {
+        const isMatch = await comparePassword(currentPassword, user.password)
+        if (!isMatch) {
+          return  {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'Mật khẩu không chính xác',
+          }
         }
       }
       const encryptedPassword = await hashPassword(newPassword);
@@ -490,7 +492,9 @@ export class AuthController {
       const backEndUrl = this.configService.get<string>('BACKEND_URL');
       const Token = await this.jwtService.signAsync(
         {
-          ...user,
+          id: user.id,
+          password: user.password,
+          email: user.email,
         },
         {
           secret: jwtSercret,
@@ -506,8 +510,13 @@ export class AuthController {
       );
       return {
         data: {
-          user: user,
+          user: {
+            id: user.id,
+            password: user.password,
+            email: user.email,
+          },
           token: Token,
+          isReset: true,
         },
         status: HttpStatus.OK,
         message: 'Gửi email thành công',

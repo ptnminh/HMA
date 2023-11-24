@@ -470,7 +470,6 @@ export class AuthController {
   })
   @Post('reset-password')
   async ResetPasswordVerify(@Body() dto: ResetPasswordVerifyDto) {
-    const email = dto
     const ResetPasswordVerifyResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, dto),
     );

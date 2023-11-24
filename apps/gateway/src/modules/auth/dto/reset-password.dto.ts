@@ -16,6 +16,9 @@ export class ChangePasswordDto {
   @IsString()
   @IsNotEmpty()
   newPassword: string;
+
+  @ApiProperty({example: true})
+  isReset: string;
 }
 
 export class ResetPasswordVerifyDto{
