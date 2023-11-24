@@ -444,7 +444,7 @@ export class AuthController {
           message: 'Người dùng không tồn tại',
         };
       }
-      if (isReset != true) {
+      if (data.isReset != "true") {
         const isMatch = await comparePassword(currentPassword, user.password);     
         if (!isMatch) {
           return {

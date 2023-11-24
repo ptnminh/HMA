@@ -39,14 +39,39 @@ export class PlanService {
     return await this.prismaService.plans.findUnique({
       where: {
         id,
+      },
+      select: {
+        id: true,
+        planName: true,
+        currentPrice: true,
+        description: true,
+        isActive: true,
+        updatedAt: true,
+        createdAt: true,
+        planOptions: {
+          select: {
+            plan: true
+          }
+        }
       }
     })
   }
 
   async findAllPlan() {
     return this.prismaService.plans.findMany({
-      include: {
-        planOptions: true,
+      select: {
+        id: true,
+        planName: true,
+        currentPrice: true,
+        description: true,
+        isActive: true,
+        updatedAt: true,
+        createdAt: true,
+        planOptions: {
+          select: {
+            plan: true
+          }
+        }
       }
     })
   }
