@@ -25,6 +25,10 @@ export class UpdatePlanDto {
   @IsString()
   @IsOptional()
   description: string;
+
+  @ApiProperty({ example: [1, 2, 3], description: 'The list of option id' })
+  @IsOptional()
+  optionIds?: number[];
 }
 
 export class UpdatePlanResponse {
