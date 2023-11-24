@@ -81,9 +81,10 @@ export class PlanController {
     }
   }
 
+  @MessagePattern(PlanCommand.GET_PLAN_BY_ID)
   async getPlanById(data: any) {
     try {
-      const id = {...data}
+      const id = data.id
       const plan =  await this.planService.findPlanById(id);
       if(!plan) {
         return {

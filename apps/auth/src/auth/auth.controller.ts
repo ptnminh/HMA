@@ -433,7 +433,7 @@ export class AuthController {
     id: string;
     currentPassword: string;
     newPassword: string;
-    isReset: any;
+    isReset: string;
   }) {
     try {
       const { id, currentPassword, newPassword, isReset } = data;
@@ -444,13 +444,14 @@ export class AuthController {
           message: 'Người dùng không tồn tại',
         };
       }
-      if (isReset != true) {
+      if (data.isReset != "true") {
         const isMatch = await comparePassword(currentPassword, user.password);     
         if (!isMatch) {
           return {
             status: HttpStatus.BAD_REQUEST,
             data: {
               user: user,
+              isReset,
             },
             message: 'Mật khẩu không chính xác',
           };
