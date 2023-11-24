@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { IPlanOption, IPlans } from '../interface/plans';
 
 export class CreatePlanDto {
@@ -22,6 +22,10 @@ export class CreatePlanDto {
   })
   @IsString()
   description: string;
+
+  @ApiProperty({ example: [1, 2, 3], description: 'The list of option id' })
+  @IsOptional()
+  optionIds?: number[];
 }
 
 export class CreatePlanResponse {

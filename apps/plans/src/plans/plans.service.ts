@@ -18,6 +18,13 @@ export class PlanService {
         id,
       },
       data,
+      include: {
+        planOptions: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
   }
 
@@ -31,23 +38,41 @@ export class PlanService {
     return await this.prismaService.options.findMany({
       where: {
         isActive: true,
-      }
-    })
+      },
+    });
   }
 
   async findPlanById(id: number) {
     return await this.prismaService.plans.findUnique({
       where: {
         id,
-      }
-    })
+      },
+    });
   }
 
   async findAllPlan() {
     return this.prismaService.plans.findMany({
       include: {
         planOptions: true,
-      }
-    })
+      },
+    });
+  }
+
+  async createPlanOption(planId: number, optionIds: number[]) {
+    const data = optionIds.map((optionId) => ({
+      planId,
+      optionId,
+    }));
+    return await this.prismaService.planOptions.createMany({
+      data,
+    });
+  }
+
+  async deletePlanOption(planId: number) {
+    return await this.prismaService.planOptions.deleteMany({
+      where: {
+        planId,
+      },
+    });
   }
 }
