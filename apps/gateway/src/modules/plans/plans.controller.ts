@@ -9,6 +9,7 @@ import {
   Inject,
   HttpStatus,
   HttpException,
+  GatewayTimeoutException,
 } from '@nestjs/common';
 import {
   CreatePlanDto,
@@ -27,6 +28,7 @@ import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { PlanCommand } from './command';
+import { GetAllActiveOptionResponse } from './dto/get-option.dto';
 
 @Controller('plans')
 @ApiTags('Plans')
@@ -93,6 +95,76 @@ export class PlansController {
       this.planServiceClient.send(PlanCommand.CREATE_OPTION, createOptionDto),
     );
     if (planServiceResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: planServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        planServiceResponse.status,
+      );
+    }
+    return {
+      message: planServiceResponse.message,
+      data: planServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @ApiCreatedResponse({type: GetAllActiveOptionResponse})
+  @Get('all-active-options')
+  async getAllOptions() {
+    const planServiceResponse = await firstValueFrom(
+      this.planServiceClient.send(PlanCommand.GET_ALL_ACTIVE_OPTION, {}),
+    );
+    if (planServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: planServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        planServiceResponse.status,
+      );
+    }
+    return {
+      message: planServiceResponse.message,
+      data: planServiceResponse.data,
+      status: true,
+    };
+  }
+
+
+  @Get('get-plan/:id')
+  async getPlanByID(@Param('id') id: string) {
+    const getPlanResponse = await firstValueFrom(
+      this.planServiceClient.send(PlanCommand.GET_PLAN_BY_ID, {
+        id: parseInt(id),
+      }),
+    );
+    if (getPlanResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getPlanResponse.message,
+          data: null,
+          status: false, 
+        },
+        getPlanResponse.status,
+      )
+    }
+    return {
+      message: getPlanResponse.message,
+      status: true,
+      data: getPlanResponse.data,
+    }
+  }
+
+  @Get('all-plans')
+  async getAllPlans() {
+    const planServiceResponse = await firstValueFrom(
+      this.planServiceClient.send(PlanCommand.GET_ALL_PLAN, {}),
+    );
+    if (planServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: planServiceResponse.message,

@@ -61,4 +61,67 @@ export class PlanController {
       };
     }
   }
+
+  @MessagePattern(PlanCommand.GET_ALL_ACTIVE_OPTION)
+  async getAllActiveOptions() {
+    try {
+      const option = await this.planService.findAllActiveOption();
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách option thành công',
+        data: option
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống'
+      }
+    }
+  }
+
+  async getPlanById(data: {id: string}) {
+    try {
+      const plan =  await this.planService.findPlanById(parseInt(data.id));
+      if(!plan) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Gói không tồn tại',
+          data: null,
+        }
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Tìm kiếm thành công',
+        data: plan,
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống'
+      }
+    }
+  }
+
+  @MessagePattern(PlanCommand.GET_ALL_PLAN)
+  async getAllPlans() {
+    try {
+      const plan = await this.planService.findAllPlan();
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách plan thành công',
+        data: plan
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống'
+      }
+    }
+  }
 }

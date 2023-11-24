@@ -433,9 +433,10 @@ export class AuthController {
     id: string;
     currentPassword: string;
     newPassword: string;
+    isReset: any;
   }) {
     try {
-      const { id, currentPassword, newPassword } = data;
+      const { id, currentPassword, newPassword, isReset } = data;
       const user = await this.authService.findPasswordByUserID(id);
       if (!user) {
         return {
@@ -443,13 +444,19 @@ export class AuthController {
           message: 'Người dùng không tồn tại',
         };
       }
-      const isMatch = comparePassword(currentPassword, user.password);
-      if (!isMatch) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Mật khẩu không chính xác',
-        };
+      if (isReset != true) {
+        const isMatch = await comparePassword(currentPassword, user.password);     
+        if (!isMatch) {
+          return {
+            status: HttpStatus.BAD_REQUEST,
+            data: {
+              user: user,
+            },
+            message: 'Mật khẩu không chính xác',
+          };
+        }
       }
+
       const encryptedPassword = await hashPassword(newPassword);
       await this.authService.updatePassword(id, encryptedPassword);
       const newUser = await this.authService.findPasswordByUserID(id);
@@ -476,20 +483,24 @@ export class AuthController {
   }
 
   @MessagePattern(AuthCommand.RESET_PASSWORD_VERIFY)
-  async resetPassword(data: { email: string }) {
+  async resetPassword(data: { email: string}) {
     try {
-      const user = await this.authService.findUserVerifiedByEmail(data.email);
+      const email = data.email
+      const user = await this.authService.findUserVerifiedByEmail(email);
       if (!user) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Email không tồn tại',
         };
       }
+
       const frontEndUrl = this.configService.get<string>('FRONTEND_URL');
       const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
       const Token = await this.jwtService.signAsync(
         {
-          ...user,
+          id: user.id,
+          email: user.email,
+          password: user.password
         },
         {
           secret: jwtSercret,
@@ -506,7 +517,11 @@ export class AuthController {
       );
       return {
         data: {
-          user: user,
+          user: {
+            id: user.id,
+            email: user.email,
+            password: user.password
+          },
           token: Token,
         },
         status: HttpStatus.OK,
