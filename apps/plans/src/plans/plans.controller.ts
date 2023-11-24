@@ -10,7 +10,11 @@ export class PlanController {
   @MessagePattern(PlanCommand.PLAN_CREATE)
   async createPlan(data: any) {
     try {
-      const plan = await this.planService.createPlan(data);
+      const { optionIds, ...rest } = data;
+      const plan = await this.planService.createPlan(rest);
+      if (optionIds && optionIds.length > 0 && plan) {
+        await this.planService.createPlanOption(plan.id, optionIds);
+      }
       return {
         status: HttpStatus.CREATED,
         message: 'Tạo thành công',
@@ -28,8 +32,14 @@ export class PlanController {
   @MessagePattern(PlanCommand.PLAN_UPDATE)
   async updatePlan(data: any) {
     try {
-      const { id, ...rest } = data;
+      const { id, optionIds, ...rest } = data;
       const plan = await this.planService.updatePlan(id, rest);
+      if (plan) {
+        // delete old options plan
+        await this.planService.deletePlanOption(id);
+        // create new options plan
+        await this.planService.createPlanOption(id, optionIds);
+      }
       return {
         status: HttpStatus.OK,
         message: 'Cập nhật thành công',
@@ -69,41 +79,39 @@ export class PlanController {
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách option thành công',
-        data: option
-      }
-    }
-    catch(error) {
+        data: option,
+      };
+    } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Lỗi hệ thống'
-      }
+        message: 'Lỗi hệ thống',
+      };
     }
   }
 
   @MessagePattern(PlanCommand.GET_PLAN_BY_ID)
-  async getPlanById(data: {id: string}) {
+  async getPlanById(data: { id: string }) {
     try {
-      const plan =  await this.planService.findPlanById(parseInt(data.id));
-      if(!plan) {
+      const plan = await this.planService.findPlanById(parseInt(data.id));
+      if (!plan) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Gói không tồn tại',
           data: null,
-        }
+        };
       }
       return {
         status: HttpStatus.OK,
         message: 'Tìm kiếm thành công',
         data: plan,
-      }
-    }
-    catch(error) {
+      };
+    } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Lỗi hệ thống'
-      }
+        message: 'Lỗi hệ thống',
+      };
     }
   }
 
@@ -114,15 +122,14 @@ export class PlanController {
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách plan thành công',
-        data: plan
-      }
-    }
-    catch(error) {
+        data: plan,
+      };
+    } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Lỗi hệ thống'
-      }
+        message: 'Lỗi hệ thống',
+      };
     }
   }
 }
