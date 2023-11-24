@@ -429,23 +429,23 @@ export class AuthController {
   }
 
   @MessagePattern(AuthCommand.CHANGE_PASSWORD)
-  async changePassword(data: {id: string,  newPassword: string}) {
+  async changePassword(data: {id: string, currentPassword: string ,newPassword: string}) {
     try {
-      const {id, newPassword} = data;
-      /*const user = await this.authService.findPasswordByUserID(id)
+      const {id, currentPassword, newPassword} = data;
+      const user = await this.authService.findPasswordByUserID(id)
       if (!user) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Người dùng không tồn tại',
         }
       }
-      const isMatch = comparePassword(currentPassword, user.password)
+      const isMatch = comparePassword(currentPassword, user['password'])
       if (!isMatch) {
         return  {
           status: HttpStatus.BAD_REQUEST,
           message: 'Mật khẩu không chính xác',
         }
-      }*/
+      }
       const encryptedPassword = await hashPassword(newPassword);
       await this.authService.updatePassword(id, encryptedPassword)
       const newUser = await this.authService.findPasswordByUserID(id)

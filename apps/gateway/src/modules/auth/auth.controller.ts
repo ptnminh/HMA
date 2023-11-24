@@ -442,7 +442,7 @@ export class AuthController {
     const user = req.user
     const _dto = {
       id: user['id'],
-      currentPassword: user['password'],
+      currentPassword: dto.currentPassword,
       newPassword: dto.newPassword,
     }
     const ChangePasswordReponse = await firstValueFrom (
