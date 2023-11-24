@@ -477,7 +477,7 @@ export class AuthController {
   async ResetPasswordVerify(@Body() dto: ResetPasswordVerifyDto) {
     const email = dto.email;
     const ResetPasswordVerifyResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, dto.email),
+      this.authServiceClient.send(AuthCommand.RESET_PASSWORD_VERIFY, dto),
     );
     if (ResetPasswordVerifyResponse.status !== HttpStatus.OK) {
       throw new HttpException(

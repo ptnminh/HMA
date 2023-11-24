@@ -26,4 +26,29 @@ export class PlanService {
       data,
     });
   }
+
+  async findAllActiveOption() {
+    return await this.prismaService.options.findMany({
+      where: {
+        isActive: true,
+      }
+    })
+  }
+
+  async findPlanById(id: number) {
+    return await this.prismaService.plans.findUnique({
+      where: {
+        id,
+      }
+    })
+  }
+
+  async findAllPlan() {
+    return this.prismaService.plans.findMany( {
+      include: {
+        planOptions: true
+        }
+      }
+    )
+  }
 }
