@@ -101,6 +101,12 @@ export class PlanController {
           data: null,
         };
       }
+      var objArray = []; 
+      for (var i = 0; i < plan.planOptions.length; ++i) {
+        var obj = plan.planOptions[i].option
+        objArray.push({...obj})
+      }
+      plan.planOptions = objArray
       return {
         status: HttpStatus.OK,
         message: 'Tìm kiếm thành công',
@@ -119,6 +125,14 @@ export class PlanController {
   async getAllPlans() {
     try {
       const plan = await this.planService.findAllPlans();
+      for(var i = 0; i < plan.length; ++i) {
+        var objarray = []
+        for(var j = 0; j< plan[i].planOptions.length; ++j) {
+          var obj = plan[i].planOptions[j].option
+          objarray.push({...obj})
+        }
+        plan[i].planOptions = objarray
+      }
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách plan thành công',
@@ -133,3 +147,4 @@ export class PlanController {
     }
   }
 }
+

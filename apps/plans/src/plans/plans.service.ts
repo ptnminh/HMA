@@ -57,7 +57,7 @@ export class PlanService {
       include: {
         planOptions: {
           select: {
-            option: true
+            option: true,
           }
         }
       }
