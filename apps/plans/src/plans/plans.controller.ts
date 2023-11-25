@@ -118,7 +118,7 @@ export class PlanController {
   @MessagePattern(PlanCommand.GET_ALL_PLAN)
   async getAllPlans() {
     try {
-      const plan = await this.planService.findAllPlan();
+      const plan = await this.planService.findAllPlans();
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách plan thành công',

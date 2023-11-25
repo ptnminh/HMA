@@ -46,41 +46,43 @@ export class PlanService {
     return await this.prismaService.plans.findUnique({
       where: {
         id,
+        planOptions: {
+          some: {
+            option: {
+              isActive: true
+            }
+          }
+        }
       },
-      select: {
-        id: true,
-        planName: true,
-        currentPrice: true,
-        description: true,
-        isActive: true,
-        updatedAt: true,
-        createdAt: true,
+      include: {
         planOptions: {
           select: {
-            plan: true,
-          },
-        },
-      },
+            option: true
+          }
+        }
+      }
     });
   }
 
-  async findAllPlan() {
+  async findAllPlans() {
     return this.prismaService.plans.findMany({
-      select: {
-        id: true,
-        planName: true,
-        currentPrice: true,
-        description: true,
-        isActive: true,
-        updatedAt: true,
-        createdAt: true,
+      where: {
+        planOptions: {
+          some: {
+            option: {
+              isActive: true
+            }
+          }
+        }
+      },
+      include: {
         planOptions: {
           select: {
-            plan: true,
-          },
-        },
-      },
-    });
+            option: true
+          }
+        }
+      }
+    })
   }
   async createPlanOption(planId: number, optionIds: number[]) {
     const data = optionIds.map((optionId) => ({
