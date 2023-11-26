@@ -503,7 +503,7 @@ export class AuthController {
         },
       );
       const linkResetPassword =
-        frontEndUrl + '/api/auth/reset_password?token=' + Token;
+        frontEndUrl + '/auth/reset_password?token=' + Token;
       await lastValueFrom(
         this.mailService.emit(EVENTS.AUTH_REGISTER, {
           email: data.email,
@@ -512,10 +512,6 @@ export class AuthController {
       );
       return {
         data: {
-          user: {
-            id: user.id,
-            email: user.email,
-          },
           token: Token,
         },
         status: HttpStatus.OK,

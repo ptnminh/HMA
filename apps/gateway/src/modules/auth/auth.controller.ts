@@ -493,7 +493,7 @@ export class AuthController {
     return {
       message: ResetPasswordVerifyResponse.message,
       data: ResetPasswordVerifyResponse.data,
-      status: false,
-    };
+      status: true,
+    }
   }
 }

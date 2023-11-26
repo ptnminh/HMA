@@ -1,7 +1,8 @@
-import { Controller, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus, ParseBoolPipe } from '@nestjs/common';
 import { PlanService } from './plans.service';
 import { MessagePattern } from '@nestjs/microservices';
 import { PlanCommand } from './command';
+import { parse } from 'path';
 
 @Controller()
 export class PlanController {
@@ -73,9 +74,17 @@ export class PlanController {
   }
 
   @MessagePattern(PlanCommand.GET_ALL_ACTIVE_OPTION)
-  async getAllActiveOptions() {
+  async getAllOptions(data: {isActive: boolean}) {
     try {
-      const option = await this.planService.findAllActiveOption();
+      var status: boolean;
+      if (data.isActive == undefined) {
+        status  = true
+      } else {
+        status = data.isActive
+      }
+      console.log(data.isActive)
+      console.log(status)
+      const option = await this.planService.findAllOption(status);
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách option thành công',

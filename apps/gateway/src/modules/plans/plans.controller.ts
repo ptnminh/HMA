@@ -10,6 +10,7 @@ import {
   HttpStatus,
   HttpException,
   GatewayTimeoutException,
+  Query,
 } from '@nestjs/common';
 import {
   CreatePlanDto,
@@ -22,6 +23,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
@@ -111,11 +113,16 @@ export class PlansController {
     };
   }
 
+  @ApiQuery({
+    name: "isActive",
+    required: false,
+    type: Boolean,
+  })
   @ApiCreatedResponse({type: GetAllActiveOptionResponse})
-  @Get('all-active-options')
-  async getAllOptions() {
+  @Get('options')
+  async getAllOptions(@Query('isActive') isActive: boolean) {
     const planServiceResponse = await firstValueFrom(
-      this.planServiceClient.send(PlanCommand.GET_ALL_ACTIVE_OPTION, {}),
+      this.planServiceClient.send(PlanCommand.GET_ALL_ACTIVE_OPTION, {isActive}),
     );
     if (planServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -135,7 +142,7 @@ export class PlansController {
   }
 
 
-  @Get('get-plan/:id')
+  @Get(':id')
   async getPlanByID(@Param('id') id: string) {
     const getPlanResponse = await firstValueFrom(
       this.planServiceClient.send(PlanCommand.GET_PLAN_BY_ID, {
@@ -159,7 +166,7 @@ export class PlansController {
     }
   }
 
-  @Get('all-plans')
+  @Get()
   async getAllPlans() {
     const planServiceResponse = await firstValueFrom(
       this.planServiceClient.send(PlanCommand.GET_ALL_PLAN, {}),
