@@ -34,10 +34,10 @@ export class PlanService {
     });
   }
 
-  async findAllActiveOption() {
+  async findAllOption(isActive: boolean) {
     return await this.prismaService.options.findMany({
       where: {
-        isActive: true,
+        isActive,
       },
     });
   }
@@ -70,7 +70,7 @@ export class PlanService {
         planOptions: {
           some: {
             option: {
-              isActive: true
+              isActive: true,
             }
           }
         }

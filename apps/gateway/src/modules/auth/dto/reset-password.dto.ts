@@ -31,11 +31,8 @@ export class ChangePasswordReponse {
   @ApiProperty({ example: 'true', type: Boolean })
   status: string;
   @ApiProperty({
-    example: {
-      id: '1234',
-      password: '1234'
-    },
-    nullable: false,
+    example: null,
+    nullable: true
   })
   data: {
     id: string,
@@ -50,7 +47,7 @@ export class ResetPasswordVerifyResponse {
   status: string;
   @ApiProperty({
     example: {
-      email: 'nsonbao1206@gmail.com'
+      token: "Token"
     },
     nullable: false,
   })
