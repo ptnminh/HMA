@@ -444,8 +444,8 @@ export class AuthController {
           message: 'Người dùng không tồn tại',
         };
       }
-      if (data.isReset != "true") {
-        const isMatch = await comparePassword(currentPassword, user.password);     
+      if (data.isReset != 'true') {
+        const isMatch = await comparePassword(currentPassword, user.password);
         if (!isMatch) {
           return {
             status: HttpStatus.BAD_REQUEST,
@@ -467,7 +467,7 @@ export class AuthController {
       return {
         status: HttpStatus.OK,
         message: 'Thay đổi mật khẩu thành công',
-        data: null
+        data: null,
       };
     } catch (error) {
       return {
@@ -478,9 +478,9 @@ export class AuthController {
   }
 
   @MessagePattern(AuthCommand.RESET_PASSWORD_VERIFY)
-  async resetPassword(data: { email: string}) {
+  async resetPassword(data: { email: string }) {
     try {
-      const email = data.email
+      const email = data.email;
       const user = await this.authService.findUserVerifiedByEmail(email);
       if (!user) {
         return {
@@ -495,7 +495,7 @@ export class AuthController {
         {
           id: user.id,
           email: user.email,
-          password: user.password
+          password: user.password,
         },
         {
           secret: jwtSercret,
