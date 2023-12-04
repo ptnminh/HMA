@@ -503,7 +503,7 @@ export class AuthController {
         },
       );
       const linkResetPassword =
-        frontEndUrl + '/auth/reset_password?token=' + Token;
+        frontEndUrl + '/cai-lai-mat-khau?token=' + Token;
       await lastValueFrom(
         this.mailService.emit(EVENTS.AUTH_REGISTER, {
           email: data.email,
