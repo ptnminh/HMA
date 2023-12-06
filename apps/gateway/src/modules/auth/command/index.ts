@@ -12,5 +12,6 @@ export enum AuthCommand {
   LINK_ACCOUNT_WITH_EMAIL = 'link_account_with_email',
   CHANGE_PASSWORD = 'change_password',
   RESET_PASSWORD = 'reset_password',
-  RESET_PASSWORD_VERIFY = 'reset_password_verify'
+  RESET_PASSWORD_VERIFY = 'reset_password_verify',
+  ADD_NEW_PASSWORD = 'add_new_password',
 }

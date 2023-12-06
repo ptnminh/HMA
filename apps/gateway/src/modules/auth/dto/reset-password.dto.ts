@@ -57,3 +57,16 @@ export class ResetPasswordVerifyResponse {
   @ApiProperty({ example: 'Gửi email xác nhận thành công', nullable: true })
   message: { [key: string]: any };
 }
+
+
+export class addNewPasswordDto {
+  @ApiProperty({example: 'test@gmail.com'})
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty({example: '12345678'})
+  @IsNotEmpty()
+  @IsString()
+  password: string;
+}

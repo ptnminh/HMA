@@ -12,6 +12,7 @@ import {
   Param,
   Delete,
   Patch,
+  Put,
   Req,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -51,6 +52,7 @@ import {
   ChangePasswordReponse,
   ResetPasswordVerifyDto,
   ResetPasswordVerifyResponse,
+  addNewPasswordDto,
 } from './dto/reset-password.dto';
 import { Request } from 'express';
 
@@ -495,5 +497,30 @@ export class AuthController {
       data: ResetPasswordVerifyResponse.data,
       status: true,
     }
+  }
+
+  @ApiCreatedResponse({
+    type: ChangePasswordReponse,
+  })
+  @Put('add-new-password')
+  async addNewPassword(@Body() dto: addNewPasswordDto ) {
+    const ChangePasswordReponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.ADD_NEW_PASSWORD, dto),
+    );
+    if (ChangePasswordReponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: ChangePasswordReponse.message,
+          data: null,
+          status: false,
+        },
+        ChangePasswordReponse.status,
+      );
+    }
+    return {
+      message: ChangePasswordReponse.message,
+      data: ChangePasswordReponse.data,
+      status: true,
+    };
   }
 }
