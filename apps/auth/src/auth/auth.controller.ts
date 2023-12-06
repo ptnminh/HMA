@@ -13,6 +13,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom } from 'rxjs';
+import { isNull } from 'util';
 
 @Controller('auth')
 export class AuthController {
@@ -125,6 +126,7 @@ export class AuthController {
           secret: jwtSercret,
         },
       );
+      delete(user.emailVerified)
       return {
         status: HttpStatus.OK,
         message: 'Đăng nhập thành công',
@@ -293,6 +295,7 @@ export class AuthController {
           message: 'Tài khoản không tồn tại',
         };
       }
+      delete(user.emailVerified)
       return {
         status: HttpStatus.OK,
         data: user,
@@ -334,6 +337,7 @@ export class AuthController {
           secret: jwtSercret,
         },
       );
+      delete(user.emailVerified)
       return {
         status: HttpStatus.OK,
         data: {
@@ -511,14 +515,54 @@ export class AuthController {
         }),
       );
       return {
-        data: {
-          token: Token,
-        },
+        link: linkResetPassword,
         status: HttpStatus.OK,
         message: 'Gửi email thành công',
       };
     } catch (error) {
       console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(AuthCommand.ADD_NEW_PASSWORD)
+  async addNewPassword(data: {email: string, password: string}) {
+    try {
+      const {email, password} = data
+      const user = await this.authService.findUserByEmail(email)
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          massage: "Người dùng không tồn tại"
+        }
+      }
+  
+      if(user.isInputPassword == true) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Mật khẩu đã được tạo trước"
+        }
+      }
+      
+      const encryptedPassword = await hashPassword(password);
+      await this.authService.addNewPassword(user.id, encryptedPassword);
+      const newUser = await this.authService.findPasswordByUserID(user.id);
+      if (newUser.password != encryptedPassword) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Không thể thay đổi mật khẩu',
+        };
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Thay đổi mật khẩu thành công',
+        data: null,
+      };
+    }
+    catch(error) {
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',

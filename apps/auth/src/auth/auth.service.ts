@@ -33,6 +33,7 @@ export class AuthService {
             name: true,
           },
         },
+        isInputPassword: true,
       },
     });
   }
@@ -48,6 +49,8 @@ export class AuthService {
         password: true,
         isInputPassword: true,
         emailVerified: true,
+        firstName: true,
+        lastName: true,
         role: {
           select: {
             name: true,
@@ -162,6 +165,12 @@ export class AuthService {
         lastName: true,
         emailVerified: true,
         roleId: true,
+        isInputPassword: true,
+        role: {
+          select: {
+            name: true,
+          }
+        }
       },
     });
   }
@@ -189,5 +198,18 @@ export class AuthService {
         password: true,
       },
     });
+  }
+  
+  async addNewPassword(id: string, password: string) {
+    return this.prismaService.users.update({
+      where: {
+        id,
+      },
+      data: {
+        password,
+        isInputPassword: true,
+      },
+    });
+
   }
 }
