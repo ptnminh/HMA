@@ -540,7 +540,7 @@ export class AuthController {
         }
       }
   
-      if(user.isInputPassword) {
+      if(user.isInputPassword == true) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: "Mật khẩu đã được tạo trước"

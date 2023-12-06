@@ -204,7 +204,6 @@ export class AuthService {
     return this.prismaService.users.update({
       where: {
         id,
-        isInputPassword: false,
       },
       data: {
         password,
