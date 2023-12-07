@@ -26,6 +26,14 @@ services:
       - .env
     networks:
       - some-network
+  clinic:
+    build: ./apps/clinics
+    restart: always
+    hostname: clinic
+    env_file:
+      - .env
+    networks:
+      - some-network
   mailer:
     build: ./apps/mailer
     restart: always
