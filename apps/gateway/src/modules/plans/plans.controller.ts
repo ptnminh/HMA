@@ -11,6 +11,7 @@ import {
   HttpException,
   GatewayTimeoutException,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   CreatePlanDto,
@@ -34,8 +35,8 @@ import { GetAllActiveOptionResponse } from './dto/get-option.dto';
 
 @Controller('plans')
 @ApiTags('Plans')
-// @UseGuards(JwtAuthGuard)
-// @ApiBearerAuth('Bearer')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('Bearer')
 export class PlansController {
   constructor(
     @Inject('PLAN_SERVICE') private readonly planServiceClient: ClientProxy,
@@ -114,15 +115,17 @@ export class PlansController {
   }
 
   @ApiQuery({
-    name: "isActive",
+    name: 'isActive',
     required: false,
     type: Boolean,
   })
-  @ApiCreatedResponse({type: GetAllActiveOptionResponse})
+  @ApiCreatedResponse({ type: GetAllActiveOptionResponse })
   @Get('options')
   async getAllOptions(@Query('isActive') isActive: boolean) {
     const planServiceResponse = await firstValueFrom(
-      this.planServiceClient.send(PlanCommand.GET_ALL_ACTIVE_OPTION, {isActive}),
+      this.planServiceClient.send(PlanCommand.GET_ALL_ACTIVE_OPTION, {
+        isActive,
+      }),
     );
     if (planServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -141,7 +144,6 @@ export class PlansController {
     };
   }
 
-
   @Get(':id')
   async getPlanByID(@Param('id') id: string) {
     const getPlanResponse = await firstValueFrom(
@@ -154,16 +156,16 @@ export class PlansController {
         {
           message: getPlanResponse.message,
           data: null,
-          status: false, 
+          status: false,
         },
         getPlanResponse.status,
-      )
+      );
     }
     return {
       message: getPlanResponse.message,
       status: true,
       data: getPlanResponse.data,
-    }
+    };
   }
 
   @Get()

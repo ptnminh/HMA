@@ -21,6 +21,6 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/schema.prisma schema.prisma
 
-EXPOSE 8005
+EXPOSE 8006
 
 CMD [ "npm", "run", "prod" ]

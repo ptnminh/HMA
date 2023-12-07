@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { PlanController } from './plans.controller';
-import { PlanService } from './plans.service';
+import { ClinicController } from './clinics.controller';
+import { ClinicService } from './clinics.service';
 import { AllExceptionFilter } from 'src/filters/all-exception.filter';
 import { ConfigModule } from '@nestjs/config';
 import { config } from 'src/configs';
@@ -13,9 +13,9 @@ import { PrismaService } from 'src/prisma.service';
       load: [config],
     }),
   ],
-  controllers: [PlanController],
+  controllers: [ClinicController],
   providers: [
-    PlanService,
+    ClinicService,
     {
       provide: 'APP_FILTER',
       useClass: AllExceptionFilter,
@@ -23,4 +23,4 @@ import { PrismaService } from 'src/prisma.service';
     PrismaService,
   ],
 })
-export class PlanModule {}
+export class ClinicModule {}

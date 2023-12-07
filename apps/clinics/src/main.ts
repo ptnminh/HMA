@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport, TcpOptions } from '@nestjs/microservices';
-import { PlanModule } from './plans/plans.module';
+import { ClinicModule } from './clinics/clinics.module';
 import {
   HttpException,
   HttpStatus,
@@ -11,7 +11,7 @@ import { config } from './configs';
 
 async function bootstrap() {
   const configs = config();
-  const app = await NestFactory.createMicroservice(PlanModule, {
+  const app = await NestFactory.createMicroservice(ClinicModule, {
     transport: Transport.TCP,
     options: {
       host: configs.app.host,

@@ -58,6 +58,19 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
 
       inject: [ConfigService],
     },
+    {
+      provide: 'CLINIC_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          options: {
+            host: configService.get('CLINIC_SERVICE_HOST'),
+            port: configService.get('CLINIC_SERVICE_PORT'),
+          },
+        });
+      },
+
+      inject: [ConfigService],
+    },
   ],
 })
 export class AppModule {}
