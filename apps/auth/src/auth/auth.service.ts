@@ -169,8 +169,8 @@ export class AuthService {
         role: {
           select: {
             name: true,
-          }
-        }
+          },
+        },
       },
     });
   }
@@ -199,7 +199,7 @@ export class AuthService {
       },
     });
   }
-  
+
   async addNewPassword(id: string, password: string) {
     return this.prismaService.users.update({
       where: {
@@ -210,6 +210,5 @@ export class AuthService {
         isInputPassword: true,
       },
     });
-
   }
 }
