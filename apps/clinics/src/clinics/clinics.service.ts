@@ -11,10 +11,11 @@ export class ClinicService {
       data,
     });
   }
-  async findAll() {
+  async findAll(ownerId) {
     return this.prismaService.clinics.findMany({
       where: {
         isActive: true,
+        ownerId,
       },
     });
   }
@@ -28,6 +29,73 @@ export class ClinicService {
       where: {
         id,
       },
+      data,
+    });
+  }
+
+  async findAllUserInClinic(clinicId: string) {
+    return this.prismaService.userInClinics.findMany({
+      where: {
+        clinicId,
+        isDisabled: false,
+      },
+      select: {
+        users: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        role: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        isOwner: true,
+      },
+    });
+  }
+
+  async findUserInClinic(clinicId: string, userId: string) {
+    return this.prismaService.userInClinics.findFirst({
+      where: {
+        clinicId,
+        userId,
+        isDisabled: false,
+      },
+      select: {
+        users: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        role: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        isOwner: true,
+      },
+    });
+  }
+
+  async findClinicById(id: string) {
+    return this.prismaService.clinics.findFirst({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async subcribePlan(data: Prisma.subscriptionsUncheckedCreateInput) {
+    return this.prismaService.subscriptions.create({
       data,
     });
   }

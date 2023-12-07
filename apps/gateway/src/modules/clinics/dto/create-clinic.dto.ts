@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 import { IClinics } from '../interface';
+import { Transform } from 'class-transformer';
 
 export class CreateClinicDto {
   @IsString()
@@ -76,5 +77,21 @@ export class ListClinicResponse {
   })
   data: IClinics[];
   @ApiProperty({ example: 'Lấy danh sách clinics thành công.', nullable: true })
+  message: { [key: string]: any };
+}
+
+export class SubcribePlanDTO {
+  @IsString()
+  @ApiProperty({
+    example: '2021-09-27T07:45:16.000Z',
+    description: 'Expired time',
+  })
+  @Transform(({ value }) => new Date(value).toISOString())
+  expiredAt: string;
+}
+export class SubcribePlanResponse {
+  @ApiProperty({ example: 'true', type: Boolean })
+  status: string;
+  @ApiProperty({ example: 'Subcribe plan thành công.', nullable: true })
   message: { [key: string]: any };
 }

@@ -16,6 +16,8 @@ import {
   CreateClinicDto,
   CreateClinicResponse,
   ListClinicResponse,
+  SubcribePlanDTO,
+  SubcribePlanResponse,
 } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import {
@@ -71,9 +73,11 @@ export class ClinicsController {
 
   @Get()
   @ApiOkResponse({ type: ListClinicResponse })
-  async findAll() {
+  async findAll(@CurrentUser('id') ownerId: string) {
     const clinicServiceResponse = await firstValueFrom(
-      this.clinicServiceClient.send(ClinicCommand.CLINIC_LIST, {}),
+      this.clinicServiceClient.send(ClinicCommand.CLINIC_LIST, {
+        ownerId,
+      }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -102,6 +106,58 @@ export class ClinicsController {
         ...updateClinicDto,
         id,
       }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Post(':id/add-user-to-clinic/:userId')
+  @ApiOkResponse({ type: CreateClinicResponse })
+  async addUserToClinic(
+    @Param('id') clinicId: string,
+    @Param('userId') userId: string,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.ADD_USER_TO_CLINIC, {
+        clinicId,
+        userId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Post(':clinicId/subscribe-plan/:planId')
+  @ApiOkResponse({ type: SubcribePlanResponse })
+  async subscribePlan(@Body() data: SubcribePlanDTO) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.SUBSCRIBE_PLAN, data),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(

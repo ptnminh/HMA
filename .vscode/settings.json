@@ -8,6 +8,18 @@
             "name": "hma_db",
             "database": "hma",
             "username": "admin"
+        },
+        {
+            "pgOptions": {
+                "ssl": true
+            },
+            "previewLimit": 50,
+            "server": "ep-polished-math-63758335.us-east-2.aws.neon.tech",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "hma_remote",
+            "username": "ptnminh",
+            "database": "neondb"
         }
     ]
 }

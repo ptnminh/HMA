@@ -81,15 +81,16 @@ model rolePermissions {
 }
 
 model plans {
-    id           Int           @id @default(autoincrement())
-    planName     String        @map(name: "plan_name")
-    currentPrice Float?        @map(name: "current_price")
-    duration     Float?
-    description  String?       @db.Text
-    isActive     Boolean       @default(true) @map(name: "is_activated")
-    updatedAt    DateTime      @default(now()) @updatedAt @map(name: "updated_at")
-    createdAt    DateTime      @default(now()) @map(name: "created_at")
-    planOptions  planOptions[]
+    id            Int             @id @default(autoincrement())
+    planName      String          @map(name: "plan_name")
+    currentPrice  Float?          @map(name: "current_price")
+    duration      Float?
+    description   String?         @db.Text
+    isActive      Boolean         @default(true) @map(name: "is_activated")
+    updatedAt     DateTime        @default(now()) @updatedAt @map(name: "updated_at")
+    createdAt     DateTime        @default(now()) @map(name: "created_at")
+    planOptions   planOptions[]
+    subscriptions subscriptions[]
 }
 
 model options {
@@ -155,6 +156,7 @@ model clinics {
     updatedAt     DateTime        @default(now()) @updatedAt @map(name: "updated_at")
     userInClinics userInClinics[]
     owner         users           @relation(fields: [ownerId], references: [id])
+    subscriptions subscriptions[]
 }
 
 model userInClinics {
@@ -172,4 +174,19 @@ model userInClinics {
     role       roles     @relation(fields: [roleId], references: [id])
 
     @@map(name: "user_in_clinics")
+}
+
+model subscriptions {
+    id            String    @id @default(uuid())
+    clinicId      String    @map(name: "clinic_id")
+    currentPlanId Int       @map(name: "current_plan_id")
+    subcribedAt   DateTime  @default(now()) @map(name: "subcribed_at")
+    expiredAt     DateTime? @map(name: "expired_at")
+    unSubcribedAt DateTime? @map(name: "unsubcribed_at")
+    createdAt     DateTime  @default(now()) @map(name: "created_at")
+    updatedAt     DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+    isDisabled    Boolean   @default(false) @map(name: "is_disabled")
+    disabledAt    DateTime? @map(name: "disabled_at")
+    clinics       clinics   @relation(fields: [clinicId], references: [id])
+    plans         plans     @relation(fields: [currentPlanId], references: [id])
 }

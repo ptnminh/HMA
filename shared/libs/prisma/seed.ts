@@ -21,6 +21,10 @@ async function main() {
         id: 4,
         name: "user",
       },
+      {
+        id: 5,
+        name: "guest",
+      },
     ],
   });
 }

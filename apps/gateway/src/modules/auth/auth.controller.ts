@@ -528,6 +528,8 @@ export class AuthController {
   @ApiOkResponse({
     type: FindUserByEmailResponse,
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Get('find-user-by-email')
   async findUserByEmail(@Query('email') email: string) {
     const findUserByEmailResponse = await firstValueFrom(
