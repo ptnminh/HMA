@@ -158,18 +158,18 @@ model clinics {
 }
 
 model userInClinics {
-    id         Int      @id @default(autoincrement())
-    userId     String   @map(name: "user_id")
-    clinicId   String   @map(name: "clinic_id")
-    isOwner    Boolean  @default(false) @map(name: "is_owner")
-    isDisabled Boolean  @default(false) @map(name: "is_disabled")
-    disabledAt DateTime @map(name: "disabled_at")
+    id         Int       @id @default(autoincrement())
+    userId     String    @map(name: "user_id")
+    clinicId   String    @map(name: "clinic_id")
+    isOwner    Boolean   @default(false) @map(name: "is_owner")
+    isDisabled Boolean   @default(false) @map(name: "is_disabled")
+    disabledAt DateTime? @map(name: "disabled_at")
     roleId     Int
-    createdAt  DateTime @default(now()) @map(name: "created_at")
-    updatedAt  DateTime @default(now()) @updatedAt @map(name: "updated_at")
-    users      users    @relation(fields: [userId], references: [id])
-    clinics    clinics  @relation(fields: [clinicId], references: [id])
-    role       roles    @relation(fields: [roleId], references: [id])
+    createdAt  DateTime  @default(now()) @map(name: "created_at")
+    updatedAt  DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+    users      users     @relation(fields: [userId], references: [id])
+    clinics    clinics   @relation(fields: [clinicId], references: [id])
+    role       roles     @relation(fields: [roleId], references: [id])
 
     @@map(name: "user_in_clinics")
 }

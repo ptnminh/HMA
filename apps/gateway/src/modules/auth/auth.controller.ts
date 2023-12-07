@@ -55,6 +55,7 @@ import {
   addNewPasswordDto,
 } from './dto/reset-password.dto';
 import { Request } from 'express';
+import { FindUserByEmailResponse } from './dto/common.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -496,14 +497,14 @@ export class AuthController {
       message: ResetPasswordVerifyResponse.message,
       data: ResetPasswordVerifyResponse.data,
       status: true,
-    }
+    };
   }
 
   @ApiCreatedResponse({
     type: ChangePasswordReponse,
   })
   @Put('add-new-password')
-  async addNewPassword(@Body() dto: addNewPasswordDto ) {
+  async addNewPassword(@Body() dto: addNewPasswordDto) {
     const ChangePasswordReponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.ADD_NEW_PASSWORD, dto),
     );
@@ -520,6 +521,31 @@ export class AuthController {
     return {
       message: ChangePasswordReponse.message,
       data: ChangePasswordReponse.data,
+      status: true,
+    };
+  }
+
+  @ApiOkResponse({
+    type: FindUserByEmailResponse,
+  })
+  @Get('find-user-by-email')
+  async findUserByEmail(@Query('email') email: string) {
+    const findUserByEmailResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.FIND_USER_BY_EMAIL, { email }),
+    );
+    if (findUserByEmailResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: findUserByEmailResponse.message,
+          data: null,
+          status: false,
+        },
+        findUserByEmailResponse.status,
+      );
+    }
+    return {
+      message: findUserByEmailResponse.message,
+      data: findUserByEmailResponse.data,
       status: true,
     };
   }

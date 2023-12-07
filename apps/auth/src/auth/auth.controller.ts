@@ -567,4 +567,31 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.FIND_USER_BY_EMAIL)
+  async findUserByEmail(data: { email: string }) {
+    try {
+      const { email } = data;
+      const user = await this.authService.findUserVerifiedByEmail(email);
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Email không tồn tại',
+        };
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Tìm user thành công',
+        data: {
+          email: user.email,
+          id: user.id,
+        },
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }

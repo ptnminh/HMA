@@ -50,6 +50,20 @@
             "request": "launch",
             "command": "npm run dev",
             "cwd": "${workspaceFolder}/apps/files"
+        },
+        {
+            "type": "node-terminal",
+            "name": "clinics",
+            "request": "launch",
+            "command": "npm run dev",
+            "cwd": "${workspaceFolder}/apps/clinics"
+        },
+        {
+            "type": "node-terminal",
+            "name": "chats",
+            "request": "launch",
+            "command": "npm run dev",
+            "cwd": "${workspaceFolder}/apps/chats"
         }
     ]
 }

@@ -10,6 +10,7 @@ import {
   HttpStatus,
   HttpException,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import {
   CreateClinicDto,
@@ -73,6 +74,34 @@ export class ClinicsController {
   async findAll() {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.CLINIC_LIST, {}),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+  @Put(':id')
+  @ApiOkResponse({ type: CreateClinicResponse })
+  async update(
+    @Param('id') id: string,
+    @Body() updateClinicDto: UpdateClinicDto,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.UPDATE_CLINIC, {
+        ...updateClinicDto,
+        id,
+      }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
