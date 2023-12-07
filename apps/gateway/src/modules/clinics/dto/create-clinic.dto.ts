@@ -28,7 +28,7 @@ export class CreateClinicDto {
     description: 'The phone number of the Clinic',
   })
   @IsOptional()
-  phoneNumber: string;
+  phone: string;
 
   @IsString()
   @ApiProperty({ example: 'Address', description: 'The address of the Clinic' })
@@ -43,7 +43,7 @@ export class CreateClinicResponse {
       id: '1',
       name: 'Clinic 1',
       email: 'email@gmail.com',
-      phoneNumber: '0123456789',
+      phone: '0123456789',
       address: 'Address',
       isActive: true,
       createdAt: '2021-09-27T07:45:16.000Z',
@@ -53,5 +53,28 @@ export class CreateClinicResponse {
   })
   data: IClinics;
   @ApiProperty({ example: 'Tạo Clinic thành công.', nullable: true })
+  message: { [key: string]: any };
+}
+
+export class ListClinicResponse {
+  @ApiProperty({ example: 'true', type: Boolean })
+  status: string;
+  @ApiProperty({
+    example: [
+      {
+        id: '1',
+        name: 'Clinic 1',
+        email: 'email@gmail.com',
+        phone: '0123456789',
+        address: 'Address',
+        isActive: true,
+        createdAt: '2021-09-27T07:45:16.000Z',
+        updatedAt: '2021-09-27T07:45:16.000Z',
+      },
+    ],
+    nullable: false,
+  })
+  data: IClinics[];
+  @ApiProperty({ example: 'Lấy danh sách clinics thành công.', nullable: true })
   message: { [key: string]: any };
 }

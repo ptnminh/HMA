@@ -5,6 +5,7 @@ import { ClientProxyFactory } from '@nestjs/microservices';
 import { AllExceptionFilter } from 'src/filters/all-exception.filter';
 import { AuthController } from 'src/modules/auth/auth.controller';
 import { JwtStrategy } from 'src/modules/auth/jwt.strategy';
+import { ClinicsController } from 'src/modules/clinics/clinics.controller';
 import { CloudinaryController } from 'src/modules/files/cloudinary.controller';
 import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
 import { PlansController } from 'src/modules/plans/plans.controller';
@@ -23,7 +24,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
     }),
     CloudinaryModule,
   ],
-  controllers: [AuthController, PlansController],
+  controllers: [AuthController, PlansController, ClinicsController],
   providers: [
     ConfigService,
     {
