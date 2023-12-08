@@ -34,6 +34,15 @@ services:
       - .env
     networks:
       - some-network
+  chat:
+    build: ./apps/chats
+    restart: always
+    hostname: chat
+    env_file:
+      - .env
+    networks:
+      - some-network
+    
   mailer:
     build: ./apps/mailer
     restart: always
