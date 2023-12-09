@@ -11,7 +11,7 @@ RUN yarn install
 
 COPY . .
 
-RUN npm run build
+RUN yarn build
 
 FROM node:19-alpine
 
