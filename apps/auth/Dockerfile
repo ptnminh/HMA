@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY schema.prisma schema.prisma
 
 # Install app dependencies
-RUN npm install
+RUN yarn install
 
 COPY . .
 
