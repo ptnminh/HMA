@@ -9,7 +9,7 @@ COPY . .
 
 RUN chmod +x ./wait-for-postgres.sh
 
-RUN yarn install
+RUN yarn install --frozen-lockfile
 RUN npx prisma generate
 
 RUN apt --assume-yes install postgresql-client
