@@ -7,11 +7,11 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install app dependencies
-RUN yarn install --frozen-lockfile
+RUN npm install -f
 
 COPY . .
 
-RUN yarn build
+RUN npm run build
 
 FROM node:19-alpine
 
