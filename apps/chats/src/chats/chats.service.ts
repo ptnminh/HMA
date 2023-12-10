@@ -123,4 +123,87 @@ export class ChatService {
       }
     })
   }
+
+  async findAllActiveGroupChat() {
+    return this.prismaService.groupChats.findMany({
+      where: {
+        isActive: true,
+        groupChatMember: {
+          some: {
+            isDisabled: false
+          }
+        }
+      },
+      select: {
+        id: true,
+        groupName: true,
+        maxMember:  true,
+        type: true,
+        isActive: true,
+        groupChatMember: {
+          select: {
+            userId: true,
+            isAdmin:true,
+            isDisabled: true,
+            joinedAt: true,
+            users: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                roleId: true,
+                role: {
+                  select: {
+                    name: true,
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+
+  async findAllActiveGroupChatByUserId(userId: string) {
+    return this.prismaService.groupChats.findMany({
+      where: {
+        isActive: true,
+        groupChatMember: {
+          some: {
+            userId,
+            isDisabled: false
+          }
+        }
+      },
+      select: {
+        id: true,
+        groupName: true,
+        maxMember:  true,
+        type: true,
+        isActive: true,
+        groupChatMember: {
+          select: {
+            userId: true,
+            isAdmin:true,
+            isDisabled: true,
+            joinedAt: true,
+            users: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                roleId: true,
+                role: {
+                  select: {
+                    name: true,
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+  }
 }

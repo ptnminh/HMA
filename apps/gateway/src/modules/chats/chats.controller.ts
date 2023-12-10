@@ -40,7 +40,7 @@ import { group } from 'console';
       @Inject('CHATS_SERVICE') private readonly ChatsServiceClient: ClientProxy,
     ) {}
 
-    @Get('group/:id/members')
+    @Get(':id/users')
     async findAllGroupMembers(@Param('id') id: string) {
         const chatServiceResponse = await firstValueFrom(this.ChatsServiceClient.send(
             ChatsCommand.FIND_ALL_MEMBER, {id: parseInt(id),}
@@ -62,7 +62,7 @@ import { group } from 'console';
         };
     }
 
-    @Post('group')
+    @Post()
     async createGroup(@Body() dto: CreateGroupChatDto, @CurrentUser('id') id: string) {
         const chatServiceResponse = await firstValueFrom(this.ChatsServiceClient.send(
             ChatsCommand.CREATE_GROUP_CHAT, {dto, id}
@@ -85,7 +85,7 @@ import { group } from 'console';
 
     }
 
-    @Post('group/:groupChatId/member/:userId')
+    @Post(':groupChatId/user/:userId')
     async addGroupMember(@Param('groupChatId') groupChatId: string,@Param('userId') userId: string)  {
         const dto = {
             userId,
@@ -113,7 +113,7 @@ import { group } from 'console';
 
     }
 
-    @Put('group/:id')
+    @Put(':id')
     async updateGroup (@Body() dto: UpdatedGroupDto, @Param('id') id: string) {
         const data = {
             id: parseInt(id),
@@ -139,7 +139,7 @@ import { group } from 'console';
         };
     }
 
-    @Delete('group/:groupChatId/member/:userId')
+    @Delete(':groupChatId/user/:userId')
     async deleteMember (@Param('groupChatId') groupChatId: string,@Param('userId') userId: string  ) {
         const data = {
             groupChatId: parseInt(groupChatId),
@@ -165,13 +165,41 @@ import { group } from 'console';
         };
     }
 
-    @Delete('group/:id')
+    @Delete(':id')
     async deleteGroup (@Param('id') id: string) {
         const data = {
             id: parseInt(id),
         }
         const chatServiceResponse = await firstValueFrom(this.ChatsServiceClient.send(
             ChatsCommand.DELETE_GROUP, {...data}
+        ));
+        if (chatServiceResponse.status !== HttpStatus.OK) {
+            throw new HttpException(
+                {
+                  message: chatServiceResponse.message,
+                  data: null,
+                  status: false,
+                },
+                chatServiceResponse.status
+            )
+        }
+        return {
+            message: chatServiceResponse.message,
+            data: chatServiceResponse.data,
+            status: true,
+        };
+    }
+
+    @ApiQuery({
+        name: "userId",
+        type: String,
+        required: false,
+    })
+    @Get()
+    async getAllGroup (@Query('userId') userId: string) {
+        const data = {userId}
+        const chatServiceResponse = await firstValueFrom(this.ChatsServiceClient.send(
+            ChatsCommand.FIND_ALL_GROUP, {...data}
         ));
         if (chatServiceResponse.status !== HttpStatus.OK) {
             throw new HttpException(

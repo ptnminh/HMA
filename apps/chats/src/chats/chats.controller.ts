@@ -217,4 +217,49 @@ export class ChatController {
     }
   }
 
+  @MessagePattern(ChatsCommand.FIND_ALL_GROUP)
+  async findGroupChat(data: {userId: string|undefined}) {
+    try {
+      var group = []
+      const userId = data.userId
+      if (userId !== undefined) {
+        group = await this.chatService.findAllActiveGroupChat()
+      } else {
+        group = await this.chatService.findAllActiveGroupChatByUserId(userId)
+      }
+      if (group.length == 0 ) {
+        return {
+          message: "Không tìm thấy danh sách nhóm",
+          status: HttpStatus.BAD_REQUEST,
+        }
+      }
+      for(var i =0;i < group.length; i++) {
+        var member = {}
+        for(var j =0; j<group[i].groupChatMember.length; j++) {
+          member = {
+            userId: group[i].groupChatMember[j].userId,
+            joinedAt: group[i].groupChatMember[j].joinedAt,
+            isAdmin: group[i].groupChatMember[j].isActive,
+            email: group[i].groupChatMember[j].users.email,
+            firstName: group[i].groupChatMember[j].users.firstName,
+            lastName: group[i].groupChatMember[j].users.lastName,
+            role: group[i].groupChatMember[j].users.role.name,
+          }
+          group[i].groupChatMember[j] = member
+        }
+      }
+      return {
+        message : "Tìm kiếm nhóm chat thành công",
+        status: HttpStatus.OK,
+        data: group
+      }  
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: "Lỗi hệ thống",
+      }
+    }
+  }
 }
