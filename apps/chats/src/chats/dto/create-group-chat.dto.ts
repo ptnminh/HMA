@@ -1,9 +1,10 @@
-import { IsNotEmpty, IsNumber, IsString} from "class-validator";
 
-export class CreateGroupChatDto {
+export class CreateGroupDto {
     groupName: string;
 
     maxMember?: number;
 
     type?: string;
+
+    userList: string[];
 }

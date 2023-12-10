@@ -1,50 +1,77 @@
 import { Controller, HttpStatus } from '@nestjs/common';
 import { ChatService } from './chats.service';
-import { CreateGroupChatDto } from './dto';
+import { CreateGroupDto } from './dto';
 import { MessagePattern } from '@nestjs/microservices';
 import { ChatsCommand } from './command';
-import { group } from 'console';
 import { Prisma } from '@prisma/client';
+import { create } from 'domain';
 
 @Controller()
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @MessagePattern(ChatsCommand.CREATE_GROUP_CHAT)
-  async createGroupChat(data: {dto: CreateGroupChatDto, id: string}) {
+  async createGroup(data: {dto: CreateGroupDto, adminId: string}) {
     try {
-      const {groupName, maxMember, type} = {...data.dto}
-      const findGroupName = await this.chatService.findActiveGroupChatByName(groupName)
-      if (findGroupName) {
+      const {userList, ...rest} = data.dto
+      const adminId = data.adminId
+      const existedName = await this.chatService.findGroupChatByName(rest.groupName)
+      if (existedName) {
         return {
-          message: "Tên nhóm đã tồn tại",
-          status: HttpStatus.BAD_REQUEST
-        }
-      }
-      const groupChat = await this.chatService.createGroupChat(data.dto)
-      const userId = data.id
-      const admin = await this.chatService.addGroupAdmin(userId, groupChat.id)
-      if (!admin) {
-        return {
-          message: "Tạo group chat không thành công",
           status: HttpStatus.BAD_REQUEST,
+          message: "Tên nhóm chat đã tồn tại"
         }
       }
+      if (rest.maxMember < 2) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Số lượng thành viên giới hạn tối thiểu là 2"
+        }
+      }
+      if(userList.length + 1 > rest.maxMember) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Số lượng thành viên quá giới hạn"
+        }
+      }
+      const group = await this.chatService.createGroup(rest)
+      
+      const groupChatId = group.id
+      const adminInput: Prisma.groupChatMemberUncheckedCreateInput = {
+        groupChatId,
+        userId: adminId,
+      }
+      if (group.maxMember > 2) {
+        adminInput.isAdmin = true
+      }
+      const admin = await this.chatService.findActiveGroupMember(adminId, groupChatId)
+      if(!admin) {
+        await this.chatService.createMember(adminInput)
+      }
+      for(let userId of userList) {
+        const user = await this.chatService.findActiveGroupMember(userId, groupChatId)
+        if(!user) {
+          const userInput: Prisma.groupChatMemberUncheckedCreateInput = {
+            groupChatId,
+            userId,
+          }
+        await this.chatService.createMember(userInput)
+        }  
+      }
+      const returnGroup = await this.chatService.findActiveGroupChatById(groupChatId)
       return {
-        data: groupChat,
-        message: "Tạo nhóm chat thành công",
+        data: returnGroup,
         status: HttpStatus.OK,
+        message: "Tạo nhóm chat thành công"
       }
     } 
     catch(error) {
-      console.log(error)
       return {
-        message: "Lỗi hệ thống",
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: "Lổi hệ thống",
+        status: HttpStatus.INTERNAL_SERVER_ERROR
       }
     }
   }
-
   @MessagePattern(ChatsCommand.FIND_ALL_MEMBER)
   async findMember(data: {id: string}) {
     try {
@@ -89,7 +116,10 @@ export class ChatController {
           status: HttpStatus.BAD_REQUEST
         }
       }
-      await this.chatService.updateGroupName(id, groupName)
+      const updateInput: Prisma.groupChatsUncheckedUpdateInput = {
+        groupName,
+      }
+      await this.chatService.updateGroup(updateInput, id)
       const updatedGroup = await this.chatService.findActiveGroupChatById(id)
       return {
         message: "Thay đổi tên nhóm chat thành công",
@@ -108,7 +138,8 @@ export class ChatController {
   @MessagePattern(ChatsCommand.ADD_MEMBER)
   async addGroupMember(data: any) {
     try {
-      const {groupChatId, userId} = data
+      const {groupChatId, userList} = data
+      console.log(userList)
       const group = await this.chatService.findActiveGroupChatById(groupChatId)
       if (!group) {
         return {
@@ -116,22 +147,27 @@ export class ChatController {
           message: "Nhóm chat không hoạt động"
         }
       }
-      const userInGroup = await this.chatService.findActiveGroupMember(userId, groupChatId)
-      if (userInGroup) {
+      const memberList = await this.chatService.getAllGroupChatMember(groupChatId) 
+      if(memberList.length + userList.length > group.maxMember) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Người dùng tồn tại trong nhóm chat"
+          message: "Số lượng thành viên vượt giói hạn"
         }
       }
-      const payload: Prisma.groupChatMemberUncheckedCreateInput = {
-        userId,
-        groupChatId,
+      for (let userId of userList) {
+        const user = await this.chatService.findActiveGroupMember(userId, groupChatId)
+        if(!user){
+          const createInput: Prisma.groupChatMemberUncheckedCreateInput = {
+            userId,
+            groupChatId,
+          }
+          await this.chatService.createMember(createInput)  
+        }
       }
-      const member = await this.chatService.addGroupMember(payload)
       return {
         status: HttpStatus.OK,
         message: "Thêm người dùng thành công",
-        data: member
+        data: null
       }
 
     } catch(error) {
@@ -218,11 +254,11 @@ export class ChatController {
   }
 
   @MessagePattern(ChatsCommand.FIND_ALL_GROUP)
-  async findGroupChat(data: {userId: string|undefined}) {
+  async findGroupChat(data: {userId: string}) {
     try {
       var group = []
       const userId = data.userId
-      if (userId !== undefined) {
+      if (userId === undefined) {
         group = await this.chatService.findAllActiveGroupChat()
       } else {
         group = await this.chatService.findAllActiveGroupChatByUserId(userId)

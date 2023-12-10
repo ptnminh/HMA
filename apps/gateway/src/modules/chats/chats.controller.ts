@@ -26,10 +26,10 @@ import {
 import { ChatsCommand } from './command';
 import { CurrentUser } from 'src/decorators';
 import {  CreateGroupChatDto } from './dto';
-import { channel } from 'diagnostics_channel';
 import { AuthCommand } from '../auth/command';
 import { UpdatedGroupDto } from './dto/update-group.dto';
 import { group } from 'console';
+import { AddMemberDto } from './dto/addMember.dto';
   
   @Controller('chats')
   @ApiTags('Chats')
@@ -63,9 +63,12 @@ import { group } from 'console';
     }
 
     @Post()
-    async createGroup(@Body() dto: CreateGroupChatDto, @CurrentUser('id') id: string) {
+    async createGroup(
+        @Body() dto: CreateGroupChatDto, 
+        @CurrentUser('id') adminId: string,
+    ){
         const chatServiceResponse = await firstValueFrom(this.ChatsServiceClient.send(
-            ChatsCommand.CREATE_GROUP_CHAT, {dto, id}
+            ChatsCommand.CREATE_GROUP_CHAT, {dto, adminId}
         ));
         if (chatServiceResponse.status !== HttpStatus.OK) {
             throw new HttpException(
@@ -86,13 +89,13 @@ import { group } from 'console';
     }
 
     @Post(':groupChatId/user/:userId')
-    async addGroupMember(@Param('groupChatId') groupChatId: string,@Param('userId') userId: string)  {
-        const dto = {
-            userId,
+    async addGroupMember(@Param('groupChatId') groupChatId: string,@Body() dto: AddMemberDto)  {
+        const data = {
+            userList: dto.userList,
             groupChatId: parseInt(groupChatId)
         }
         const chatServiceResponse = await firstValueFrom(this.ChatsServiceClient.send(
-            ChatsCommand.ADD_MEMBER, {...dto}
+            ChatsCommand.ADD_MEMBER, {...data}
         ));
         if (chatServiceResponse.status !== HttpStatus.OK) {
             throw new HttpException(

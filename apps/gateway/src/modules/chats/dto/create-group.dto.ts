@@ -17,4 +17,7 @@ export class CreateGroupChatDto {
     @IsString()
     @IsOptional()
     type?: string;
+
+    @ApiProperty({example: ["3c9994cb-dcc4-4a22-ac23-cd8e826604e5"]})
+    userList: string[]
 }
