@@ -8,9 +8,8 @@ COPY package*.json ./
 COPY schema.prisma schema.prisma
 
 # Install app dependencies
-RUN npm cache clean --force && \
-    npm install -g npm@9.6.3 && \
-    npm install
+RUN npm config set fetch-retry-mintimeout 20000 && \ 
+    npm config set fetch-retry-maxtimeout 120000 &&  npm install
 
 COPY . .
 
