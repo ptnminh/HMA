@@ -4,14 +4,18 @@ import {
   HttpStatus,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CloudinaryService } from './cloudinary.service';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @Controller('files')
 @ApiTags('Files')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('Bearer')
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 
@@ -31,12 +35,20 @@ export class CloudinaryController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadImage(@UploadedFile('file') file: Express.Multer.File) {
     try {
-      return this.cloudinaryService.uploadFile(file);
+      const fileUploaded = await this.cloudinaryService.uploadFile(file);
+      return {
+        status: true,
+        message: 'Upload file thành công',
+        data: {
+          originalname: fileUploaded.original_filename,
+          url: fileUploaded.secure_url,
+        },
+      };
     } catch (error) {
       console.log('@@@', error);
       throw new HttpException(
         {
-          message: 'Internal server error',
+          message: error?.message || 'Upload file thất bại',
           data: null,
           status: false,
         },

@@ -9,8 +9,13 @@ const streamifier = require('streamifier');
 @Injectable()
 export class CloudinaryService {
   async uploadFile(file: Express.Multer.File): Promise<CloudinaryResponse> {
+    const originalFilename = Buffer.from(file.originalname, 'ascii').toString(
+      'utf8',
+    );
+
     return new Promise<CloudinaryResponse>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
+        { resource_type: 'auto', filename_override: originalFilename },
         (error, result) => {
           if (error) {
             console.log('@@@', error);
@@ -19,7 +24,6 @@ export class CloudinaryService {
           resolve(result);
         },
       );
-
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
     });
   }
