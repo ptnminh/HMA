@@ -1,20 +1,42 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { CreateGroupChatDto } from './dto';
+import { CreateGroupDto } from './dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ChatService {
   constructor(private readonly prismaService: PrismaService) {}
-  async createGroupChat(dto: CreateGroupChatDto) {
-    return this.prismaService.groupChats.create({
-      data: {...dto},
-      select: {
-        id: true,
-        groupName: true,
-        maxMember: true,
-        type: true,
-      }
+
+  async createGroup(data: Prisma.groupChatsUncheckedCreateInput) {
+    return await this.prismaService.groupChats.create({
+      data,
+    })
+  }
+
+  async updateGroup(data: Prisma.groupChatsUncheckedUpdateInput, id: number) {
+    return await this.prismaService.groupChats.update({
+      where: {
+        id,
+      },
+      data,
+    })
+  }
+
+  async createMember(data: Prisma.groupChatMemberUncheckedCreateInput) {
+    return await this.prismaService.groupChatMember.create({
+      data,
+    })
+  }
+
+  async updateMember(
+    data: Prisma.groupChatMemberUncheckedUpdateInput,
+    id: number,
+    ) {
+    return await this.prismaService.groupChatMember.update({
+      where: {
+        id
+      },
+      data,
     })
   }
 
@@ -31,6 +53,9 @@ export class ChatService {
       where: {
         id,
         isActive: true,
+      },
+      include: {
+        groupChatMember: true
       }
     })
   }
@@ -62,17 +87,6 @@ export class ChatService {
     })
   }
 
-  async updateGroupName(id: number, groupName: string) {
-    return this.prismaService.groupChats.update({
-      where: {
-        id, 
-        isActive: true,
-      },
-      data: {
-        groupName,          
-      }
-    })
-  }
 
   async findActiveGroupMember(userId: string, groupChatId: number) {
     return this.prismaService.groupChatMember.findFirst({
@@ -120,6 +134,89 @@ export class ChatService {
       },
       data: {
         isDisabled: true
+      }
+    })
+  }
+
+  async findAllActiveGroupChat() {
+    return this.prismaService.groupChats.findMany({
+      where: {
+        isActive: true,
+        groupChatMember: {
+          some: {
+            isDisabled: false
+          }
+        }
+      },
+      select: {
+        id: true,
+        groupName: true,
+        maxMember:  true,
+        type: true,
+        isActive: true,
+        groupChatMember: {
+          select: {
+            userId: true,
+            isAdmin:true,
+            isDisabled: true,
+            joinedAt: true,
+            users: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                roleId: true,
+                role: {
+                  select: {
+                    name: true,
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+
+  async findAllActiveGroupChatByUserId(userId: string) {
+    return this.prismaService.groupChats.findMany({
+      where: {
+        isActive: true,
+        groupChatMember: {
+          some: {
+            userId,
+            isDisabled: false
+          }
+        }
+      },
+      select: {
+        id: true,
+        groupName: true,
+        maxMember:  true,
+        type: true,
+        isActive: true,
+        groupChatMember: {
+          select: {
+            userId: true,
+            isAdmin:true,
+            isDisabled: true,
+            joinedAt: true,
+            users: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                roleId: true,
+                role: {
+                  select: {
+                    name: true,
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     })
   }
