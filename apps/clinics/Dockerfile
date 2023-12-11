@@ -8,7 +8,9 @@ COPY package*.json ./
 COPY schema.prisma schema.prisma
 
 # Install app dependencies
-RUN npm install -f
+RUN npm cache clean --force && \
+    npm install -g npm@latest && \
+    npm install
 
 COPY . .
 
