@@ -9,7 +9,7 @@ COPY schema.prisma schema.prisma
 
 # Install app dependencies
 RUN npm cache clean --force && \
-    npm install -g npm@latest && \
+    npm install -g npm@9.6.3 && \
     npm install
 
 COPY . .
