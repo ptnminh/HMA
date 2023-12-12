@@ -73,7 +73,7 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.ADD_USER_TO_CLINIC)
   async addUserToClinic(data: any) {
     try {
-      const { clinicId, userId } = data;
+      const { clinicId, userId, roleId } = data;
       const findUserInClinic = await this.clinicService.findUserInClinic(
         clinicId,
         userId,
@@ -88,7 +88,7 @@ export class ClinicController {
         userId,
         clinicId,
         isOwner: false,
-        roleId: 4,
+        roleId: roleId || 4,
       };
       await this.clinicService.addUserToClinic(payload);
       const usersInClinic = await this.clinicService.findAllUserInClinic(

@@ -13,7 +13,7 @@ datasource db {
 model users {
   id              String            @id @default(uuid())
   email           String
-  roleId          Int               @map(name: "role_id")
+  moduleId        Int?              @map(name: "module_id")
   name            String?
   firstName       String?           @map(name: "first_name")
   lastName        String?           @map(name: "last_name")
@@ -26,7 +26,6 @@ model users {
   updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
   createdAt       DateTime          @default(now()) @map(name: "created_at")
   accounts        accounts[]
-  role            roles             @relation(fields: [roleId], references: [id])
   groupChatMember groupChatMember[]
   userInClinics   userInClinics[]
   clinics         clinics[]
@@ -46,7 +45,7 @@ model accounts {
   user users @relation(fields: [userId], references: [id])
 }
 
-model roles {
+model clinicGroupRoles {
   id              Int               @id @default(autoincrement())
   name            String
   description     String?
@@ -54,9 +53,10 @@ model roles {
   disabledAt      DateTime?         @map(name: "disabled_at")
   updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
   createdAt       DateTime          @default(now()) @map(name: "created_at")
-  users           users[]
   rolePermissions rolePermissions[]
   userInClinics   userInClinics[]
+
+  @@map("clinic_group_roles")
 }
 
 model permissions {
@@ -71,11 +71,11 @@ model permissions {
 }
 
 model rolePermissions {
-  id           Int         @id @default(autoincrement())
-  roleId       Int         @map(name: "role_id")
-  permissionId Int         @map(name: "permission_id")
-  role         roles       @relation(fields: [roleId], references: [id])
-  permission   permissions @relation(fields: [permissionId], references: [id])
+  id           Int              @id @default(autoincrement())
+  roleId       Int              @map(name: "role_id")
+  permissionId Int              @map(name: "permission_id")
+  role         clinicGroupRoles @relation(fields: [roleId], references: [id])
+  permission   permissions      @relation(fields: [permissionId], references: [id])
 
   @@map(name: "role_permissions")
 }
@@ -160,18 +160,18 @@ model clinics {
 }
 
 model userInClinics {
-  id         Int       @id @default(autoincrement())
-  userId     String    @map(name: "user_id")
-  clinicId   String    @map(name: "clinic_id")
-  isOwner    Boolean   @default(false) @map(name: "is_owner")
-  isDisabled Boolean   @default(false) @map(name: "is_disabled")
-  disabledAt DateTime? @map(name: "disabled_at")
+  id         Int              @id @default(autoincrement())
+  userId     String           @map(name: "user_id")
+  clinicId   String           @map(name: "clinic_id")
+  isOwner    Boolean          @default(false) @map(name: "is_owner")
+  isDisabled Boolean          @default(false) @map(name: "is_disabled")
+  disabledAt DateTime?        @map(name: "disabled_at")
   roleId     Int
-  createdAt  DateTime  @default(now()) @map(name: "created_at")
-  updatedAt  DateTime  @default(now()) @updatedAt @map(name: "updated_at")
-  users      users     @relation(fields: [userId], references: [id])
-  clinics    clinics   @relation(fields: [clinicId], references: [id])
-  role       roles     @relation(fields: [roleId], references: [id])
+  createdAt  DateTime         @default(now()) @map(name: "created_at")
+  updatedAt  DateTime         @default(now()) @updatedAt @map(name: "updated_at")
+  users      users            @relation(fields: [userId], references: [id])
+  clinics    clinics          @relation(fields: [clinicId], references: [id])
+  role       clinicGroupRoles @relation(fields: [roleId], references: [id])
 
   @@map(name: "user_in_clinics")
 }

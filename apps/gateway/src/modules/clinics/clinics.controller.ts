@@ -11,6 +11,7 @@ import {
   HttpException,
   UseGuards,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   CreateClinicDto,
@@ -22,6 +23,7 @@ import {
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
@@ -129,11 +131,13 @@ export class ClinicsController {
   async addUserToClinic(
     @Param('id') clinicId: string,
     @Param('userId') userId: string,
+    @Query('roleId') roleId: number,
   ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.ADD_USER_TO_CLINIC, {
         clinicId,
         userId,
+        roleId: +roleId,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {

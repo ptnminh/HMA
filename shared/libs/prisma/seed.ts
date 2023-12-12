@@ -1,9 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 async function main() {
-  const roles = await prisma.roles.findMany();
+  const roles = await prisma.clinicGroupRoles.findMany();
   if (roles.length > 0) return;
-  await prisma.roles.createMany({
+  await prisma.clinicGroupRoles.createMany({
     data: [
       {
         id: 1,
@@ -11,7 +11,7 @@ async function main() {
       },
       {
         id: 2,
-        name: "manager",
+        name: "nurse",
       },
       {
         id: 3,
@@ -19,7 +19,7 @@ async function main() {
       },
       {
         id: 4,
-        name: "user",
+        name: "unknown",
       },
       {
         id: 5,
