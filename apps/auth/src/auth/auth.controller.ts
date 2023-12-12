@@ -590,4 +590,22 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.UPDATE_USER)
+  async updateUser(data: any) {
+    try {
+      const { id, ...payload } = data;
+      const user = await this.authService.updateUser(id, payload);
+      return {
+        status: HttpStatus.OK,
+        message: 'Cập nhật user thành công',
+        data: user,
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }

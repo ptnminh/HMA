@@ -16,6 +16,15 @@ export class AuthService {
     });
   }
 
+  async updateUser(id: string, data): Promise<any> {
+    return this.prismaService.users.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
   async findUserVerifiedById(id: string): Promise<any> {
     return this.prismaService.users.findFirst({
       where: {

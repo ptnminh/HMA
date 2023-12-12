@@ -1,12 +1,17 @@
-import { Controller, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { ClinicService } from './clinics.service';
-import { MessagePattern } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { ClinicCommand } from './command';
 import { Prisma } from '@prisma/client';
+import { firstValueFrom } from 'rxjs';
 
 @Controller()
 export class ClinicController {
-  constructor(private readonly clinicService: ClinicService) {}
+  constructor(
+    private readonly clinicService: ClinicService,
+    @Inject('AUTH_SERVICE')
+    private readonly authServiceClient: ClientProxy,
+  ) {}
   @MessagePattern(ClinicCommand.CLINIC_CREATE)
   async createClinic(data: any) {
     try {
@@ -18,6 +23,12 @@ export class ClinicController {
         roleId: 1,
       };
       await this.clinicService.addUserToClinic(payload);
+      await firstValueFrom(
+        this.authServiceClient.send(ClinicCommand.UPDATE_USER, {
+          id: data.ownerId,
+          moduleId: 2,
+        }),
+      );
       return {
         status: HttpStatus.CREATED,
         message: 'Tạo clinic thành công',
@@ -91,6 +102,13 @@ export class ClinicController {
         roleId: roleId || 4,
       };
       await this.clinicService.addUserToClinic(payload);
+      // update role for user
+      await firstValueFrom(
+        this.authServiceClient.send(ClinicCommand.UPDATE_USER, {
+          id: userId,
+          moduleId: 2,
+        }),
+      );
       const usersInClinic = await this.clinicService.findAllUserInClinic(
         data.clinicId,
       );

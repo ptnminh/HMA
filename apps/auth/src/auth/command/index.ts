@@ -14,4 +14,5 @@ export enum AuthCommand {
   RESET_PASSWORD_VERIFY = 'reset_password_verify',
   ADD_NEW_PASSWORD = 'add_new_password',
   FIND_USER_BY_EMAIL = 'find_user_by_email',
+  UPDATE_USER = 'update_user',
 }
