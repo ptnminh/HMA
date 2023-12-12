@@ -101,7 +101,6 @@ export class ClinicController {
           return {
             ...user,
             ...user.users,
-            role: user.role.name,
           };
         }),
       };

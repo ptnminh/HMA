@@ -5,8 +5,8 @@ import { AuthCommand } from './command';
 import { RegisterDto } from './dto/create-user.dto';
 import {
   EVENTS,
+  MODULES,
   PROVIDERS,
-  ROLES,
   comparePassword,
   hashPassword,
 } from 'src/shared';
@@ -37,11 +37,10 @@ export class AuthController {
       }
       if (exUser) {
         const encryptedPassword = await hashPassword(rest.password);
-        const role = rest?.role;
-        const roleId = ROLES[role?.toUpperCase() || 'USER'];
+        const moduleId = MODULES.USER;
         await this.authService.updateUserByEmail(email, {
           ...rest,
-          ...(roleId && { roleId }), // if roleId is not undefined then add roleId to data
+          ...(moduleId && { moduleId }), // if roleId is not undefined then add roleId to data
           password: encryptedPassword,
           role: undefined,
         });
@@ -77,7 +76,6 @@ export class AuthController {
         status: HttpStatus.CREATED,
         user: {
           ...user,
-          role: user.role.name,
           emailVerified: !rest.emailVerified ? false : true,
         },
       };
@@ -131,7 +129,6 @@ export class AuthController {
         message: 'Đăng nhập thành công',
         user: {
           ...user,
-          role: user.role.name,
         },
         token,
       };
@@ -156,7 +153,6 @@ export class AuthController {
         message: 'Xác thực email thành công',
         user: {
           ...user,
-          role: user.role.name,
         },
       };
     } catch (error) {

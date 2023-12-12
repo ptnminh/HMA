@@ -13,7 +13,7 @@ datasource db {
 model users {
     id              String            @id @default(uuid())
     email           String
-    roleId          Int               @map(name: "role_id")
+    moduleId        Int?              @map(name: "module_id")
     name            String?
     firstName       String?           @map(name: "first_name")
     lastName        String?           @map(name: "last_name")
@@ -26,7 +26,6 @@ model users {
     updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
     createdAt       DateTime          @default(now()) @map(name: "created_at")
     accounts        accounts[]
-    role            roles             @relation(fields: [roleId], references: [id])
     groupChatMember groupChatMember[]
     userInClinics   userInClinics[]
     clinics         clinics[]
@@ -54,7 +53,6 @@ model roles {
     disabledAt      DateTime?         @map(name: "disabled_at")
     updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
     createdAt       DateTime          @default(now()) @map(name: "created_at")
-    users           users[]
     rolePermissions rolePermissions[]
     userInClinics   userInClinics[]
 }

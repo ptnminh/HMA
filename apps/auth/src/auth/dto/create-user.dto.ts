@@ -7,11 +7,9 @@ export class RegisterDto {
 
   lastName?: string;
 
-  roleId?: number;
+  moduleId?: number;
 
   emailVerified?: boolean;
-
-  role?: string;
 
   isInputPassword?: boolean;
 }

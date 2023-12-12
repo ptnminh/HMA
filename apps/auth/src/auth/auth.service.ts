@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { RegisterDto } from './dto/create-user.dto';
-import { ROLES, hashPassword } from '../shared/';
+import { MODULES, hashPassword } from '../shared/';
 
 @Injectable()
 export class AuthService {
@@ -28,11 +28,6 @@ export class AuthService {
         firstName: true,
         lastName: true,
         emailVerified: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
         isInputPassword: true,
       },
     });
@@ -51,11 +46,7 @@ export class AuthService {
         emailVerified: true,
         firstName: true,
         lastName: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
+        moduleId: true,
       },
     });
   }
@@ -69,24 +60,19 @@ export class AuthService {
   }
 
   async signUpByEmail(createUserDTO: RegisterDto) {
-    const { password, role, ...rest } = createUserDTO;
-    const roleId = ROLES[role?.toUpperCase() || 'USER'];
+    const { password, moduleId, ...rest } = createUserDTO;
     const encryptedPassword = await hashPassword(password);
     return this.prismaService.users.create({
       data: {
         password: encryptedPassword as string,
-        roleId: roleId ? roleId : (ROLES.USER as number as number),
+        moduleId: moduleId ? moduleId : (MODULES.USER as number as number),
         ...rest,
       },
       select: {
         id: true,
         isInputPassword: true,
         email: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
+        moduleId: true,
       },
     });
   }
@@ -164,13 +150,8 @@ export class AuthService {
         firstName: true,
         lastName: true,
         emailVerified: true,
-        roleId: true,
+        moduleId: true,
         isInputPassword: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
       },
     });
   }
