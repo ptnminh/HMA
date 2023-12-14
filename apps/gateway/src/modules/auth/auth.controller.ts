@@ -14,6 +14,7 @@ import {
   Patch,
   Put,
   Req,
+  Res,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -56,6 +57,8 @@ import {
 } from './dto/reset-password.dto';
 import { Request } from 'express';
 import { FindUserByEmailResponse } from './dto/common.dto';
+import { IsMobile } from 'src/decorators/device.decorator';
+import { Response } from 'express';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -70,9 +73,12 @@ export class AuthController {
   @ApiCreatedResponse({
     type: RegisterResponse,
   })
-  async register(@Body() body: RegisterDto) {
+  async register(@Body() body: RegisterDto, @IsMobile() isMobile: boolean) {
     const createUserResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.USER_CREATE, body),
+      this.authServiceClient.send(AuthCommand.USER_CREATE, {
+        ...body,
+        isMobile,
+      }),
     );
     if (createUserResponse.status !== HttpStatus.CREATED) {
       console.log(createUserResponse);
@@ -136,9 +142,12 @@ export class AuthController {
     };
   }
 
-  @Render('index')
   @Get('verify')
-  async verifyAccount(@Query('token') token: string) {
+  async verifyAccount(
+    @Query('token') token: string,
+    @Res() res,
+    @IsMobile() isMobile: boolean,
+  ) {
     if (!token) {
       throw new HttpException(
         {
@@ -189,7 +198,13 @@ export class AuthController {
         verifyResponse.status,
       );
     }
-    return { name: verifyResponse.user.firstName };
+    const frontEndUrl = this.configService.get<string>('FRONTEND_URL');
+    return isMobile
+      ? {
+          status: true,
+          message: 'Verify user thành công',
+        }
+      : res.redirect(`${frontEndUrl}/dang-nhap`);
   }
 
   @ApiCreatedResponse({

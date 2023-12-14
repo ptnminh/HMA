@@ -22,11 +22,11 @@ export class AppController {
         MAIL_TEMPLATE_ID.REGISTER as string,
         dynamic_template_data,
       );
-
-      await this.mailService.send(msg);
       const channel = context.getChannelRef();
       const originalMessage = context.getMessage();
       channel.ack(originalMessage);
+      await this.mailService.send(msg);
+
       return true;
     } catch (error) {
       console.log(

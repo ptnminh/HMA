@@ -26,7 +26,7 @@ export class AuthController {
   @MessagePattern(AuthCommand.USER_CREATE)
   async register(data: RegisterDto) {
     try {
-      const { email, ...rest } = data;
+      const { email, isMobile, ...rest } = data;
 
       const exUser = await this.authService.findUserByEmail(email);
       if (exUser?.emailVerified) {
@@ -60,8 +60,9 @@ export class AuthController {
           expiresIn: '30d',
         },
       );
-      const linkComfirm =
-        backendUrl + '/api/auth/verify?token=' + registerToken;
+      const linkComfirm = isMobile
+        ? 'clinus://abc.myapp.io/verify-account?token=' + registerToken
+        : backendUrl + '/api/auth/verify?token=' + registerToken;
 
       if (!rest.emailVerified) {
         await lastValueFrom(
@@ -402,7 +403,7 @@ export class AuthController {
         const data = {
           password: email,
           email,
-          isInutPassword: false,
+          isInputPassword: false,
         };
         user = await this.authService.signUpByEmail(data);
       }
@@ -420,6 +421,7 @@ export class AuthController {
         data: null,
       };
     } catch (error) {
+      console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
