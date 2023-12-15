@@ -228,4 +228,12 @@ export class AuthService {
       },
     });
   }
+
+  async getUserToken(userId: string) {
+    return this.prismaService.userDeviceTokens.findMany({
+      where: {
+        userId,
+      },
+    });
+  }
 }

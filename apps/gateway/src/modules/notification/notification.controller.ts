@@ -10,8 +10,8 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUserTokenResponse } from './dto/response';
-import { CreateUserTokenDTO } from './dto/noti.dto';
-import { firstValueFrom } from 'rxjs';
+import { CreateUserTokenDTO, PushNotificationDTO } from './dto/noti.dto';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { NotiCommand } from './command';
 
 @Controller('notification')
@@ -20,6 +20,8 @@ export class NotificationController {
   constructor(
     @Inject('AUTH_SERVICE')
     private readonly authServiceClient: ClientProxy,
+    @Inject('NOTI_SERVICE')
+    private readonly notificationServiceClient: ClientProxy,
   ) {}
 
   @Post('create-user-token')
@@ -67,6 +69,42 @@ export class NotificationController {
       }
       return {
         message: deleteTokenResponse.message,
+        status: true,
+      };
+    } catch (error) {
+      return error;
+    }
+  }
+
+  @Post('push-notification')
+  @ApiOkResponse({ type: CreateUserTokenResponse })
+  async pushNotification(@Body() body: PushNotificationDTO) {
+    try {
+      const { userId, ...rest } = body;
+      const getTokens = await firstValueFrom(
+        this.authServiceClient.send(NotiCommand.GET_USER_TOKEN, {
+          userId,
+        }),
+      );
+      if (getTokens.status !== HttpStatus.OK) {
+        throw new HttpException(
+          {
+            message: getTokens.message,
+            data: null,
+            status: false,
+          },
+          getTokens.status,
+        );
+      }
+      const tokens = getTokens.data;
+      await lastValueFrom(
+        this.authServiceClient.send(NotiCommand.PUSH_NOTIFICATION, {
+          tokens,
+          ...rest,
+        }),
+      );
+      return {
+        message: 'Gửi notification thành công',
         status: true,
       };
     } catch (error) {

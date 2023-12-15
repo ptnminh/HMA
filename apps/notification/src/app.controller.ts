@@ -37,27 +37,9 @@ export class AppController {
     return this.appService.getNotifications(params, userId);
   }
 
-  @EventPattern('send_notification')
+  @EventPattern('push_notification')
   public async sendNotification(@Payload() payload: string): Promise<any> {
     const data = JSON.parse(payload);
     await this.appService.createNotification(data);
-  }
-
-  @Post('send-notification')
-  public async sendNotificationToUser(
-    @Query('userId') userId: string,
-    @Body() body: any,
-  ): Promise<any> {
-    try {
-      const payload = {
-        content: 'WELCOME_NOTIFICATION',
-        type: NotificationType.WELCOME_NOTIFICATION + 'test',
-        payload: 'WELCOME_NOTIFICATION',
-        userId,
-      };
-      await this.appService.createNotification(payload);
-    } catch (error) {
-      console.log(error);
-    }
   }
 }

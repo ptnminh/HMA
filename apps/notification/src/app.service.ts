@@ -22,21 +22,10 @@ export class AppService {
 
   public async createNotification(data: INotificationPayload): Promise<void> {
     try {
-      const { content, type, payload, userId } = data;
-      const notification = new this.notificationModel({
-        user_id: userId,
-        content,
-        type,
-        payload: JSON.stringify(payload),
-      });
-      await notification.save();
-      const user = await firstValueFrom(
-        this.authClient.send('test', JSON.stringify({ id: userId })),
-      );
-      console.log('device id', user?.deviceId);
-      if (user?.deviceId) {
+      const { tokens, title, image, body } = data;
+      if (tokens && tokens.length > 0) {
         this.firebaseService
-          .sendMessage(user?.deviceId, content, payload)
+          .multiCastMessage(tokens, body, title, image)
           .then(() => {
             this.logger.log('notificaiton sent.');
           })

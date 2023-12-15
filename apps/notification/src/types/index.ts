@@ -1,8 +1,8 @@
 export interface INotificationPayload {
-  content: string;
-  type: string;
-  payload?: any;
-  userId: string;
+  image?: string;
+  body?: string;
+  title?: string;
+  tokens: string[];
 }
 
 export interface GetResponse<T> {

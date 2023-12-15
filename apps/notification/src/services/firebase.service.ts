@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
+import * as FCM from 'fcm-node';
 import config from './firebase.config.json';
 @Injectable()
 export class FirebaseService {
@@ -28,16 +29,18 @@ export class FirebaseService {
   }
 
   public async multiCastMessage(
-    tokens: [],
-    message?: string,
-    payload?: any,
+    tokens: string[],
+    body?: string,
+    title?: string,
+    image?: string,
   ): Promise<firebase.messaging.BatchResponse> {
     return firebase.messaging().sendMulticast({
       tokens,
       notification: {
-        body: message,
+        body,
+        title,
+        imageUrl: image,
       },
-      data: payload,
     });
   }
 }
