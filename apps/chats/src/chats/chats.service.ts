@@ -44,6 +44,7 @@ export class ChatService {
     return this.prismaService.groupChats.findFirst({
       where: {
         groupName,
+        isActive: true,
       }
     })
   }
@@ -74,7 +75,7 @@ export class ChatService {
     return this.prismaService.groupChatMember.findMany({
       where: {
         groupChatId: id,
-        isDisabled: false
+        isDisabled: false,
       },
       select: {
         id: true,
@@ -83,7 +84,14 @@ export class ChatService {
         isAdmin: true,
         joinedAt: true,
         isDisabled: true,
-      }
+        users: {
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true,
+          }
+        }
+      },
     })
   }
 
@@ -154,27 +162,7 @@ export class ChatService {
         maxMember:  true,
         type: true,
         isActive: true,
-        groupChatMember: {
-          select: {
-            userId: true,
-            isAdmin:true,
-            isDisabled: true,
-            joinedAt: true,
-            users: {
-              select: {
-                email: true,
-                firstName: true,
-                lastName: true,
-                roleId: true,
-                role: {
-                  select: {
-                    name: true,
-                  }
-                }
-              }
-            }
-          }
-        }
+        groupChatMember: true
       }
     })
   }
@@ -188,7 +176,7 @@ export class ChatService {
             userId,
             isDisabled: false
           }
-        }
+        },
       },
       select: {
         id: true,
@@ -196,27 +184,7 @@ export class ChatService {
         maxMember:  true,
         type: true,
         isActive: true,
-        groupChatMember: {
-          select: {
-            userId: true,
-            isAdmin:true,
-            isDisabled: true,
-            joinedAt: true,
-            users: {
-              select: {
-                email: true,
-                firstName: true,
-                lastName: true,
-                roleId: true,
-                role: {
-                  select: {
-                    name: true,
-                  }
-                }
-              }
-            }
-          }
-        }
+        groupChatMember: true,
       }
     })
   }

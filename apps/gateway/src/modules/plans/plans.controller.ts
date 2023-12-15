@@ -35,13 +35,15 @@ import { GetAllActiveOptionResponse } from './dto/get-option.dto';
 
 @Controller('plans')
 @ApiTags('Plans')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('Bearer')
+/*@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('Bearer')*/
 export class PlansController {
   constructor(
     @Inject('PLAN_SERVICE') private readonly planServiceClient: ClientProxy,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post()
   @ApiCreatedResponse({ type: CreatePlanResponse })
   async create(@Body() createPlanDto: CreatePlanDto) {
@@ -65,6 +67,9 @@ export class PlansController {
     };
   }
 
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put(':id')
   @ApiOkResponse({ type: CreatePlanResponse })
   async update(@Param('id') id: string, @Body() updatePlanDto: UpdatePlanDto) {
@@ -91,6 +96,8 @@ export class PlansController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post('option')
   @ApiOkResponse({ type: CreatePlanOptionResponse })
   async createOption(@Body() createOptionDto: CreatePlanOptionDto) {
@@ -114,6 +121,8 @@ export class PlansController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @ApiQuery({
     name: 'isActive',
     required: false,
@@ -144,6 +153,8 @@ export class PlansController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Get(':id')
   async getPlanByID(@Param('id') id: string) {
     const getPlanResponse = await firstValueFrom(
@@ -167,6 +178,7 @@ export class PlansController {
       data: getPlanResponse.data,
     };
   }
+
 
   @Get()
   async getAllPlans() {
