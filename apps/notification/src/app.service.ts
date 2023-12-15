@@ -31,7 +31,7 @@ export class AppService {
       });
       await notification.save();
       const user = await firstValueFrom(
-        this.authClient.send('get_user_by_id', JSON.stringify({ id: userId })),
+        this.authClient.send('test', JSON.stringify({ id: userId })),
       );
       console.log('device id', user?.deviceId);
       if (user?.deviceId) {

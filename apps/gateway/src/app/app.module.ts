@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { ClientProxyFactory } from '@nestjs/microservices';
+import {
+  ClientProxyFactory,
+  ClientsModule,
+  Transport,
+} from '@nestjs/microservices';
 import { AllExceptionFilter } from 'src/filters/all-exception.filter';
 import { AuthController } from 'src/modules/auth/auth.controller';
 import { JwtStrategy } from 'src/modules/auth/jwt.strategy';
 import { ChatsController } from 'src/modules/chats/chats.controller';
 import { ClinicsController } from 'src/modules/clinics/clinics.controller';
-import { CloudinaryController } from 'src/modules/files/cloudinary.controller';
 import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
 import { PlansController } from 'src/modules/plans/plans.controller';
 import { GoogleStrategy } from 'src/stategies/google.strategy';
@@ -24,8 +27,29 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
       secret: process.env.SECRET_KEY,
     }),
     CloudinaryModule,
+    ClientsModule.register([
+      {
+        name: 'NOTI_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [
+            'amqps://zwhbnmku:w_XDp3N5qASxWXSmz6O8_sE3flzQMrYf@octopus.rmq3.cloudamqp.com/zwhbnmku',
+          ],
+          queue: 'notification',
+          noAck: true,
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
   ],
-  controllers: [AuthController, PlansController, ClinicsController, ChatsController],
+  controllers: [
+    AuthController,
+    PlansController,
+    ClinicsController,
+    ChatsController,
+  ],
   providers: [
     ConfigService,
     {
@@ -71,7 +95,6 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
         });
       },
 
-
       inject: [ConfigService],
     },
     {
@@ -84,7 +107,6 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
           },
         });
       },
-
 
       inject: [ConfigService],
     },

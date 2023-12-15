@@ -15,4 +15,6 @@ export enum AuthCommand {
   ADD_NEW_PASSWORD = 'add_new_password',
   FIND_USER_BY_EMAIL = 'find_user_by_email',
   UPDATE_USER = 'update_user',
+  CREATE_USER_TOKEN = 'create_user_token',
+  DELETE_USER_TOKEN = 'delete_user_token',
 }

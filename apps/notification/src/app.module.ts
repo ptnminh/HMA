@@ -48,10 +48,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   controllers: [AppController],
   providers: [
     ConfigService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
     AppService,
     FirebaseService,
     {

@@ -201,4 +201,31 @@ export class AuthService {
       },
     });
   }
+
+  async findUserToken(userId: string, token: string) {
+    return this.prismaService.userDeviceTokens.findFirst({
+      where: {
+        userId,
+        token,
+      },
+    });
+  }
+
+  async createUserToken(userId: string, token: string) {
+    return this.prismaService.userDeviceTokens.create({
+      data: {
+        userId,
+        token,
+      },
+    });
+  }
+
+  async deleteUserToken(userId: string, token: string) {
+    return this.prismaService.userDeviceTokens.deleteMany({
+      where: {
+        userId,
+        token,
+      },
+    });
+  }
 }

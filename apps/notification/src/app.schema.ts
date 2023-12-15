@@ -12,7 +12,7 @@ export class Notification {
   type: string;
 
   @Prop()
-  user_id: number;
+  user_id: string;
 
   @Prop()
   payload: string;

@@ -1,8 +1,8 @@
 export interface INotificationPayload {
   content: string;
-  type: keyof typeof NotificationType;
+  type: string;
   payload?: any;
-  userId: number;
+  userId: string;
 }
 
 export interface GetResponse<T> {

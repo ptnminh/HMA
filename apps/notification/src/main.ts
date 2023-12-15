@@ -57,7 +57,8 @@ async function bootstrap() {
       urls: [`${configService.get('RABBITMQ_URL')}`],
       queue: `${configService.get('RABBITMQ_NOTIFICATION_QUEUE')}`,
       queueOptions: { durable: false },
-      prefetchCount: 1,
+      prefetchCount: 2,
+      noAck: false,
     },
   });
   await app.startAllMicroservices();

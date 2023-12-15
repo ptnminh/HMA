@@ -610,4 +610,52 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.CREATE_USER_TOKEN)
+  async createUserToken(data: { userId: string; token: string }) {
+    try {
+      const { userId, token } = data;
+      const exToken = await this.authService.findUserToken(userId, token);
+      if (exToken) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Token đã tồn tại',
+        };
+      }
+      await this.authService.createUserToken(userId, token);
+      return {
+        status: HttpStatus.OK,
+        message: 'Tạo token thành công',
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(AuthCommand.DELETE_USER_TOKEN)
+  async deleteUserToken(data: { userId: string; token: string }) {
+    try {
+      const { userId, token } = data;
+      const exToken = await this.authService.findUserToken(userId, token);
+      if (!exToken) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Token không tồn tại',
+        };
+      }
+      await this.authService.deleteUserToken(userId, token);
+      return {
+        status: HttpStatus.OK,
+        message: 'Xóa token thành công',
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }
