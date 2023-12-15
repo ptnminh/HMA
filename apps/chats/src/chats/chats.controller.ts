@@ -85,9 +85,21 @@ export class ChatController {
           status: HttpStatus.BAD_REQUEST
         }
       }
-      const member = await this.chatService.getAllGroupChatMember(parseInt(data.id))
+      const memberList = await this.chatService.getAllGroupChatMember(parseInt(data.id))
+      var returnList = []
+      for(let member of memberList) {
+        const result = {
+          userId: member.userId,
+          isAdmin: member.isAdmin,
+          joinedAt: member.joinedAt,
+          email: member.users.email,
+          firstName: member.users.firstName,
+          lastName: member.users.lastName
+        }
+        returnList.push(result)
+      }
       return {
-        data: member,
+        data: returnList,
         message: "Lấy danh sách member thành công",
         status: HttpStatus.OK
       }  
@@ -306,7 +318,20 @@ export class ChatController {
           }
         }*/
         const id: number = groupObj.id
-        group[group.indexOf(groupObj)].groupChatMember = await this.chatService.getAllGroupChatMember(id)
+        const list = await this.chatService.getAllGroupChatMember(id)
+        var groupMemberList = []
+        for(let member of list) {
+          const obj = {
+            userId: member.userId,
+            isAdmin: member.isAdmin,
+            joinedAt: member.joinedAt,
+            email: member.users.email,
+            firstName: member.users.firstName,
+            lastName: member.users.lastName
+          }
+          groupMemberList.push(obj)
+        }
+        group[group.indexOf(groupObj)].groupChatMember = groupMemberList
         
       }
       return {

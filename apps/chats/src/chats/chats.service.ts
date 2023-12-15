@@ -84,7 +84,14 @@ export class ChatService {
         isAdmin: true,
         joinedAt: true,
         isDisabled: true,
-      }
+        users: {
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true,
+          }
+        }
+      },
     })
   }
 
