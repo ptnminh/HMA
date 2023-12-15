@@ -38,6 +38,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.18.2",
     "fcm-node": "^1.6.1",
+    "firebase": "^10.7.1",
     "firebase-admin": "^12.0.0",
     "helmet": "^7.1.0",
     "mongoose": "^8.0.3",
