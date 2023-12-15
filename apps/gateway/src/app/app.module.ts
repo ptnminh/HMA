@@ -12,6 +12,7 @@ import { JwtStrategy } from 'src/modules/auth/jwt.strategy';
 import { ChatsController } from 'src/modules/chats/chats.controller';
 import { ClinicsController } from 'src/modules/clinics/clinics.controller';
 import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
+import { NotificationModule } from 'src/modules/notification/notification.module';
 import { PlansController } from 'src/modules/plans/plans.controller';
 import { GoogleStrategy } from 'src/stategies/google.strategy';
 
@@ -43,6 +44,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
         },
       },
     ]),
+    NotificationModule,
   ],
   controllers: [
     AuthController,
