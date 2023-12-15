@@ -7,11 +7,11 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { ConfigService } from './config/config.service';
 import { HttpExceptionFilter, ResponseInterceptor } from './interceptor';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import * as express from 'express';
+import express from 'express';
 import helmet from 'helmet';
+import { ConfigService } from '@nestjs/config';
 
 function configureSwagger(app): void {
   const config = new DocumentBuilder()
@@ -54,18 +54,18 @@ async function bootstrap() {
   app.connectMicroservice({
     transport: Transport.RMQ,
     options: {
-      urls: [`${configService.get('rb_url')}`],
-      queue: `${configService.get('notification_queue')}`,
+      urls: [`${configService.get('RABBITMQ_URL')}`],
+      queue: `${configService.get('RABBITMQ_NOTIFICATION_QUEUE')}`,
       queueOptions: { durable: false },
       prefetchCount: 1,
     },
   });
   await app.startAllMicroservices();
-  await app.listen(configService.get('servicePort'));
+  await app.listen(configService.get('PORT'));
   logger.log(
     `🚀 Notification service started successfully on port ${configService.get(
-      'servicePort',
-    )}`,
+      'PORT',
+    )}: http://localhost:${configService.get('PORT')}/api/docs`,
   );
 }
 bootstrap();

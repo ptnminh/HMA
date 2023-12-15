@@ -3,22 +3,24 @@ import { APP_GUARD } from '@nestjs/core';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from './config/config.module';
-import { ConfigService } from './config/config.service';
 import { JwtAuthGuard } from './guards';
 import { TerminusModule } from '@nestjs/terminus';
 import { Notification, NotificationSchema } from './app.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FirebaseService } from './services';
+import { AllExceptionFilter } from './filters/all-exception.filter';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TerminusModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get('database_url'),
+        uri: configService.get('DATABASE_URL'),
       }),
       inject: [ConfigService],
     }),
@@ -32,8 +34,8 @@ import { FirebaseService } from './services';
         useFactory: async (configService: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
-            urls: [`${configService.get('rb_url')}`],
-            queue: `${configService.get('auth_queue')}`,
+            urls: [`${configService.get('RABBITMQ_URL')}`],
+            queue: `${configService.get('RABBITMQ_AUTH_QUEUE')}`,
             queueOptions: {
               durable: false,
             },
@@ -45,12 +47,17 @@ import { FirebaseService } from './services';
   ],
   controllers: [AppController],
   providers: [
+    ConfigService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
     AppService,
     FirebaseService,
+    {
+      provide: 'APP_FILTER',
+      useClass: AllExceptionFilter,
+    },
   ],
 })
 export class AppModule {}

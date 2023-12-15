@@ -64,7 +64,7 @@ export class AppService {
         limit = 10;
       }
       const skip = (page - 1) * limit;
-      const count = await this.notificationModel.count().exec();
+      const count = await this.notificationModel.countDocuments().exec();
       const response = await this.notificationModel
         .find({
           user_id: userId,

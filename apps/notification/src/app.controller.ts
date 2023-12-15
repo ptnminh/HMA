@@ -1,10 +1,11 @@
-import { Controller, Get, Query } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { AppService } from './app.service';
 import { GetResponse } from './types';
 import { CurrentUser, Public } from './decorators';
 import { Notification } from './app.schema';
 import { GetNotificationDto } from './dtos/get-notification.dto';
+import { Controller, Get, Query } from '@nestjs/common';
+
 import {
   HealthCheck,
   HealthCheckService,
@@ -37,8 +38,8 @@ export class AppController {
   }
 
   @EventPattern('send_notification')
-  public sendNotification(@Payload() payload: string): void {
+  public async sendNotification(@Payload() payload: string): Promise<any> {
     const data = JSON.parse(payload);
-    this.appService.createNotification(data);
+    await this.appService.createNotification(data);
   }
 }
