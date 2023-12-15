@@ -34,7 +34,7 @@ export class ChatController {
       if(rest.type === 'one-on-one' && rest.maxMember > 2) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Nhóm chat đơn có số lượng thành viên không lớn hơn 2"
+          message: "Nhóm chat one-on-one có số lượng thành viên tối đa không lớn hơn 2"
         }
       }
       const group = await this.chatService.createGroup(rest)
@@ -182,10 +182,11 @@ export class ChatController {
           await this.chatService.createMember(createInput)  
         }
       }
+      const returnGroup = await this.chatService.findActiveGroupChatById(groupChatId)
       return {
         status: HttpStatus.OK,
         message: "Thêm người dùng thành công",
-        data: null
+        data: returnGroup
       }
 
     } catch(error) {
@@ -289,7 +290,7 @@ export class ChatController {
       }
       var memberList = []
       for(let groupObj of group) {
-        var member = {}
+        /*var member = {}
         for(let memberobj of groupObj.groupChatMember) {
           member = {
             userId: memberobj.userId,
@@ -298,12 +299,14 @@ export class ChatController {
             email: memberobj.users.email,
             firstName: memberobj.users.firstName,
             lastName: memberobj.users.lastName,
+            isDisabled: memberobj.isDisabled
           }
           if(memberobj.isDisabled === false) {
             memberList.push(member)
           }
-        }
-        group[group.indexOf(groupObj)].groupChatMember = member
+        }*/
+        const id: number = groupObj.id
+        group[group.indexOf(groupObj)].groupChatMember = await this.chatService.getAllGroupChatMember(id)
         
       }
       return {

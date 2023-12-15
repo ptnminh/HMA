@@ -155,21 +155,7 @@ export class ChatService {
         maxMember:  true,
         type: true,
         isActive: true,
-        groupChatMember: {
-          select: {
-            userId: true,
-            isAdmin:true,
-            joinedAt: true,
-            isDisabled: true,
-            users: {
-              select: {
-                email: true,
-                firstName: true,
-                lastName: true,
-              }
-            }
-          }
-        }
+        groupChatMember: true
       }
     })
   }
@@ -191,21 +177,7 @@ export class ChatService {
         maxMember:  true,
         type: true,
         isActive: true,
-        groupChatMember: {
-          select: {
-            userId: true,
-            isAdmin:true,
-            joinedAt: true,
-            isDisabled: true,
-            users: {
-              select: {
-                email: true,
-                firstName: true,
-                lastName: true,
-              }
-            }
-          }
-        }
+        groupChatMember: true,
       }
     })
   }
