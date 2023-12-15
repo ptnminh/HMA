@@ -5,4 +5,5 @@ export enum ClinicCommand {
   ADD_USER_TO_CLINIC = 'ADD_USER_TO_CLINIC',
   SUBSCRIBE_PLAN = 'SUBSCRIBE_PLAN',
   UPDATE_USER = 'update_user',
+  GET_USERS_BY_CLINIC = 'GET_USERS_BY_CLINIC',
 }

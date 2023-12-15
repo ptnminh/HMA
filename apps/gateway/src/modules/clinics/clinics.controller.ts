@@ -16,6 +16,7 @@ import {
 import {
   CreateClinicDto,
   CreateClinicResponse,
+  GetUsersInClinicResponse,
   ListClinicResponse,
   SubcribePlanDTO,
   SubcribePlanResponse,
@@ -162,6 +163,31 @@ export class ClinicsController {
   async subscribePlan(@Body() data: SubcribePlanDTO) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.SUBSCRIBE_PLAN, data),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Get(':id/users')
+  @ApiOkResponse({ type: GetUsersInClinicResponse })
+  async getUsers(@Param('id') clinicId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.GET_USERS_BY_CLINIC, {
+        clinicId,
+      }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(

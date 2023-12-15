@@ -95,3 +95,28 @@ export class SubcribePlanResponse {
   @ApiProperty({ example: 'Subcribe plan thành công.', nullable: true })
   message: { [key: string]: any };
 }
+
+export class GetUsersInClinicResponse {
+  @ApiProperty({ example: 'true', type: Boolean })
+  status: string;
+  @ApiProperty({
+    example: [
+      {
+        id: '1',
+        firstName: 'minh',
+        email: 'minhphan113@gmail.com',
+        roleId: 1,
+        lastName: 'phan',
+        isOwer: true,
+        role: {
+          id: 1,
+          name: 'Admin',
+        },
+      },
+    ],
+    nullable: false,
+  })
+  data: any[];
+  @ApiProperty({ example: 'Lấy danh sách user thành công.', nullable: true })
+  message: { [key: string]: any };
+}

@@ -160,4 +160,29 @@ export class ClinicController {
       };
     }
   }
+
+  @MessagePattern(ClinicCommand.GET_USERS_BY_CLINIC)
+  async getUsersByClinic(data: any) {
+    try {
+      const { clinicId } = data;
+      const usersInClinic =
+        await this.clinicService.findAllUserInClinic(clinicId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách user thành công',
+        data: usersInClinic?.map((user) => {
+          return {
+            ...user,
+            ...user.users,
+          };
+        }),
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }
