@@ -22,16 +22,19 @@ export class ChatController {
           message: "Tên nhóm chat đã tồn tại"
         }
       }
-      if (rest.maxMember < 2) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: "Số lượng thành viên giới hạn tối thiểu là 2"
-        }
+      if (!userList.includes(adminId)) {
+        userList.push(adminId)
       }
-      if(userList.length + 1 > rest.maxMember) {
+      if(userList.length > rest.maxMember) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: "Số lượng thành viên quá giới hạn"
+        }
+      }
+      if(rest.type === 'one-on-one' && rest.maxMember > 2) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Nhóm chat đơn có số lượng thành viên không lớn hơn 2"
         }
       }
       const group = await this.chatService.createGroup(rest)
@@ -41,7 +44,7 @@ export class ChatController {
         groupChatId,
         userId: adminId,
       }
-      if (group.maxMember > 2) {
+      if (group.type === 'group') {
         adminInput.isAdmin = true
       }
       const admin = await this.chatService.findActiveGroupMember(adminId, groupChatId)
@@ -147,13 +150,28 @@ export class ChatController {
           message: "Nhóm chat không hoạt động"
         }
       }
-      const memberList = await this.chatService.getAllGroupChatMember(groupChatId) 
-      if(memberList.length + userList.length > group.maxMember) {
+      const checkeduserList: string[] = []
+      for (let userId of userList) {
+        const user = await this.chatService.findActiveGroupMember(userId, groupChatId)
+        if(!user) {
+          checkeduserList.push(userId)
+        }
+      }
+      const memberList = await this.chatService.getAllGroupChatMember(groupChatId)
+      if(group.type === 'one-on-one' && memberList.length + checkeduserList.length > 2) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: "Số lượng thành viên vượt giói hạn"
         }
       }
+
+      if(memberList.length + checkeduserList.length > group.maxMember) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Số lượng thành viên vượt giói hạn"
+        }
+      }
+
       for (let userId of userList) {
         const user = await this.chatService.findActiveGroupMember(userId, groupChatId)
         if(!user){
@@ -269,20 +287,24 @@ export class ChatController {
           status: HttpStatus.BAD_REQUEST,
         }
       }
-      for(var i =0;i < group.length; i++) {
+      var memberList = []
+      for(let groupObj of group) {
         var member = {}
-        for(var j =0; j<group[i].groupChatMember.length; j++) {
+        for(let memberobj of groupObj.groupChatMember) {
           member = {
-            userId: group[i].groupChatMember[j].userId,
-            joinedAt: group[i].groupChatMember[j].joinedAt,
-            isAdmin: group[i].groupChatMember[j].isActive,
-            email: group[i].groupChatMember[j].users.email,
-            firstName: group[i].groupChatMember[j].users.firstName,
-            lastName: group[i].groupChatMember[j].users.lastName,
-            role: group[i].groupChatMember[j].users.role.name,
+            userId: memberobj.userId,
+            joinedAt: memberobj.joinedAt,
+            isAdmin: memberobj.isAdmin,
+            email: memberobj.users.email,
+            firstName: memberobj.users.firstName,
+            lastName: memberobj.users.lastName,
           }
-          group[i].groupChatMember[j] = member
+          if(memberobj.isDisabled === false) {
+            memberList.push(member)
+          }
         }
+        group[group.indexOf(groupObj)].groupChatMember = member
+        
       }
       return {
         message : "Tìm kiếm nhóm chat thành công",
