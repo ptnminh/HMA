@@ -44,7 +44,6 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
         },
       },
     ]),
-    NotificationModule,
   ],
   controllers: [
     AuthController,
