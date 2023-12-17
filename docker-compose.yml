@@ -51,7 +51,14 @@ services:
       - .env
     networks:
       - some-network
+  noti:
+    build: ./apps/notification
+    restart: always
+    hostname: notification
+    env_file:
+      - .env
+    networks:
+      - some-network
 networks:
   some-network:
-    external:
-      name: some-network
+    driver: bridge

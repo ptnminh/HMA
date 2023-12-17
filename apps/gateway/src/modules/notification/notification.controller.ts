@@ -9,8 +9,15 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { CreateUserTokenResponse } from './dto/response';
-import { CreateUserTokenDTO, PushNotificationDTO } from './dto/noti.dto';
+import {
+  CreateRealtimeNotificationResponse,
+  CreateUserTokenResponse,
+} from './dto/response';
+import {
+  CreateRealtimeNotificationDto,
+  CreateUserTokenDTO,
+  PushNotificationDTO,
+} from './dto/noti.dto';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { NotiCommand } from './command';
 
@@ -77,7 +84,7 @@ export class NotificationController {
   }
 
   @Post('push-notification')
-  @ApiOkResponse({ type: CreateUserTokenResponse })
+  @ApiOkResponse({ type: CreateRealtimeNotificationResponse })
   async pushNotification(@Body() body: PushNotificationDTO) {
     try {
       const { userId, ...rest } = body;
@@ -96,12 +103,33 @@ export class NotificationController {
           getTokens.status,
         );
       }
-      const tokens = getTokens.data;
+      const tokens = getTokens.data?.map((item) => item.token);
       await lastValueFrom(
-        this.authServiceClient.send(NotiCommand.PUSH_NOTIFICATION, {
+        this.notificationServiceClient.emit(NotiCommand.PUSH_NOTIFICATION, {
           tokens,
           ...rest,
         }),
+      );
+      return {
+        message: 'Gửi notification thành công',
+        status: true,
+      };
+    } catch (error) {
+      return error;
+    }
+  }
+
+  @Post('create-realtime-notification')
+  @ApiOkResponse({ type: CreateRealtimeNotificationResponse })
+  async createRealtimeNotification(
+    @Body() body: CreateRealtimeNotificationDto,
+  ) {
+    try {
+      await lastValueFrom(
+        this.notificationServiceClient.emit(
+          NotiCommand.CREATE_REALTIME_NOTIFICATION,
+          body,
+        ),
       );
       return {
         message: 'Gửi notification thành công',

@@ -12,7 +12,7 @@ import { JwtStrategy } from 'src/modules/auth/jwt.strategy';
 import { ChatsController } from 'src/modules/chats/chats.controller';
 import { ClinicsController } from 'src/modules/clinics/clinics.controller';
 import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
-import { NotificationModule } from 'src/modules/notification/notification.module';
+import { NotificationController } from 'src/modules/notification/notification.controller';
 import { PlansController } from 'src/modules/plans/plans.controller';
 import { GoogleStrategy } from 'src/stategies/google.strategy';
 
@@ -50,6 +50,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
     PlansController,
     ClinicsController,
     ChatsController,
+    NotificationController,
   ],
   providers: [
     ConfigService,

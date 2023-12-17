@@ -3,4 +3,5 @@ export enum NotiCommand {
   DELETE_USER_TOKEN = 'delete_user_token',
   PUSH_NOTIFICATION = 'push_notification',
   GET_USER_TOKEN = 'get_user_token',
+  CREATE_REALTIME_NOTIFICATION = 'create_realtime_notification',
 }

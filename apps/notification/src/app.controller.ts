@@ -1,4 +1,4 @@
-import { EventPattern, Payload } from '@nestjs/microservices';
+import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { AppService } from './app.service';
 import {
   GetResponse,
@@ -42,9 +42,14 @@ export class AppController {
   }
 
   @EventPattern('push_notification')
-  public async sendNotification(@Payload() payload: string): Promise<any> {
-    const data = JSON.parse(payload);
-    await this.appService.createNotification(data);
+  public async sendNotification(
+    @Payload() payload: any,
+    @Ctx() context: RmqContext,
+  ): Promise<any> {
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+    channel.ack(originalMessage);
+    await this.appService.createNotification(payload);
   }
 
   @Post('push-notification')
@@ -56,8 +61,12 @@ export class AppController {
 
   @EventPattern('create_realtime_notification')
   public createRealtimeNotificationsEvent(
-    params: CreateRealtimeNotificationDto,
+    @Payload() params: CreateRealtimeNotificationDto,
+    @Ctx() context: RmqContext,
   ): Promise<any> {
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+    channel.ack(originalMessage);
     return this.appService.createRealtimeNotifications(params);
   }
 }
