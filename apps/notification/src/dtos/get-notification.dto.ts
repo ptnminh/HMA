@@ -1,12 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
-export class GetNotificationDto {
+export class CreateRealtimeNotificationDto {
   @ApiProperty()
   @IsNotEmpty()
-  public page: number;
+  public content: string;
 
   @ApiProperty()
   @IsNotEmpty()
-  public limit: number;
+  public body: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  public userId: string;
 }

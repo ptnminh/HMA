@@ -1,28 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import * as firebase from 'firebase-admin';
-// import config from './firebase.config.json';
+import config from './firebase.config.json';
 @Injectable()
 export class FirebaseService {
   constructor() {
-    const firebaseConfig = {
-      apiKey: 'AIzaSyBUjR_LpKzbeLaBANVXDN84BDLPLRn6VhM',
-      authDomain: 'clinus-1d1d1.firebaseapp.com',
+    firebase.initializeApp({
+      credential: firebase.credential.cert({
+        projectId: config.project_id,
+        clientEmail: config.client_email,
+        privateKey: config.private_key,
+      }),
       databaseURL:
         'https://clinus-1d1d1-default-rtdb.asia-southeast1.firebasedatabase.app',
-      projectId: 'clinus-1d1d1',
-      storageBucket: 'clinus-1d1d1.appspot.com',
-      messagingSenderId: '698964272341',
-      appId: '1:698964272341:web:f8e27c1489c69dbf6cee5c',
-      measurementId: 'G-13Z9189280',
-    };
-    // firebase.initializeApp({
-    //   credential: firebase.credential.cert({
-    //     projectId: config.project_id,
-    //     clientEmail: config.client_email,
-    //     privateKey: config.private_key,
-    //   }),
-    // });
-    firebase.initializeApp(firebaseConfig);
+    });
   }
 
   public sendMessage(
@@ -53,5 +43,39 @@ export class FirebaseService {
         imageUrl: image,
       },
     });
+  }
+
+  public async readNotiLengthFromDB(userId: string) {
+    return firebase
+      .database()
+      .ref('notifications')
+      .child(userId)
+      .once('value')
+      .then((snapshot) => {
+        return snapshot.numChildren();
+      })
+      .catch((e) => {
+        console.log('error from read', e);
+      });
+  }
+
+  async saveNewNotiToUser({
+    userId,
+    currentNotiLength,
+    newData,
+  }: {
+    userId: string;
+    currentNotiLength: number;
+    newData: any;
+  }) {
+    const ref = firebase.database().ref('notifications');
+    if (!currentNotiLength) {
+      return ref.child(userId).set({ '1': newData });
+    }
+    const newKeyRef = ref
+      .child(userId)
+      .child((currentNotiLength + 1).toString())
+      .set(newData);
+    return newKeyRef;
   }
 }

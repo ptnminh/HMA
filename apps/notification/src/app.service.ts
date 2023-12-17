@@ -5,8 +5,9 @@ import { GetResponse, INotificationPayload } from './types';
 import { Notification, NotificationDocument } from './app.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { GetNotificationDto } from './dtos/get-notification.dto';
+import { CreateRealtimeNotificationDto } from './dtos/get-notification.dto';
 import { FirebaseService } from './services';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class AppService {
@@ -40,31 +41,25 @@ export class AppService {
     }
   }
 
-  public async getNotifications(
-    data: GetNotificationDto,
-    userId: number,
-  ): Promise<GetResponse<Notification>> {
+  public async createRealtimeNotifications(
+    data: CreateRealtimeNotificationDto,
+  ): Promise<any> {
     try {
-      let { limit, page } = data;
-      if (!page || page === 0) {
-        page = 1;
-      }
-      if (!limit) {
-        limit = 10;
-      }
-      const skip = (page - 1) * limit;
-      const count = await this.notificationModel.countDocuments().exec();
-      const response = await this.notificationModel
-        .find({
-          user_id: userId,
-        })
-        .skip(skip)
-        .limit(limit)
-        .exec();
-      return {
-        count,
-        data: response,
-      };
+      const id = uuid();
+      const { userId, ...payload } = data;
+      const notiLength =
+        await this.firebaseService.readNotiLengthFromDB(userId);
+
+      const saveNewNotiToUser = await this.firebaseService.saveNewNotiToUser({
+        userId,
+        currentNotiLength: notiLength || 0,
+        newData: {
+          ...payload,
+          id,
+          sendingTime: new Date().toISOString(),
+        },
+      });
+      return saveNewNotiToUser;
     } catch (e) {
       throw e;
     }

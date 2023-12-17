@@ -62,11 +62,11 @@ async function bootstrap() {
     },
   });
   await app.startAllMicroservices();
-  await app.listen(configService.get('PORT'));
+  await app.listen(8008);
   logger.log(
     `🚀 Notification service started successfully on port ${configService.get(
       'PORT',
-    )}: http://localhost:${configService.get('PORT')}/api/docs`,
+    )}: http://localhost:${8008}/api/docs`,
   );
 }
 bootstrap();
