@@ -13,6 +13,7 @@ import { ChatsController } from 'src/modules/chats/chats.controller';
 import { ClinicsController } from 'src/modules/clinics/clinics.controller';
 import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
 import { NotificationController } from 'src/modules/notification/notification.controller';
+import { PaymentController } from 'src/modules/payment/payment.controller';
 import { PlansController } from 'src/modules/plans/plans.controller';
 import { GoogleStrategy } from 'src/stategies/google.strategy';
 
@@ -51,6 +52,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
     ClinicsController,
     ChatsController,
     NotificationController,
+    PaymentController,
   ],
   providers: [
     ConfigService,
@@ -106,6 +108,20 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
           options: {
             host: configService.get('CHAT_SERVICE_HOST'),
             port: configService.get('CHAT_SERVICE_PORT'),
+          },
+        });
+      },
+
+      inject: [ConfigService],
+    },
+
+    {
+      provide: 'PAYMENT_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          options: {
+            host: configService.get('PAYMENT_SERVICE_HOST'),
+            port: configService.get('PAYMENT_SERVICE_PORT'),
           },
         });
       },

@@ -1793,6 +1793,11 @@ cross-spawn@^7.0.0, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
+crypto@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/crypto/-/crypto-1.0.1.tgz#2af1b7cad8175d24c8a1b0778255794a21803037"
+  integrity sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==
+
 debug@^4.1.0, debug@^4.1.1, debug@^4.3.2, debug@^4.3.4:
   version "4.3.4"
   resolved "https://registry.npmjs.org/debug/-/debug-4.3.4.tgz"
@@ -3380,6 +3385,11 @@ minipass@^4.2.4:
   resolved "https://registry.npmjs.org/minipass/-/minipass-7.0.4.tgz"
   integrity sha512-jYofLM5Dam9279rdkWzqHozUo4ybjdZmCsDHePy5V/PbBcVMiSZR97gmAy45aqi8CK1lG2ECd356FU86avfwUQ==
 
+moment@^2.29.4:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
+  integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
+
 ms@2.1.2:
   version "2.1.2"
   resolved "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz"
@@ -3694,6 +3704,13 @@ pure-rand@^6.0.0:
 qs@^6.11.0:
   version "6.11.2"
   resolved "https://registry.npmjs.org/qs/-/qs-6.11.2.tgz"
+  integrity sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==
+  dependencies:
+    side-channel "^1.0.4"
+
+qs@^6.11.2:
+  version "6.11.2"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.2.tgz#64bea51f12c1f5da1bc01496f48ffcff7c69d7d9"
   integrity sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==
   dependencies:
     side-channel "^1.0.4"
