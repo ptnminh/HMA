@@ -56,7 +56,17 @@ export class ChatService {
         isActive: true,
       },
       include: {
-        groupChatMember: true
+        groupChatMember: {
+          where: {
+            isDisabled: false
+          },
+          select: {
+            id: true,
+            userId: true,
+            joinedAt: true,
+            isAdmin: true,
+          }
+        }
       }
     })
   }
@@ -96,6 +106,16 @@ export class ChatService {
   }
 
 
+  async findActiveGroupAdmin(groupChatId: number) {
+    return this.prismaService.groupChatMember.findFirst({
+      where: {
+        groupChatId,
+        isDisabled: false,
+        isAdmin: true
+      }
+    })
+
+  }
   async findActiveGroupMember(userId: string, groupChatId: number) {
     return this.prismaService.groupChatMember.findFirst({
       where: {

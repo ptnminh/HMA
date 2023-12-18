@@ -4,10 +4,10 @@ import { ArrayUnique, IsArray, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString,
 
 export class CreateGroupChatDto {
 
-    @ApiProperty({example: "GroupChat01"})
+    @ApiProperty({example: "GroupChatDemo"})
     @IsString()
     @IsNotEmpty()
-    groupName: string;
+    groupName?: string;
 
     @Min(2)
     @ApiProperty({example: "15"})
@@ -16,7 +16,7 @@ export class CreateGroupChatDto {
     maxMember?: number;
 
     @IsIn(['one-on-one', 'group'])
-    @ApiProperty({example: "one-on-one"})
+    @ApiProperty({example: "group"})
     @IsString()
     @IsOptional()
     type?: string;
@@ -24,7 +24,7 @@ export class CreateGroupChatDto {
     @ArrayUnique()
     @IsArray()
     @ApiProperty({example: 
-        ["3c9994cb-dcc4-4a22-ac23-cd8e826604e5", "9e9b2d9c-d9f8-46d8-abf3-9d731681a670"]})
+        []})
     @IsString({each: true})
     userList: string[]
 }

@@ -1,6 +1,6 @@
 import { Controller, HttpStatus } from '@nestjs/common';
 import { ChatService } from './chats.service';
-import { CreateGroupDto } from './dto';
+import { CreateGroupDto, UpdateGroupDto } from './dto';
 import { MessagePattern } from '@nestjs/microservices';
 import { ChatsCommand } from './command';
 import { Prisma } from '@prisma/client';
@@ -14,14 +14,10 @@ export class ChatController {
   async createGroup(data: {dto: CreateGroupDto, adminId: string}) {
     try {
       const {userList, ...rest} = data.dto
-      const adminId = data.adminId
-      const existedName = await this.chatService.findGroupChatByName(rest.groupName)
-      if (existedName) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: "Tên nhóm chat đã tồn tại"
-        }
+      if (rest.type == null) {
+        rest.type = 'group'
       }
+      const adminId = data.adminId
       if (!userList.includes(adminId)) {
         userList.push(adminId)
       }
@@ -114,9 +110,9 @@ export class ChatController {
   }
 
   @MessagePattern(ChatsCommand.RENAME_GROUP_CHAT)
-  async renameGroupChat(data: {id: number, groupName: string}) {
+  async updateGroupChat(data: any) {
     try {
-      const {id, groupName} = {...data}
+      const { dto, id, adminId} = data
       const group = await this.chatService.findActiveGroupChatById(id)
       if (!group) {
         return {
@@ -124,25 +120,23 @@ export class ChatController {
           status: HttpStatus.BAD_REQUEST,
         }
       }
-      const findGroupName = await this.chatService.findActiveGroupChatByName(groupName)
-      if (findGroupName) {
+      if (group.type === 'one-on-one' && dto.maxMember > 2) {
         return {
-          message: "Tên nhóm tồn tại",
+          message: 'Nhóm chat 1-1 có số lượng thành viên tối đa là 2',
           status: HttpStatus.BAD_REQUEST
         }
       }
-      const updateInput: Prisma.groupChatsUncheckedUpdateInput = {
-        groupName,
-      }
+      const updateInput: Prisma.groupChatsUncheckedUpdateInput = dto
       await this.chatService.updateGroup(updateInput, id)
       const updatedGroup = await this.chatService.findActiveGroupChatById(id)
       return {
-        message: "Thay đổi tên nhóm chat thành công",
+        message: "Cập nhận nhóm chat thành công",
         status: HttpStatus.OK,
         data: updatedGroup,
       }
     }
     catch(error) {
+      console.log(error)
       return {
         message: "Lổi hệ thống",
         status: HttpStatus.INTERNAL_SERVER_ERROR
@@ -222,6 +216,10 @@ export class ChatController {
           message: "Nhóm chat không tồn tại"
         }
       }
+      const members = await this.chatService.getAllGroupChatMember(group.id)
+      for (let member of members) {
+        await this.chatService.deleteMember(member.id)
+      }
       await this.chatService.deleteGroup(id)
       const deletedGroup = await this.chatService.findActiveGroupChatById(id)
       if(deletedGroup) {
@@ -245,9 +243,10 @@ export class ChatController {
   }
 
   @MessagePattern(ChatsCommand.DELETE_MEMBER)
-  async deleteMember(data: {groupChatId: number, userId: string}) {
+  async deleteMember(data: any) {
     try {
-      const {userId, groupChatId} = {...data}
+      const {groupChatId, dto} =data
+      const userList = dto.userList
       const group = await this.chatService.findActiveGroupChatById(groupChatId)
       if (!group) {
         return {
@@ -255,25 +254,25 @@ export class ChatController {
           message: "Nhóm chat không tồn tại"
         }
       }
-      const member = await this.chatService.findActiveGroupMember(userId, groupChatId)
-      if(!member) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: "Thành viên không tồn tại"
+      for (let userId of userList) {
+        const member = await this.chatService.findActiveGroupMember(userId, groupChatId) 
+        if (member && member.isAdmin === false) {
+          await this.chatService.deleteMember(member.id)
         }
       }
-      if(member.isAdmin === true) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: "Thành viên đang là admin"
-        }
+      const admin = await this.chatService.findActiveGroupAdmin(groupChatId)
+      if (admin) {
+        if (userList.includes(admin.userId)) {
+          return {
+            status: HttpStatus.OK,
+            message: "Xóa thành công, bỏ qua yêu cầu xóa admin của nhóm"
+          }  
+        }  
       }
-      const id = member.id
-      await this.chatService.deleteMember(id)
       return {
         status: HttpStatus.OK,
         message: "Xóa thành công"
-      }
+      } 
     }
     catch(error) {
       console.log(error) 
@@ -300,23 +299,7 @@ export class ChatController {
           status: HttpStatus.BAD_REQUEST,
         }
       }
-      var memberList = []
       for(let groupObj of group) {
-        /*var member = {}
-        for(let memberobj of groupObj.groupChatMember) {
-          member = {
-            userId: memberobj.userId,
-            joinedAt: memberobj.joinedAt,
-            isAdmin: memberobj.isAdmin,
-            email: memberobj.users.email,
-            firstName: memberobj.users.firstName,
-            lastName: memberobj.users.lastName,
-            isDisabled: memberobj.isDisabled
-          }
-          if(memberobj.isDisabled === false) {
-            memberList.push(member)
-          }
-        }*/
         const id: number = groupObj.id
         const list = await this.chatService.getAllGroupChatMember(id)
         var groupMemberList = []

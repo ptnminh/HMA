@@ -29,7 +29,7 @@ import {  CreateGroupChatDto } from './dto';
 import { AuthCommand } from '../auth/command';
 import { UpdatedGroupDto } from './dto/update-group.dto';
 import { group } from 'console';
-import { AddMemberDto } from './dto/addMember.dto';
+import { userListDto } from './dto/user-list.dto';
   
   @Controller('chats')
   @ApiTags('Chats')
@@ -88,8 +88,8 @@ import { AddMemberDto } from './dto/addMember.dto';
 
     }
 
-    @Post(':groupChatId/user/:userId')
-    async addGroupMember(@Param('groupChatId') groupChatId: string,@Body() dto: AddMemberDto)  {
+    @Post(':groupChatId/user')
+    async addGroupMember(@Param('groupChatId') groupChatId: string,@Body() dto: userListDto)  {
         const data = {
             userList: dto.userList,
             groupChatId: parseInt(groupChatId)
@@ -117,10 +117,15 @@ import { AddMemberDto } from './dto/addMember.dto';
     }
 
     @Put(':id')
-    async updateGroup (@Body() dto: UpdatedGroupDto, @Param('id') id: string) {
+    async updateGroup (
+        @Body() dto: UpdatedGroupDto,
+        @Param('id') id: string,
+        @CurrentUser('id') adminId: string,
+    ) {
         const data = {
+            dto,
             id: parseInt(id),
-            groupName: dto.groupName
+            adminId,
         }
         const chatServiceResponse = await firstValueFrom(this.ChatsServiceClient.send(
             ChatsCommand.RENAME_GROUP_CHAT, {...data}
@@ -142,11 +147,11 @@ import { AddMemberDto } from './dto/addMember.dto';
         };
     }
 
-    @Delete(':groupChatId/user/:userId')
-    async deleteMember (@Param('groupChatId') groupChatId: string,@Param('userId') userId: string  ) {
+    @Delete(':groupChatId/user')
+    async deleteMember (@Param('groupChatId') groupChatId: string,@Body() dto: userListDto  ) {
         const data = {
             groupChatId: parseInt(groupChatId),
-            userId,
+            dto,
         }
         const chatServiceResponse = await firstValueFrom(this.ChatsServiceClient.send(
             ChatsCommand.DELETE_MEMBER, {...data}
