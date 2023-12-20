@@ -1,1 +1,2 @@
-export * from './vnpay-order.dto'
+
+export * from './payment.dto'

@@ -12,22 +12,26 @@ import {
     GatewayTimeoutException,
     Query,
     UseGuards,
-    Req
+    Req,
+    Res, 
+    Headers
   } from '@nestjs/common';
   import {
     ApiBearerAuth,
     ApiCreatedResponse,
+    ApiExcludeEndpoint,
+    ApiHideProperty,
     ApiOkResponse,
+    ApiOperation,
     ApiQuery,
     ApiTags,
   } from '@nestjs/swagger';
   import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-  import { ClientProxy } from '@nestjs/microservices';
+  import { ClientProxy, MessagePattern } from '@nestjs/microservices';
   import { firstValueFrom } from 'rxjs';
-  import { VnpayOrderDto } from './dto';
-  import { Request } from 'express';
+  import { Request, Response, response } from 'express';
 import { PaymentCommand } from './command';
-import { ZalopayOrderDto } from './dto/zalopay-order.dto';
+import { paymentDto } from './dto/payment.dto';
   
   @Controller('payment')
   @ApiTags('Payment')
@@ -38,12 +42,18 @@ import { ZalopayOrderDto } from './dto/zalopay-order.dto';
       @Inject('PAYMENT_SERVICE') private readonly paymentServiceClient: ClientProxy,
     ) {}
 
-
-    @Post('zalopay/create')
-    async zalopayCreateOrder(@Body() dto: ZalopayOrderDto) {
-
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('Bearer')
+    @Post()
+    async createOrder(@Body() dto: paymentDto, @Req() req: Request) {
+      const ipAddr =  req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress
+      if (dto.returnUrl === '' || dto.returnUrl === undefined) {
+        dto.returnUrl = process.env.BACKEND_URL +  '/api/payment/return'
+      }
       const paymentServiceResponse = await firstValueFrom(this.paymentServiceClient.send(
-        PaymentCommand.ZALOPAY_CREATE_ORDER, {...dto}
+        PaymentCommand.CREATE_ORDER, {dto, ipAddr}
       ))
 
       if(paymentServiceResponse.status !== HttpStatus.OK) {
@@ -63,30 +73,21 @@ import { ZalopayOrderDto } from './dto/zalopay-order.dto';
       }
     }
 
-    @Post('vnpay/create')
-    async vnpayCreateOrder(@Body() dto: VnpayOrderDto, @Req() req: Request) {
-      const ipAddr =  req.headers['x-forwarded-for'] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress
 
-      const paymentServiceResponse = await firstValueFrom(this.paymentServiceClient.send(
-        PaymentCommand.VNPAY_CREATE_ORDER, {dto, ipAddr}
-      ))
 
-      if(paymentServiceResponse.status !== HttpStatus.OK) {
-        throw new HttpException( 
-          {
-            message: paymentServiceResponse.message,
-            data: null,
-            status: false
-          },
-          paymentServiceResponse.status
-        )
+    @ApiExcludeEndpoint()
+    @Get('return')
+    async testGet(@Req() req: Request, @Res() res: Response, @Headers('origin') origin: string) {
+      try {
+        var params = req.query
+        params['body'] = req.body
+        const paymentServiceResponse = await firstValueFrom(this.paymentServiceClient.send(PaymentCommand.HANDLE_CALLBACK, {...params}))
+        var host = 'http://localhost:5173/thanh-toan/thong-tin-thanh-toan?'
+        res.redirect(host + paymentServiceResponse.data) 
       }
-      return {
-        message: paymentServiceResponse.message,
-        data: paymentServiceResponse.data,
-        status: true,
+      catch(error) {
+        res.redirect('http://localhost:5173')
+        console.log(error)
       }
     }
   }

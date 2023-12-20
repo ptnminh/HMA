@@ -47,7 +47,14 @@ export class ClinicController {
   async listClinic(data: any) {
     try {
       const { ownerId } = data;
-      const clinics = await this.clinicService.findAll(ownerId);
+      var clinics
+      if(ownerId !== null ||ownerId !== undefined||ownerId !== '') {
+        clinics = await this.clinicService.findAll(ownerId);
+
+      }
+      else {
+        clinics = await this.clinicService.findClinics();
+      }
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách clinic thành công',

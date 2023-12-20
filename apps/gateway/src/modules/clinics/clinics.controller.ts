@@ -27,6 +27,7 @@ import {
   ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { ClientProxy } from '@nestjs/microservices';
@@ -74,9 +75,14 @@ export class ClinicsController {
     };
   }
 
+  @ApiQuery({
+    name: "id",
+    type: String,
+    required: false
+  })
   @Get()
   @ApiOkResponse({ type: ListClinicResponse })
-  async findAll(@CurrentUser('id') ownerId: string) {
+  async findAll(@Query('id') ownerId: string ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.CLINIC_LIST, {
         ownerId,
