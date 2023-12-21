@@ -316,6 +316,11 @@ export class ClinicsController {
         clinicServiceResponse.status,
       );
     }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
   }
 
   @Put(':id/update-user-group-role/:userGroupRoleId')
@@ -341,6 +346,11 @@ export class ClinicsController {
         clinicServiceResponse.status,
       );
     }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
   }
 
   @Get(':id/user-group-role')
@@ -360,5 +370,10 @@ export class ClinicsController {
         clinicServiceResponse.status,
       );
     }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
   }
 }

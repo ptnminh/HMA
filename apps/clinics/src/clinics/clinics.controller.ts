@@ -6,6 +6,7 @@ import { Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { SUBSCRIPTION_STATUS } from 'src/shared';
+import { map } from 'lodash';
 
 @Controller()
 export class ClinicController {
@@ -451,7 +452,7 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.GET_USER_GROUP_ROLE)
   async getUserGroupRole(data: any) {
     try {
-      const { clinicId, userGroupRoleId } = data;
+      const { clinicId } = data;
       const clinic = await this.clinicService.findClinicById(clinicId);
       if (!clinic) {
         return {
@@ -460,24 +461,21 @@ export class ClinicController {
         };
       }
       const userGroupRole =
-        await this.clinicService.findClinicGroupRoleById(userGroupRoleId);
-      if (!userGroupRole) {
+        await this.clinicService.findClinicGroupRoleByClinicId(clinicId);
+      if (!userGroupRole || userGroupRole.length === 0) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'User group role không tồn tại',
         };
       }
-      const rolePermissions =
-        await this.clinicService.findPermissionsByRoleId(userGroupRoleId);
+
       return {
         status: HttpStatus.OK,
         message: 'Lấy user group role thành công',
-        data: {
-          ...userGroupRole,
-          permissions: rolePermissions?.map(
-            (permission) => permission.permission,
-          ),
-        },
+        data: userGroupRole?.map((group) => ({
+          ...group,
+          rolePermissions: map(group.rolePermissions, 'permission'),
+        })),
       };
     } catch (error) {
       console.log(error);

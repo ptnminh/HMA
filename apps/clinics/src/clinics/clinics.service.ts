@@ -166,6 +166,31 @@ export class ClinicService {
     });
   }
 
+  async findClinicGroupRoleByClinicId(clinicId: string) {
+    return this.prismaService.clinicGroupRoles.findMany({
+      where: {
+        clinicId,
+        isDisabled: false,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        rolePermissions: {
+          select: {
+            permission: {
+              select: {
+                id: true,
+                optionName: true,
+                description: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async findClinicGroupRoleById(id: number) {
     return this.prismaService.clinicGroupRoles.findFirst({
       where: {
@@ -173,7 +198,6 @@ export class ClinicService {
       },
     });
   }
-
   async findPermissionsByRoleId(roleId: number) {
     return this.prismaService.rolePermissions.findMany({
       where: {
@@ -185,6 +209,12 @@ export class ClinicService {
             id: true,
             optionName: true,
             description: true,
+          },
+        },
+        role: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },
