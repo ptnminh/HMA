@@ -20,6 +20,7 @@ import {
   ListClinicResponse,
   SubcribePlanDTO,
   SubcribePlanResponse,
+  UpdateSubcribePlanDTO,
 } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import {
@@ -76,13 +77,13 @@ export class ClinicsController {
   }
 
   @ApiQuery({
-    name: "id",
+    name: 'id',
     type: String,
-    required: false
+    required: false,
   })
   @Get()
   @ApiOkResponse({ type: ListClinicResponse })
-  async findAll(@Query('id') ownerId: string ) {
+  async findAll(@Query('id') ownerId: string) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.CLINIC_LIST, {
         ownerId,
@@ -187,6 +188,36 @@ export class ClinicsController {
     };
   }
 
+  @Put(':clinicId/subscribe-plan/:subscribePlanId')
+  async updateSubscribePlan(
+    @Param('clinicId') clinicId: string,
+    @Param('subscribePlanId') subscribePlanId: string,
+    @Body() data: UpdateSubcribePlanDTO,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.UPDATE_SUBSCRIBE_PLAN, {
+        data,
+        clinicId,
+        subscribePlanId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
   @Get(':id/users')
   @ApiOkResponse({ type: GetUsersInClinicResponse })
   async getUsers(@Param('id') clinicId: string) {
@@ -194,6 +225,28 @@ export class ClinicsController {
       this.clinicServiceClient.send(ClinicCommand.GET_USERS_BY_CLINIC, {
         clinicId,
       }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Get('permissions')
+  async getPermissions() {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.GET_PERMISSIONS, {}),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(

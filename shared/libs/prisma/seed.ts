@@ -1,29 +1,29 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 async function main() {
-  const roles = await prisma.clinicGroupRoles.findMany();
+  const roles = await prisma.options.findMany();
   if (roles.length > 0) return;
-  await prisma.clinicGroupRoles.createMany({
+  await prisma.options.createMany({
     data: [
       {
-        id: 1,
-        name: "admin",
+        optionName: "MANAGE_CLINIC",
+        isServiceOption: false,
       },
       {
-        id: 2,
-        name: "nurse",
+        optionName: "MANAGE_USER",
+        isServiceOption: false,
       },
       {
-        id: 3,
-        name: "doctor",
+        optionName: "MANAGE_ROLE",
+        isServiceOption: false,
       },
       {
-        id: 4,
-        name: "unknown",
+        optionName: "MANAGE_PLAN",
+        isServiceOption: false,
       },
       {
-        id: 5,
-        name: "guest",
+        optionName: "MANAGE_SERVICE",
+        isServiceOption: false,
       },
     ],
   });

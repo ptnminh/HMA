@@ -112,7 +112,41 @@ export class SubcribePlanDTO {
   })
   @Transform(({ value }) => new Date(value).toISOString())
   expiredAt: string;
+
+  @IsString()
+  @ApiProperty({
+    example: '1',
+    description:
+      'INPAYMENT = 1, EXPIRED = 2, ACTIVE = 3, CANCEL = 4, PENDING = 5',
+  })
+  status: number;
 }
+
+export class UpdateSubcribePlanDTO {
+  @IsString()
+  @ApiProperty({
+    example: '2021-09-27T07:45:16.000Z',
+    description: 'Expired time',
+  })
+  @Transform(({ value }) => new Date(value).toISOString())
+  expiredAt: string;
+
+  @IsString()
+  @ApiProperty({
+    example: '1',
+    description: 'Plan id',
+  })
+  planId: string;
+
+  @IsString()
+  @ApiProperty({
+    example: '1',
+    description:
+      'INPAYMENT = 1, EXPIRED = 2, ACTIVE = 3, CANCEL = 4, PENDING = 5',
+  })
+  status: number;
+}
+
 export class SubcribePlanResponse {
   @ApiProperty({ example: 'true', type: Boolean })
   status: string;

@@ -213,10 +213,40 @@ export class ClinicController {
         expiredAt,
         status,
       };
-      await this.clinicService.subcribePlan(payload);
+      const subscription = await this.clinicService.subcribePlan(payload);
       return {
         status: HttpStatus.OK,
         message: 'Subscribe plan thành công',
+        data: subscription,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(ClinicCommand.UPDATE_SUBSCRIBE_PLAN)
+  async updateSubscribePlan(data: any) {
+    try {
+      const { clinicId, subscribePlanId, data: payload } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const subscription = await this.clinicService.updateSubscribePlan(
+        subscribePlanId,
+        payload,
+      );
+      return {
+        status: HttpStatus.OK,
+        message: 'Update subscribe plan thành công',
+        data: subscription,
       };
     } catch (error) {
       console.log(error);

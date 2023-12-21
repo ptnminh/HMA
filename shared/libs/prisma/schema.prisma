@@ -61,25 +61,26 @@ model clinicGroupRoles {
     id              Int               @id @default(autoincrement())
     name            String
     description     String?
+    clinicId        String            @map(name: "clinic_id")
     isDisabled      Boolean           @default(false) @map(name: "is_disabled")
     disabledAt      DateTime?         @map(name: "disabled_at")
     updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
     createdAt       DateTime          @default(now()) @map(name: "created_at")
     rolePermissions rolePermissions[]
     userInClinics   userInClinics[]
+    clinics         clinics           @relation(fields: [clinicId], references: [id])
 
     @@map("clinic_group_roles")
 }
 
 model permissions {
-    id              Int               @id @default(autoincrement())
-    permission      String
-    description     String?
-    isDisabled      Boolean           @default(false) @map(name: "is_disabled")
-    disabledAt      DateTime?         @map(name: "disabled_at")
-    updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
-    createdAt       DateTime          @default(now()) @map(name: "created_at")
-    rolePermissions rolePermissions[]
+    id          Int       @id @default(autoincrement())
+    permission  String
+    description String?
+    isDisabled  Boolean   @default(false) @map(name: "is_disabled")
+    disabledAt  DateTime? @map(name: "disabled_at")
+    updatedAt   DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+    createdAt   DateTime  @default(now()) @map(name: "created_at")
 }
 
 model rolePermissions {
@@ -87,7 +88,7 @@ model rolePermissions {
     roleId       Int              @map(name: "role_id")
     permissionId Int              @map(name: "permission_id")
     role         clinicGroupRoles @relation(fields: [roleId], references: [id])
-    permission   permissions      @relation(fields: [permissionId], references: [id])
+    permission   options          @relation(fields: [permissionId], references: [id])
 
     @@map(name: "role_permissions")
 }
@@ -107,13 +108,15 @@ model plans {
 }
 
 model options {
-    id          Int           @id @default(autoincrement())
-    optionName  String        @map(name: "option_name")
-    description String?       @db.Text
-    isActive    Boolean       @default(true) @map(name: "is_activated")
-    createdAt   DateTime      @default(now()) @map(name: "created_at")
-    updatedAt   DateTime      @default(now()) @updatedAt @map(name: "updated_at")
-    planOptions planOptions[]
+    id              Int               @id @default(autoincrement())
+    optionName      String            @map(name: "option_name")
+    description     String?           @db.Text
+    isServiceOption Boolean           @default(false) @map(name: "is_service_option")
+    isActive        Boolean           @default(true) @map(name: "is_activated")
+    createdAt       DateTime          @default(now()) @map(name: "created_at")
+    updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
+    planOptions     planOptions[]
+    rolePermissions rolePermissions[]
 }
 
 model planOptions {
@@ -158,18 +161,22 @@ model groupChatMember {
 }
 
 model clinics {
-    id            String          @id @default(uuid())
-    name          String?
-    phone         String?
-    email         String?
-    ownerId       String          @map(name: "owner_id")
-    address       String?
-    isActive      Boolean         @default(true) @map(name: "is_activated")
-    createdAt     DateTime        @default(now()) @map(name: "created_at")
-    updatedAt     DateTime        @default(now()) @updatedAt @map(name: "updated_at")
-    userInClinics userInClinics[]
-    owner         users           @relation(fields: [ownerId], references: [id])
-    subscriptions subscriptions[]
+    id               String             @id @default(uuid())
+    name             String?
+    phone            String?
+    email            String?
+    ownerId          String             @map(name: "owner_id")
+    address          String?
+    logo             String?
+    description      String?
+    metadata         String?
+    isActive         Boolean            @default(true) @map(name: "is_activated")
+    createdAt        DateTime           @default(now()) @map(name: "created_at")
+    updatedAt        DateTime           @default(now()) @updatedAt @map(name: "updated_at")
+    userInClinics    userInClinics[]
+    owner            users              @relation(fields: [ownerId], references: [id])
+    subscriptions    subscriptions[]
+    clinicGroupRoles clinicGroupRoles[]
 }
 
 model userInClinics {
@@ -192,7 +199,8 @@ model userInClinics {
 model subscriptions {
     id            String          @id @default(uuid())
     clinicId      String          @map(name: "clinic_id")
-    currentPlanId Int             @map(name: "current_plan_id")
+    planId        Int             @map(name: "current_plan_id")
+    status        Int
     subcribedAt   DateTime        @default(now()) @map(name: "subcribed_at")
     expiredAt     DateTime?       @map(name: "expired_at")
     unSubcribedAt DateTime?       @map(name: "unsubcribed_at")
@@ -201,7 +209,7 @@ model subscriptions {
     isDisabled    Boolean         @default(false) @map(name: "is_disabled")
     disabledAt    DateTime?       @map(name: "disabled_at")
     clinics       clinics         @relation(fields: [clinicId], references: [id])
-    plans         plans           @relation(fields: [currentPlanId], references: [id])
+    plans         plans           @relation(fields: [planId], references: [id])
     planHistories planHistories[]
     invoices      invoices[]
 }

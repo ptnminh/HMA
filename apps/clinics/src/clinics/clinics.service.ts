@@ -12,6 +12,18 @@ export class ClinicService {
     });
   }
 
+  async updateSubscribePlan(
+    id: string,
+    data: Prisma.subscriptionsUncheckedUpdateInput,
+  ) {
+    return this.prismaService.subscriptions.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
   async getPermissions() {
     return this.prismaService.options.findMany({
       where: {
