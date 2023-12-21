@@ -82,11 +82,11 @@ import { paymentDto } from './dto/payment.dto';
         var params = req.query
         params['body'] = req.body
         const paymentServiceResponse = await firstValueFrom(this.paymentServiceClient.send(PaymentCommand.HANDLE_CALLBACK, {...params}))
-        var host = 'http://localhost:5173/thanh-toan/thong-tin-thanh-toan?'
+        var host = process.env.FRONTEND_URL +'/thanh-toan/thong-tin-thanh-toan?'
         res.redirect(host + paymentServiceResponse.data) 
       }
       catch(error) {
-        res.redirect('http://localhost:5173')
+        res.redirect(process.env.FRONTEND_URL)
         console.log(error)
       }
     }
