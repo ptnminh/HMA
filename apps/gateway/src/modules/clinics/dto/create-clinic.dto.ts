@@ -34,6 +34,30 @@ export class CreateClinicDto {
   @IsString()
   @ApiProperty({ example: 'Address', description: 'The address of the Clinic' })
   address: string;
+
+  @IsString()
+  @ApiProperty({
+    example: 'logo.png',
+    description: 'The logo of the Clinic',
+  })
+  @IsOptional()
+  logo?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    example: 'Description',
+    description: 'The description of the Clinic',
+  })
+  description?: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    example: '2',
+    description: 'Expired time',
+  })
+  planId?: string;
 }
 
 export class CreateClinicResponse {

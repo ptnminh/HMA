@@ -122,3 +122,11 @@ export const enum FormatTimeEnum {
   DATE = 'YYYY-MM-DD',
   TIME = 'HH:mm:ss',
 }
+
+export const enum SUBSCRIPTION_STATUS {
+  INPAYMENT = 1,
+  EXPIRED = 2,
+  ACTIVE = 3,
+  CANCEL = 4,
+  PENDING = 5,
+}

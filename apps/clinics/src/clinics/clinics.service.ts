@@ -11,6 +11,42 @@ export class ClinicService {
       data,
     });
   }
+
+  async getPermissions() {
+    return this.prismaService.options.findMany({
+      where: {
+        isServiceOption: false,
+      },
+    });
+  }
+
+  async createRolePermissions({
+    roleId,
+    permissionId,
+  }: Prisma.rolePermissionsUncheckedCreateInput) {
+    return this.prismaService.rolePermissions.create({
+      data: {
+        roleId,
+        permissionId,
+      },
+    });
+  }
+  async createClinicGroupRoles(
+    payload: Prisma.clinicGroupRolesUncheckedCreateInput,
+  ) {
+    return this.prismaService.clinicGroupRoles.create({
+      data: payload,
+    });
+  }
+
+  async getPlanDetail(id: number) {
+    return this.prismaService.plans.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
   async findAll(ownerId) {
     return this.prismaService.clinics.findMany({
       where: {

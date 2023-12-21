@@ -4,6 +4,8 @@ import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { ClinicCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
+import moment from 'moment-timezone';
+import { SUBSCRIPTION_STATUS } from 'src/shared';
 
 @Controller()
 export class ClinicController {
@@ -15,14 +17,72 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.CLINIC_CREATE)
   async createClinic(data: any) {
     try {
-      const clinic = await this.clinicService.create(data);
+      const { planId, ...preparePayload } = data;
+      const clinic = await this.clinicService.create(preparePayload);
+
+      const plan = await this.clinicService.getPlanDetail(planId);
+      if (!plan) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Plan không tồn tại',
+        };
+      }
+      const { duration } = plan;
+
+      // create clinic group roles
+      const payloadClinicGroupRoles: Prisma.clinicGroupRolesUncheckedCreateInput =
+        {
+          clinicId: clinic.id,
+          name: 'Admin',
+          description: 'Owner who can manage clinic',
+        };
+      const clinicGroupRole = await this.clinicService.createClinicGroupRoles(
+        payloadClinicGroupRoles,
+      );
+      if (!clinicGroupRole) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tạo clinic group role thất bại',
+        };
+      }
+
+      const permissions = await this.clinicService.getPermissions();
+      if (!permissions || permissions.length === 0) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Không tìm thấy permissions',
+        };
+      }
+      // create role permissions
+      await Promise.all(
+        permissions.map(async (permission) =>
+          this.clinicService.createRolePermissions({
+            roleId: clinicGroupRole.id,
+            permissionId: permission.id,
+          }),
+        ),
+      );
+      // add user to clinic
       const payload: Prisma.userInClinicsUncheckedCreateInput = {
         userId: data.ownerId,
         clinicId: clinic.id,
         isOwner: true,
-        roleId: 1,
+        roleId: clinicGroupRole.id,
       };
       await this.clinicService.addUserToClinic(payload);
+
+      // subscribe plan
+      const payloadSubcribePlan: Prisma.subscriptionsUncheckedCreateInput = {
+        planId,
+        clinicId: clinic.id,
+        expiredAt: moment().add(duration, 'days').toISOString(),
+        status: SUBSCRIPTION_STATUS.INPAYMENT,
+        subcribedAt: new Date().toISOString(),
+      };
+      const subscription =
+        await this.clinicService.subcribePlan(payloadSubcribePlan);
+
+      // update role for user
       await firstValueFrom(
         this.authServiceClient.send(ClinicCommand.UPDATE_USER, {
           id: data.ownerId,
@@ -32,7 +92,7 @@ export class ClinicController {
       return {
         status: HttpStatus.CREATED,
         message: 'Tạo clinic thành công',
-        data: clinic,
+        data: { clinic, subscription },
       };
     } catch (error) {
       console.log(error);
@@ -47,12 +107,10 @@ export class ClinicController {
   async listClinic(data: any) {
     try {
       const { ownerId } = data;
-      var clinics
-      if(ownerId !== null ||ownerId !== undefined||ownerId !== '') {
+      let clinics;
+      if (ownerId !== null || ownerId !== undefined || ownerId !== '') {
         clinics = await this.clinicService.findAll(ownerId);
-
-      }
-      else {
+      } else {
         clinics = await this.clinicService.findClinics();
       }
       return {
@@ -141,7 +199,7 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.SUBSCRIBE_PLAN)
   async subscribePlan(data: any) {
     try {
-      const { clinicId, planId, expiredAt } = data;
+      const { clinicId, planId, expiredAt, status } = data;
       const clinic = await this.clinicService.findClinicById(clinicId);
       if (!clinic) {
         return {
@@ -150,9 +208,10 @@ export class ClinicController {
         };
       }
       const payload: Prisma.subscriptionsUncheckedCreateInput = {
-        currentPlanId: planId,
+        planId,
         clinicId,
         expiredAt,
+        status,
       };
       await this.clinicService.subcribePlan(payload);
       return {
