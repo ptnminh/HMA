@@ -19,6 +19,14 @@ export class ClinicService {
       },
     });
   }
+
+  async findClinics() {
+    return this.prismaService.clinics.findMany({
+      where: {
+        isActive: true,
+      },
+    });
+  }
   async addUserToClinic(data: Prisma.userInClinicsUncheckedCreateInput) {
     return this.prismaService.userInClinics.create({
       data,
