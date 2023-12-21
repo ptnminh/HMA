@@ -59,6 +59,15 @@ services:
       - .env
     networks:
       - some-network
+
+  payment:
+    build: ./apps/notification
+    restart: always
+    hostname: payment
+    env_file:
+      - .env
+    networks:
+      - some-network
 networks:
   some-network:
     driver: bridge
