@@ -4,7 +4,7 @@ import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { ClinicCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
-import moment from 'moment-timezone';
+import * as moment from 'moment-timezone';
 import { SUBSCRIPTION_STATUS } from 'src/shared';
 
 @Controller()
@@ -20,7 +20,7 @@ export class ClinicController {
       const { planId, ...preparePayload } = data;
       const clinic = await this.clinicService.create(preparePayload);
 
-      const plan = await this.clinicService.getPlanDetail(planId);
+      const plan = await this.clinicService.getPlanDetail(+planId);
       if (!plan) {
         return {
           status: HttpStatus.BAD_REQUEST,
@@ -73,7 +73,7 @@ export class ClinicController {
 
       // subscribe plan
       const payloadSubcribePlan: Prisma.subscriptionsUncheckedCreateInput = {
-        planId,
+        planId: +planId,
         clinicId: clinic.id,
         expiredAt: moment().add(duration, 'days').toISOString(),
         status: SUBSCRIPTION_STATUS.INPAYMENT,
@@ -327,10 +327,10 @@ export class ClinicController {
       }
       // create role permissions
       await Promise.all(
-        permissions.map(async (permission) =>
+        permissions.map(async (permission: number) =>
           this.clinicService.createRolePermissions({
             roleId: clinicGroupRole.id,
-            permissionId: permission.id,
+            permissionId: permission,
           }),
         ),
       );
@@ -338,6 +338,146 @@ export class ClinicController {
         status: HttpStatus.OK,
         message: 'Tạo clinic group role thành công',
         data: clinicGroupRole,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(ClinicCommand.DELETE_USER_GROUP_ROLE)
+  async deleteUserGroupRole(data: any) {
+    try {
+      const { clinicId, userGroupRoleId } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const userGroupRole =
+        await this.clinicService.findClinicGroupRoleById(userGroupRoleId);
+      if (!userGroupRole) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'User group role không tồn tại',
+        };
+      }
+      await this.clinicService.updateClinicGroupRole({
+        where: {
+          id: userGroupRoleId,
+        },
+        data: {
+          isDisabled: true,
+        },
+      });
+      return {
+        status: HttpStatus.OK,
+        message: 'Xóa clinic group role thành công',
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(ClinicCommand.UPDATE_USER_GROUP_ROLE)
+  async updateUserGroupRole(data: any) {
+    try {
+      const { clinicId, userGroupRoleId, data: payload } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const userGroupRole =
+        await this.clinicService.findClinicGroupRoleById(userGroupRoleId);
+      if (!userGroupRole) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'User group role không tồn tại',
+        };
+      }
+      const { name, description, permissions } = payload;
+      if (permissions && permissions.length > 0) {
+        // delete all role permissions
+        await this.clinicService.deleteAllRolePermissions(userGroupRoleId);
+        // create role permissions
+        await Promise.all(
+          permissions.map(async (permission: number) =>
+            this.clinicService.createRolePermissions({
+              roleId: userGroupRoleId,
+              permissionId: permission,
+            }),
+          ),
+        );
+      }
+      const updatedUserGroupRole =
+        await this.clinicService.updateClinicGroupRole({
+          where: {
+            id: userGroupRoleId,
+          },
+          data: {
+            name,
+            description,
+          },
+        });
+      return {
+        status: HttpStatus.OK,
+        message: 'Cập nhật clinic group role thành công',
+        data: {
+          ...updatedUserGroupRole,
+          ...payload,
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(ClinicCommand.GET_USER_GROUP_ROLE)
+  async getUserGroupRole(data: any) {
+    try {
+      const { clinicId, userGroupRoleId } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const userGroupRole =
+        await this.clinicService.findClinicGroupRoleById(userGroupRoleId);
+      if (!userGroupRole) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'User group role không tồn tại',
+        };
+      }
+      const rolePermissions =
+        await this.clinicService.findPermissionsByRoleId(userGroupRoleId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy user group role thành công',
+        data: {
+          ...userGroupRole,
+          permissions: rolePermissions?.map(
+            (permission) => permission.permission,
+          ),
+        },
       };
     } catch (error) {
       console.log(error);

@@ -22,6 +22,7 @@ import {
   SubcribePlanDTO,
   SubcribePlanResponse,
   UpdateSubcribePlanDTO,
+  UpdateUserGroupRoleDTO,
 } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import {
@@ -292,5 +293,72 @@ export class ClinicsController {
       data: clinicServiceResponse.data,
       status: true,
     };
+  }
+
+  @Delete(':id/delete-user-group-role/:userGroupRoleId')
+  async deleteUserGroupRole(
+    @Param('id') clinicId: string,
+    @Param('userGroupRoleId') userGroupRoleId: string,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.DELETE_USER_GROUP_ROLE, {
+        clinicId,
+        userGroupRoleId: +userGroupRoleId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+  }
+
+  @Put(':id/update-user-group-role/:userGroupRoleId')
+  async updateUserGroupRole(
+    @Param('id') clinicId: string,
+    @Param('userGroupRoleId') userGroupRoleId: string,
+    @Body() data: UpdateUserGroupRoleDTO,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.UPDATE_USER_GROUP_ROLE, {
+        clinicId,
+        userGroupRoleId: +userGroupRoleId,
+        data,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+  }
+
+  @Get(':id/user-group-role')
+  async getUserGroupRole(@Param('id') clinicId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.GET_USER_GROUP_ROLE, {
+        clinicId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
   }
 }

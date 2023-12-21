@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsPhoneNumber,
   IsString,
@@ -110,10 +111,10 @@ export class SubcribePlanDTO {
     example: '2021-09-27T07:45:16.000Z',
     description: 'Expired time',
   })
-  @Transform(({ value }) => new Date(value).toISOString())
-  expiredAt: string;
+  @Transform(({ value }) => (value ? new Date(value).toISOString() : undefined))
+  expiredAt?: string;
 
-  @IsString()
+  @IsNumber()
   @ApiProperty({
     example: '1',
     description:
@@ -130,6 +131,7 @@ export class CreateUserGroupRoleDTO {
   name: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({
     example: 'description',
   })
@@ -142,14 +144,37 @@ export class CreateUserGroupRoleDTO {
   })
   permissions: number[];
 }
+export class UpdateUserGroupRoleDTO {
+  @IsString()
+  @ApiProperty({
+    example: 'name',
+  })
+  @IsOptional()
+  name: string;
 
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    example: 'description',
+  })
+  description: string;
+
+  @ApiProperty({
+    type: Number,
+    isArray: true,
+    example: [1, 2, 3],
+  })
+  @IsOptional()
+  permissions: number[];
+}
 export class UpdateSubcribePlanDTO {
   @IsString()
   @ApiProperty({
     example: '2021-09-27T07:45:16.000Z',
     description: 'Expired time',
   })
-  @Transform(({ value }) => new Date(value).toISOString())
+  @IsOptional()
+  @Transform(({ value }) => (value ? new Date(value).toISOString() : undefined))
   expiredAt: string;
 
   @IsString()
@@ -157,14 +182,16 @@ export class UpdateSubcribePlanDTO {
     example: '1',
     description: 'Plan id',
   })
+  @IsOptional()
   planId: string;
 
-  @IsString()
+  @IsNumber()
   @ApiProperty({
     example: '1',
     description:
       'INPAYMENT = 1, EXPIRED = 2, ACTIVE = 3, CANCEL = 4, PENDING = 5',
   })
+  @IsOptional()
   status: number;
 }
 

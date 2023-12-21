@@ -66,6 +66,9 @@ export class ClinicService {
         isActive: true,
         ownerId,
       },
+      include: {
+        subscriptions: true,
+      },
     });
   }
 
@@ -73,6 +76,9 @@ export class ClinicService {
     return this.prismaService.clinics.findMany({
       where: {
         isActive: true,
+      },
+      include: {
+        subscriptions: true,
       },
     });
   }
@@ -87,6 +93,9 @@ export class ClinicService {
         id,
       },
       data,
+      include: {
+        subscriptions: true,
+      },
     });
   }
 
@@ -154,6 +163,46 @@ export class ClinicService {
   async subcribePlan(data: Prisma.subscriptionsUncheckedCreateInput) {
     return this.prismaService.subscriptions.create({
       data,
+    });
+  }
+
+  async findClinicGroupRoleById(id: number) {
+    return this.prismaService.clinicGroupRoles.findFirst({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async findPermissionsByRoleId(roleId: number) {
+    return this.prismaService.rolePermissions.findMany({
+      where: {
+        roleId,
+      },
+      select: {
+        permission: {
+          select: {
+            id: true,
+            optionName: true,
+            description: true,
+          },
+        },
+      },
+    });
+  }
+
+  async updateClinicGroupRole(payload: {
+    where: Prisma.clinicGroupRolesWhereUniqueInput;
+    data: Prisma.clinicGroupRolesUncheckedUpdateInput;
+  }) {
+    return this.prismaService.clinicGroupRoles.update(payload);
+  }
+
+  async deleteAllRolePermissions(roleId: number) {
+    return this.prismaService.rolePermissions.deleteMany({
+      where: {
+        roleId,
+      },
     });
   }
 }

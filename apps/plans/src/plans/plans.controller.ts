@@ -1,8 +1,7 @@
-import { Controller, HttpStatus, ParseBoolPipe } from '@nestjs/common';
+import { Controller, HttpStatus } from '@nestjs/common';
 import { PlanService } from './plans.service';
 import { MessagePattern } from '@nestjs/microservices';
 import { PlanCommand } from './command';
-import { parse } from 'path';
 
 @Controller()
 export class PlanController {
@@ -74,16 +73,16 @@ export class PlanController {
   }
 
   @MessagePattern(PlanCommand.GET_ALL_ACTIVE_OPTION)
-  async getAllOptions(data: {isActive: boolean}) {
+  async getAllOptions(data: { isActive: boolean }) {
     try {
-      var status: boolean;
+      let status: boolean;
       if (data.isActive == undefined) {
-        status  = true
+        status = true;
       } else {
-        status = data.isActive
+        status = data.isActive;
       }
-      console.log(data.isActive)
-      console.log(status)
+      console.log(data.isActive);
+      console.log(status);
       const option = await this.planService.findAllOption(status);
       return {
         status: HttpStatus.OK,
@@ -110,12 +109,12 @@ export class PlanController {
           data: null,
         };
       }
-      var objArray = []; 
-      for (var i = 0; i < plan.planOptions.length; ++i) {
-        var obj = plan.planOptions[i].option
-        objArray.push({...obj})
+      const objArray = [];
+      for (let i = 0; i < plan.planOptions.length; ++i) {
+        const obj = plan.planOptions[i].option;
+        objArray.push({ ...obj });
       }
-      plan.planOptions = objArray
+      plan.planOptions = objArray;
       return {
         status: HttpStatus.OK,
         message: 'Tìm kiếm thành công',
@@ -134,13 +133,13 @@ export class PlanController {
   async getAllPlans() {
     try {
       const plan = await this.planService.findAllPlans();
-      for(var i = 0; i < plan.length; ++i) {
-        var objarray = []
-        for(var j = 0; j< plan[i].planOptions.length; ++j) {
-          var obj = plan[i].planOptions[j].option
-          objarray.push({...obj})
+      for (let i = 0; i < plan.length; ++i) {
+        const objarray = [];
+        for (let j = 0; j < plan[i].planOptions.length; ++j) {
+          const obj = plan[i].planOptions[j].option;
+          objarray.push({ ...obj });
         }
-        plan[i].planOptions = objarray
+        plan[i].planOptions = objarray;
       }
       return {
         status: HttpStatus.OK,
@@ -156,4 +155,3 @@ export class PlanController {
     }
   }
 }
-
