@@ -16,6 +16,7 @@ import {
 import {
   CreateClinicDto,
   CreateClinicResponse,
+  CreateUserGroupRoleDTO,
   GetUsersInClinicResponse,
   ListClinicResponse,
   SubcribePlanDTO,
@@ -247,6 +248,34 @@ export class ClinicsController {
   async getPermissions() {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.GET_PERMISSIONS, {}),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Post(':id/create-user-group-role')
+  async createUserGroupRole(
+    @Body() data: CreateUserGroupRoleDTO,
+    @Param('id') clinicId: string,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.CREATE_USER_GROUP_ROLE, {
+        data,
+        clinicId,
+      }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(

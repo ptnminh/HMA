@@ -281,4 +281,70 @@ export class ClinicController {
       };
     }
   }
+
+  @MessagePattern(ClinicCommand.GET_PERMISSIONS)
+  async getPermissions() {
+    try {
+      const permissions = await this.clinicService.getPermissions(true);
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách permissions thành công',
+        data: permissions,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(ClinicCommand.CREATE_USER_GROUP_ROLE)
+  async createUserGroupRole(data: any) {
+    try {
+      const { clinicId, data: payload } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const { name, description, permissions } = payload;
+      const preparePayload: Prisma.clinicGroupRolesUncheckedCreateInput = {
+        clinicId,
+        name,
+        description,
+      };
+      const clinicGroupRole =
+        await this.clinicService.createClinicGroupRoles(preparePayload);
+      if (!clinicGroupRole) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tạo clinic group role thất bại',
+        };
+      }
+      // create role permissions
+      await Promise.all(
+        permissions.map(async (permission) =>
+          this.clinicService.createRolePermissions({
+            roleId: clinicGroupRole.id,
+            permissionId: permission.id,
+          }),
+        ),
+      );
+      return {
+        status: HttpStatus.OK,
+        message: 'Tạo clinic group role thành công',
+        data: clinicGroupRole,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }

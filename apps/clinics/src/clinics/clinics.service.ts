@@ -24,10 +24,11 @@ export class ClinicService {
     });
   }
 
-  async getPermissions() {
+  async getPermissions(takeAll: boolean = false) {
     return this.prismaService.options.findMany({
       where: {
-        isServiceOption: false,
+        isActive: true,
+        ...(takeAll ? {} : { isServiceOption: false }),
       },
     });
   }

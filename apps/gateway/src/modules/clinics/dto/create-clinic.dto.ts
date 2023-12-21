@@ -122,6 +122,27 @@ export class SubcribePlanDTO {
   status: number;
 }
 
+export class CreateUserGroupRoleDTO {
+  @IsString()
+  @ApiProperty({
+    example: 'name',
+  })
+  name: string;
+
+  @IsString()
+  @ApiProperty({
+    example: 'description',
+  })
+  description: string;
+
+  @ApiProperty({
+    type: Number,
+    isArray: true,
+    example: [1, 2, 3],
+  })
+  permissions: number[];
+}
+
 export class UpdateSubcribePlanDTO {
   @IsString()
   @ApiProperty({
