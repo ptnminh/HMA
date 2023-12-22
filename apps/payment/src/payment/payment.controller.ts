@@ -100,8 +100,10 @@ export class PaymentController {
             }
             const subscribePlanId = returnQuery.subscribePlanId
             const subcription = await this.paymenService.findSubcriptionById(subscribePlanId)
-            returnQuery.clinicId = subcription.clinicId
-            if (returnQuery.status === '1' ) {
+            if (subcription) {
+                returnQuery.clinicId = subcription.clinicId
+            }
+            if (returnQuery.status === '1' && subcription ) {
                 const clinicId = subcription.clinicId
                 const data: UpdateSubcribePlanDTO = {
                     status: 3
