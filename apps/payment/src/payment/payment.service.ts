@@ -5,10 +5,12 @@ import * as crypto from 'crypto';
 import * as CryptoJS from 'crypto-js';
 import axios from 'axios';
 import { paymentDto } from './dto/payment.dto';
+import { PrismaService } from 'src/prisma.service';
 
 
 @Injectable()
 export class PaymentService {
+    constructor(private pismaService: PrismaService) {}
 
     vnpayConfig = {
         terminald: process.env.VNPAY_TERMINAL_ID as string,
@@ -42,7 +44,8 @@ export class PaymentService {
         ipAddr: string,
         clinicId: string,
         totalCost: number,
-        returnUrl: string
+        returnUrl: string,
+        subscribePlanId: string,
         ) {
         var params = {}
         params['vnp_Amount'] = totalCost*100
@@ -54,9 +57,10 @@ export class PaymentService {
         params['vnp_OrderInfo'] = "ZALOPAY_THANH TOÁN_" + clinicId+"_"+totalCost,
         params['vnp_OrderType'] =   'other'
         params['vnp_ReturnUrl'] = returnUrl,
-        params['vnp_TxnRef'] = clinicId
+        params['vnp_TxnRef'] = "CLINUS" + "_" + subscribePlanId + "_" + moment(new Date()).format('YYYYMMDDHHmmss')
         params['vnp_Version'] = '2.1.0'
         params['vnp_TmnCode'] = this.vnpayConfig.terminald
+        console.log(params)
 
         params = this.sortObject(params)
 
@@ -72,6 +76,7 @@ export class PaymentService {
         clinicId: string,
         totalCost: number,
         returnUrl: string,
+        subscribePlanId: string,
     ) {
         const items = [{
             itemid: clinicId,
@@ -89,9 +94,14 @@ export class PaymentService {
             totalCost += item['itemprice'] * item['itemquantity']
         }
 
+        const splitedString = subscribePlanId.split('-')
+        var transid = moment(new Date()).format('YYMMDD') + "_"
+        for(let str of splitedString) {
+            transid += str
+        }
         var order = {
             appid: this.zalopayConfig.appid,
-            apptransid: moment(new Date()).format('YYMMDD') + "_CLINUSID_" + clinicId,
+            apptransid: transid,
             appuser: "DEMO",
             apptime: Date.now(),
             item: JSON.stringify(items),
@@ -100,6 +110,7 @@ export class PaymentService {
             description: "ZALOPAY_THANH TOÁN_" + clinicId+"_"+totalCost,
             bankcode: "",
         }
+        console.log(order)
 
         const signToken = order.appid + "|" + order.apptransid + "|" + order.appuser + "|" + order.amount + "|" + order.apptime + "|" + order.embeddata + "|" + order.item;
         console.log(signToken)
@@ -178,4 +189,13 @@ export class PaymentService {
         return qs.stringify(data)
     }
 
+
+    async findSubcriptionById(id: string) {
+        return this.pismaService.subscriptions.findUnique({
+            where: {
+                id,
+            }
+        })
+    }
+ 
 }

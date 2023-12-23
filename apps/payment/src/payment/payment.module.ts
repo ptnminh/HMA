@@ -22,12 +22,12 @@ import { PaymentService } from './payment.service';
       useClass: AllExceptionFilter,
     },
     {
-      provide: 'AUTH_SERVICE',
+      provide: 'CLINIC_SERVICE',
       useFactory: (configService: ConfigService) => {
         return ClientProxyFactory.create({
           options: {
-            host: configService.get('PAYMENT_SERVICE_HOST'),
-            port: configService.get('PAYMENT_SERVICE_PORT'),
+            host: configService.get('CLINIC_SERVICE_HOST'),
+            port: configService.get('CLINIC_SERVICE_PORT'),
           },
         });
       },
