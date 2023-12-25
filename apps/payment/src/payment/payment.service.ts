@@ -62,7 +62,7 @@ export class PaymentService {
         params['vnp_TxnRef'] = "CLINUS" + "_" + subscribePlanId + "_" + moment(new Date()).format('YYYYMMDDHHmmss')
         params['vnp_Version'] = '2.1.0'
         params['vnp_TmnCode'] = this.vnpayConfig.terminald
-        if (provider === 'ATM') {
+        if (provider === 'VNBANK') {
             params['vnp_BankCode'] = 'VNBANK'
         }
         else if (provider === 'InternationalCard') {
