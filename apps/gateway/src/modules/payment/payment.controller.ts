@@ -42,8 +42,6 @@ import { paymentDto } from './dto/payment.dto';
       @Inject('PAYMENT_SERVICE') private readonly paymentServiceClient: ClientProxy,
     ) {}
 
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth('Bearer')
     @Post()
     async createOrder(@Body() dto: paymentDto, @Req() req: Request) {
       const ipAddr =  req.headers['x-forwarded-for'] ||

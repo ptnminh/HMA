@@ -2,12 +2,9 @@ import { Controller, HttpStatus, Get, Req, Res, Inject } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { MessagePattern, ClientProxy } from '@nestjs/microservices';
 import { PaymentCommand } from './command';
-import { paymentDto } from './dto';
-import { Request, Response } from 'express';
 import * as qs from 'qs';
-import { first, firstValueFrom } from 'rxjs';
-import { Prisma } from '@prisma/client';
-import { UpdateSubcribePlanDTO } from './dto/updateSubcriptio.dto';
+import { firstValueFrom } from 'rxjs';
+import * as randomstring from 'randomstring';
 
 
 @Controller('payment')
@@ -20,15 +17,17 @@ export class PaymentController {
     async createPaymentUrl(data: any) {
         const {dto, ipAddr} = data;
         console.log(dto)
-        const paymentData = {
+        var paymentData = {
             clinicId: dto.clinicId,
             totalCost: dto.totalCost,
             returnUrl: dto.returnUrl,
             subscribePlanId: dto.subscribePlanId,
+            provider: dto.provider
         }
         try {
             var responseData: any;
             if(dto.provider === "Zalopay") {
+                paymentData.subscribePlanId += randomstring.generate({length: 1, charset: 'alphanumeric'})
                 responseData = await this.paymenService.zalopayCreateOrder(paymentData.clinicId, paymentData.totalCost, paymentData.returnUrl, paymentData.subscribePlanId)
                 if (responseData['orderurl'] === '') {
                     return {
@@ -39,13 +38,19 @@ export class PaymentController {
                 responseData = responseData['orderurl']
             }
             else {
-                responseData = await this.paymenService.vnpayCreateOrder(ipAddr, paymentData.clinicId, paymentData.totalCost, paymentData.returnUrl, paymentData.subscribePlanId)
+                responseData = await this.paymenService.vnpayCreateOrder(ipAddr, paymentData.clinicId, paymentData.totalCost, paymentData.returnUrl, paymentData.subscribePlanId, paymentData.provider )
                 if (responseData['orderurl'] === '') {
                     return {
                         status: HttpStatus.BAD_REQUEST,
                         message: "Tạo link thanh toán thất bại"
                     }
                 }
+            }
+            const clinic = await this.paymenService.findSubcriptionById(paymentData.subscribePlanId)
+            if (clinic) {
+                setTimeout(() => {
+                    console.log(clinic.clinicId)
+                }, 1000)
             }
             return {
                 status: HttpStatus.OK,
@@ -90,7 +95,7 @@ export class PaymentController {
                 returnQuery.amount = (parseInt(data['vnp_Amount'])/100).toString()
                 var str: string = data['vnp_TxnRef']
                 var splitedString = str.split("_")
-                returnQuery.subscribePlanId = splitedString[1]
+                returnQuery.subscribePlanId = splitedString[1].substring(0, 36)
                 if (data['vnp_TransactionStatus'] === '00') {
                     returnQuery.status = '1'
                 }
@@ -100,13 +105,10 @@ export class PaymentController {
             }
             const subscribePlanId = returnQuery.subscribePlanId
             const subcription = await this.paymenService.findSubcriptionById(subscribePlanId)
-            if (subcription) {
-                returnQuery.clinicId = subcription.clinicId
-            }
-            if (returnQuery.status === '1' && subcription ) {
+            if (subcription ) {
                 const clinicId = subcription.clinicId
-                const data: UpdateSubcribePlanDTO = {
-                    status: 3
+                const data = {
+                    status: (returnQuery.status === "1") ? 3:2
                 }
                 const response = await firstValueFrom(this.clinicServiceClient.send(PaymentCommand.UPDATE_SUBSCRIBE_PLAN, {
                     data,
@@ -115,11 +117,11 @@ export class PaymentController {
                 }))
                 if (response.status === false) {
                     return {
-                        data: "update-false",
+                        data: "update_false",
                         status: false,
                     }
                 }
-                delete(returnQuery.subscribePlanId)
+                returnQuery.clinicId = clinicId
             }
             return {
                 status: true,

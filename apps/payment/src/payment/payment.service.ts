@@ -40,12 +40,14 @@ export class PaymentService {
         return sorted;
     }
 
+
     async vnpayCreateOrder (
         ipAddr: string,
         clinicId: string,
         totalCost: number,
         returnUrl: string,
         subscribePlanId: string,
+        provider: string
         ) {
         var params = {}
         params['vnp_Amount'] = totalCost*100
@@ -54,14 +56,18 @@ export class PaymentService {
         params['vnp_CurrCode'] = 'VND'
         params['vnp_IpAddr'] = ipAddr
         params['vnp_Locale'] = 'vn'
-        params['vnp_OrderInfo'] = "ZALOPAY_THANH TOÁN_" + clinicId+"_"+totalCost,
+        params['vnp_OrderInfo'] = "VNPAY_THANH TOÁN_" +"_"+totalCost,
         params['vnp_OrderType'] =   'other'
         params['vnp_ReturnUrl'] = returnUrl,
         params['vnp_TxnRef'] = "CLINUS" + "_" + subscribePlanId + "_" + moment(new Date()).format('YYYYMMDDHHmmss')
         params['vnp_Version'] = '2.1.0'
         params['vnp_TmnCode'] = this.vnpayConfig.terminald
-        console.log(params)
-
+        if (provider === 'ATM') {
+            params['vnp_BankCode'] = 'VNBANK'
+        }
+        else if (provider === 'InternationalCard') {
+            params['vnp_BankCode'] = 'INTCARD'
+        }
         params = this.sortObject(params)
 
         const signData = qs.stringify(params, {encode: false})
@@ -85,8 +91,7 @@ export class PaymentService {
             itemquantity: 1, 
         }]
         var embededData = {
-            "prefer_payment_method": [],
-            'redirecturl': returnUrl,
+            'redirecturl': returnUrl
         }
 
         var totalCost = 0
@@ -99,6 +104,7 @@ export class PaymentService {
         for(let str of splitedString) {
             transid += str
         }
+
         var order = {
             appid: this.zalopayConfig.appid,
             apptransid: transid,
@@ -107,8 +113,8 @@ export class PaymentService {
             item: JSON.stringify(items),
             embeddata: JSON.stringify(embededData),
             amount: totalCost,
-            description: "ZALOPAY_THANH TOÁN_" + clinicId+"_"+totalCost,
-            bankcode: "",
+            description: "ZALOPAY_THANH TOÁN_" + subscribePlanId +"_"+totalCost,
+            bankcode: "zalopayapp",
         }
         console.log(order)
 
