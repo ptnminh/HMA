@@ -62,7 +62,7 @@ export class PaymentService {
         params['vnp_TxnRef'] = "CLINUS" + "_" + subscribePlanId + "_" + moment(new Date()).format('YYYYMMDDHHmmss')
         params['vnp_Version'] = '2.1.0'
         params['vnp_TmnCode'] = this.vnpayConfig.terminald
-        if (provider === 'VNBANK') {
+        if (provider === 'ATM') {
             params['vnp_BankCode'] = 'VNBANK'
         }
         else if (provider === 'InternationalCard') {
@@ -116,10 +116,8 @@ export class PaymentService {
             description: "ZALOPAY_THANH TOÁN_" + subscribePlanId +"_"+totalCost,
             bankcode: "zalopayapp",
         }
-        console.log(order)
 
         const signToken = order.appid + "|" + order.apptransid + "|" + order.appuser + "|" + order.amount + "|" + order.apptime + "|" + order.embeddata + "|" + order.item;
-        console.log(signToken)
 
         order['mac'] = CryptoJS.HmacSHA256(signToken, this.zalopayConfig.key1)
         const res = await axios.post(process.env.ZALOPAY_ENDPOINT, null, {params: order})
@@ -204,4 +202,6 @@ export class PaymentService {
         })
     }
  
+
+
 }

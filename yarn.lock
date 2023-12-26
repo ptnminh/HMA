@@ -706,6 +706,14 @@
     webpack "5.88.2"
     webpack-node-externals "3.0.0"
 
+"@nestjs/schedule@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@nestjs/schedule/-/schedule-4.0.0.tgz#522fa0c79a2b44a66aab16a46bdf4c11ae73f3c3"
+  integrity sha512-zz4h54m/F/1qyQKvMJCRphmuwGqJltDAkFxUXCVqJBXEs5kbPt93Pza3heCQOcMH22MZNhGlc9DmDMLXVHmgVQ==
+  dependencies:
+    cron "3.1.3"
+    uuid "9.0.1"
+
 "@nestjs/schematics@^10.0.0", "@nestjs/schematics@^10.0.1":
   version "10.0.2"
   resolved "https://registry.npmjs.org/@nestjs/schematics/-/schematics-10.0.2.tgz"
@@ -950,6 +958,11 @@
   version "7.0.13"
   resolved "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.13.tgz"
   integrity sha512-RbSSoHliUbnXj3ny0CNFOoxrIDV6SUGyStHsvDqosw6CkdPV8TtWGlfecuK4ToyMEAql6pzNxgCFKanovUzlgQ==
+
+"@types/luxon@~3.3.0":
+  version "3.3.7"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-3.3.7.tgz#043d413b6492a012de47503907bdf3ec4f827933"
+  integrity sha512-gKc9P2d4g5uYwmy4s/MO/yOVPmvHyvzka1YH6i5dM03UrFofHSmgc0D0ymbDRStFWHusk6cwwF6nhLm/ckBbbQ==
 
 "@types/mime@*", "@types/mime@^1":
   version "1.3.3"
@@ -1783,6 +1796,14 @@ create-require@^1.1.0:
   version "1.1.1"
   resolved "https://registry.npmjs.org/create-require/-/create-require-1.1.1.tgz"
   integrity sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==
+
+cron@3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/cron/-/cron-3.1.3.tgz#4eac8f6691ce7e24c8e89b5317b8097d6f2d0053"
+  integrity sha512-KVxeKTKYj2eNzN4ElnT6nRSbjbfhyxR92O/Jdp6SH3pc05CDJws59jBrZWEMQlxevCiE6QUTrXy+Im3vC3oD3A==
+  dependencies:
+    "@types/luxon" "~3.3.0"
+    luxon "~3.4.0"
 
 cross-spawn@^7.0.0, cross-spawn@^7.0.2, cross-spawn@^7.0.3:
   version "7.0.3"
@@ -3261,6 +3282,11 @@ lru-cache@^6.0.0:
   resolved "https://registry.npmjs.org/lru-cache/-/lru-cache-10.0.1.tgz"
   integrity sha512-IJ4uwUTi2qCccrioU6g9g/5rvvVl13bsdczUUcqbciD9iLr095yj8DQKdObriEvuNSx325N1rV1O0sJFszx75g==
 
+luxon@~3.4.0:
+  version "3.4.4"
+  resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.4.4.tgz#cf20dc27dc532ba41a169c43fdcc0063601577af"
+  integrity sha512-zobTr7akeGHnv7eBOXcRgMeCP6+uyYsczwmeRCauvpvaAltgNyTbLH/+VaEAPUeWBT+1GuNmz4wC/6jtQzbbVA==
+
 macos-release@^2.5.0:
   version "2.5.1"
   resolved "https://registry.npmjs.org/macos-release/-/macos-release-2.5.1.tgz"
@@ -3701,14 +3727,7 @@ pure-rand@^6.0.0:
   resolved "https://registry.npmjs.org/pure-rand/-/pure-rand-6.0.4.tgz"
   integrity sha512-LA0Y9kxMYv47GIPJy6MI84fqTd2HmYZI83W/kM/SkKfDlajnZYfmXFTxkbY+xSBPkLJxltMa9hIkmdc29eguMA==
 
-qs@^6.11.0:
-  version "6.11.2"
-  resolved "https://registry.npmjs.org/qs/-/qs-6.11.2.tgz"
-  integrity sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==
-  dependencies:
-    side-channel "^1.0.4"
-
-qs@^6.11.2:
+qs@^6.11.0, qs@^6.11.2:
   version "6.11.2"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.2.tgz#64bea51f12c1f5da1bc01496f48ffcff7c69d7d9"
   integrity sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==
@@ -4306,6 +4325,11 @@ util-deprecate@^1.0.1:
   version "1.0.2"
   resolved "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
+
+uuid@9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
+  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"

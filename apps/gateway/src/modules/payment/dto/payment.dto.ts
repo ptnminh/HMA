@@ -15,7 +15,7 @@ export class paymentDto {
 
     @IsString()
     @IsNotEmpty()
-    @IsIn(['Zalopay', 'Vnpay', 'VNBANK', "InternationalCard"])
+    @IsIn(['Zalopay', 'Vnpay', 'ATM', "InternationalCard"])
     @ApiProperty({example: "Zalopay"})
     provider: string;
 
