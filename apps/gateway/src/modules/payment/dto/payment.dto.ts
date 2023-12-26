@@ -15,7 +15,7 @@ export class paymentDto {
 
     @IsString()
     @IsNotEmpty()
-    @IsIn(['Zalopay', 'Vnpay'])
+    @IsIn(['Zalopay', 'Vnpay', 'VNBANK', "InternationalCard"])
     @ApiProperty({example: "Zalopay"})
     provider: string;
 
@@ -24,7 +24,7 @@ export class paymentDto {
 
     @IsNotEmpty()
     @IsString()
-    @ApiProperty({example: "0a585195-c703-4560-a8d8-eb122192f78b"})
+    @ApiProperty({example: "9d0df7a5-5486-43b4-9957-d60ef8b1663f"})
     subscribePlanId: string;
 
 } 
