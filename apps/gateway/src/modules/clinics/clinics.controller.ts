@@ -85,10 +85,10 @@ export class ClinicsController {
   })
   @Get()
   @ApiOkResponse({ type: ListClinicResponse })
-  async findAll(@Query('id') ownerId: string) {
+  async findAll(@CurrentUser('id') userId: string) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.CLINIC_LIST, {
-        ownerId,
+        userId,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
@@ -246,9 +246,15 @@ export class ClinicsController {
   }
 
   @Get('permissions')
-  async getPermissions() {
+  async getPermissions(
+    @CurrentUser('id') userId: string,
+    @Query('clinicId') clinicId: string,
+  ) {
     const clinicServiceResponse = await firstValueFrom(
-      this.clinicServiceClient.send(ClinicCommand.GET_PERMISSIONS, {}),
+      this.clinicServiceClient.send(ClinicCommand.GET_PERMISSIONS, {
+        userId,
+        clinicId,
+      }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(

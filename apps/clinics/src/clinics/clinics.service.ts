@@ -6,6 +6,37 @@ import { PrismaService } from 'src/prisma.service';
 export class ClinicService {
   constructor(private readonly prismaService: PrismaService) {}
 
+  async getPermissionOfClinicByOwnerId(ownerId: string, clinicId: string) {
+    return this.prismaService.clinics.findFirst({
+      where: {
+        ownerId,
+        id: clinicId,
+      },
+      select: {
+        id: true,
+        name: true,
+        clinicGroupRoles: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            rolePermissions: {
+              select: {
+                permission: {
+                  select: {
+                    id: true,
+                    optionName: true,
+                    description: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async create(data: any) {
     return this.prismaService.clinics.create({
       data,

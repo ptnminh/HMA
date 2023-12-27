@@ -107,13 +107,8 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.CLINIC_LIST)
   async listClinic(data: any) {
     try {
-      const { ownerId } = data;
-      let clinics;
-      if (ownerId !== null || ownerId !== undefined || ownerId !== '') {
-        clinics = await this.clinicService.findAll(ownerId);
-      } else {
-        clinics = await this.clinicService.findClinics();
-      }
+      const { userId } = data;
+      const clinics = await this.clinicService.findAll(userId);
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách clinic thành công',
@@ -284,13 +279,31 @@ export class ClinicController {
   }
 
   @MessagePattern(ClinicCommand.GET_PERMISSIONS)
-  async getPermissions() {
+  async getPermissions(data: { userId: string; clinicId: string }) {
     try {
-      const permissions = await this.clinicService.getPermissions(true);
+      const { userId, clinicId } = data;
+      const permissions =
+        await this.clinicService.getPermissionOfClinicByOwnerId(
+          userId,
+          clinicId,
+        );
+      if (!permissions) {
+        return {
+          status: HttpStatus.UNAUTHORIZED,
+          message: 'Không tìm thấy permissions',
+        };
+      }
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách permissions thành công',
-        data: permissions,
+        data: permissions?.clinicGroupRoles?.map((role) => {
+          return {
+            id: role.id,
+            name: role.name,
+            description: role.description,
+            permissions: map(role.rolePermissions, 'permission'),
+          };
+        }),
       };
     } catch (error) {
       console.log(error);
