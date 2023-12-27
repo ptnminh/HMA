@@ -61,7 +61,7 @@ services:
       - some-network
 
   payment:
-    build: ./apps/notification
+    build: ./apps/payment
     restart: always
     hostname: payment
     env_file:
