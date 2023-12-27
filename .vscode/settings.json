@@ -20,6 +20,18 @@
             "name": "hma_remote",
             "username": "ptnminh",
             "database": "neondb"
+        },
+        {
+            "pgOptions": {
+                "ssl": true
+            },
+            "previewLimit": 50,
+            "server": "db-postgresql-sgp1-15674-do-user-15052273-0.c.db.ondigitalocean.com",
+            "port": 25060,
+            "driver": "PostgreSQL",
+            "username": "doadmin",
+            "database": "hma",
+            "name": "hma_do"
         }
     ]
 }
