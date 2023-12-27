@@ -107,7 +107,11 @@ export class ClinicService {
         },
       },
       include: {
-        subscriptions: true,
+        subscriptions: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
