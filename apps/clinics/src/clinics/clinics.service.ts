@@ -91,11 +91,10 @@ export class ClinicService {
     });
   }
 
-  async findAll(ownerId) {
+  async findAll(userId: string) {
     return this.prismaService.clinics.findMany({
       where: {
         isActive: true,
-        ownerId,
         subscriptions: {
           some: {
             NOT: {
@@ -103,6 +102,11 @@ export class ClinicService {
                 in: [4],
               },
             },
+          },
+        },
+        userInClinics: {
+          some: {
+            userId,
           },
         },
       },
