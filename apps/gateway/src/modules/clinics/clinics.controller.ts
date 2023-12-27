@@ -78,11 +78,6 @@ export class ClinicsController {
     };
   }
 
-  @ApiQuery({
-    name: 'id',
-    type: String,
-    required: false,
-  })
   @Get()
   @ApiOkResponse({ type: ListClinicResponse })
   async findAll(@CurrentUser('id') userId: string) {

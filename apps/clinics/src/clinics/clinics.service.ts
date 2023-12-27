@@ -96,9 +96,21 @@ export class ClinicService {
       where: {
         isActive: true,
         ownerId,
+        subscriptions: {
+          some: {
+            NOT: {
+              status: {
+                in: [4],
+              },
+            },
+          },
+        },
       },
       include: {
         subscriptions: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
