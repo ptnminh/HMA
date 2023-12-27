@@ -1,8 +1,0 @@
-#### 
-POST http://localhost:2222/api/v1/auth/register
-content-type: application/json
-
-{
-    "email": "minhphan113@gmail.com",
-    "password": "123"
-}

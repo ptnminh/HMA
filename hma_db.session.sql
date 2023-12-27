@@ -1,1 +1,0 @@
-delete  FROM users
