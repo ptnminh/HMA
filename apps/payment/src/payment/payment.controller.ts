@@ -114,7 +114,7 @@ export class PaymentController {
             if (subcription ) {
                 const clinicId = subcription.clinicId
                 const data = {
-                    status: (returnQuery.status === "1") ? 3:2
+                    status: (returnQuery.status === "1") ? 3:4
                 }
                 const response = await firstValueFrom(this.clinicServiceClient.send(PaymentCommand.UPDATE_SUBSCRIBE_PLAN, {
                     data,
@@ -147,7 +147,7 @@ export class PaymentController {
         try {
             const {data, clinicId, subscribePlanId} = inputData
             const subscription = await this.paymenService.findSubcriptionById(subscribePlanId)
-            if (subscription.status === 1) {
+            if (subscription.status !== 3 && subscription.status !== 4) {
                 const response = await firstValueFrom(this.clinicServiceClient.send(PaymentCommand.UPDATE_SUBSCRIBE_PLAN, {
                     data,
                     clinicId,
