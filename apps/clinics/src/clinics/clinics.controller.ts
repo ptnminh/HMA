@@ -263,9 +263,10 @@ export class ClinicController {
         status: HttpStatus.OK,
         message: 'Lấy danh sách user thành công',
         data: usersInClinic?.map((user) => {
+          const { users, ...rest } = user;
           return {
-            ...user,
-            ...user.users,
+            ...rest,
+            ...users,
           };
         }),
       };
