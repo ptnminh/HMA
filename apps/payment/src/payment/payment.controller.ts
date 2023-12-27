@@ -5,6 +5,7 @@ import { PaymentCommand } from './command';
 import * as qs from 'qs';
 import { firstValueFrom } from 'rxjs';
 import * as randomstring from 'randomstring';
+import { Console } from 'console';
 
 
 @Controller('payment')
@@ -16,7 +17,6 @@ export class PaymentController {
     @MessagePattern(PaymentCommand.CREATE_ORDER)
     async createPaymentUrl(data: any) {
         const {dto, ipAddr} = data;
-        console.log(dto)
         var paymentData = {
             clinicId: dto.clinicId,
             totalCost: dto.totalCost,
@@ -46,11 +46,17 @@ export class PaymentController {
                     }
                 }
             }
-            const clinic = await this.paymenService.findSubcriptionById(paymentData.subscribePlanId)
-            if (clinic) {
-                setTimeout(() => {
-                    console.log(clinic.clinicId)
-                }, 1000)
+            const id = paymentData.subscribePlanId
+            const subscription = await this.paymenService.findSubcriptionById(id)
+            if (subscription) {
+                const inputData = {
+                    clinicId: subscription.clinicId,
+                    subscribePlanId: subscription.id,
+                    data: {
+                        status: 2
+                    }
+                }
+                await this.delayedUpdateSubcriptions(inputData)
             }
             return {
                 status: HttpStatus.OK,
@@ -108,7 +114,7 @@ export class PaymentController {
             if (subcription ) {
                 const clinicId = subcription.clinicId
                 const data = {
-                    status: (returnQuery.status === "1") ? 3:2
+                    status: (returnQuery.status === "1") ? 3:4
                 }
                 const response = await firstValueFrom(this.clinicServiceClient.send(PaymentCommand.UPDATE_SUBSCRIBE_PLAN, {
                     data,
@@ -135,6 +141,37 @@ export class PaymentController {
                 data: 'error',
             }
         }
+    }
+
+    async updateSubcriptions(inputData: any) {
+        try {
+            const {data, clinicId, subscribePlanId} = inputData
+            const subscription = await this.paymenService.findSubcriptionById(subscribePlanId)
+            if (subscription.status !== 3 && subscription.status !== 4) {
+                const response = await firstValueFrom(this.clinicServiceClient.send(PaymentCommand.UPDATE_SUBSCRIBE_PLAN, {
+                    data,
+                    clinicId,
+                    subscribePlanId,
+                }))
+                if (response.status === HttpStatus.OK) {
+                    console.log("Updated Successfully")
+                }
+                else {
+                    console.log(response.status)
+                }    
+            }
+        }
+        catch(error) {
+            console.log(error)
+        }
+    }
+
+    async delayedUpdateSubcriptions(inputData: any) {
+        var update = async () => {
+            await this.updateSubcriptions(inputData)
+        }
+        const timer = 15*60*1000
+        setTimeout(update, timer)
     }
 
 }
