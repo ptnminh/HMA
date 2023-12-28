@@ -227,6 +227,9 @@ export class ClinicService {
           },
         },
         userInClinics: {
+          where: {
+            isDisabled: false,
+          },
           select: {
             users: {
               select: {
@@ -284,6 +287,9 @@ export class ClinicService {
     return this.prismaService.clinicGroupRoles.findFirst({
       where: {
         id,
+      },
+      include: {
+        userInClinics: true,
       },
     });
   }

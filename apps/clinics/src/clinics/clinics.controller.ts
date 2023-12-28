@@ -348,12 +348,19 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.DELETE_USER_GROUP_ROLE)
   async deleteUserGroupRole(data: any) {
     try {
-      const { clinicId, userGroupRoleId } = data;
+      const { clinicId, userGroupRoleId, userId } = data;
       const clinic = await this.clinicService.findClinicById(clinicId);
       if (!clinic) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Clinic không tồn tại',
+        };
+      }
+      const { ownerId } = clinic;
+      if (userId !== ownerId) {
+        return {
+          status: HttpStatus.UNAUTHORIZED,
+          message: 'Bạn không có quyền xóa role này',
         };
       }
       const userGroupRole =
@@ -362,6 +369,13 @@ export class ClinicController {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'User group role không tồn tại',
+        };
+      }
+      const { userInClinics } = userGroupRole;
+      if (userInClinics && userInClinics.length > 0) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Không thể xóa role này',
         };
       }
       await this.clinicService.updateClinicGroupRole({

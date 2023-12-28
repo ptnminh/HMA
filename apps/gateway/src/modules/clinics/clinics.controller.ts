@@ -322,11 +322,13 @@ export class ClinicsController {
   async deleteUserGroupRole(
     @Param('id') clinicId: string,
     @Param('userGroupRoleId') userGroupRoleId: string,
+    @CurrentUser('id') userId: string,
   ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.DELETE_USER_GROUP_ROLE, {
         clinicId,
         userGroupRoleId: +userGroupRoleId,
+        userId,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
