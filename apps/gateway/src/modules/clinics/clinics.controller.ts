@@ -77,7 +77,29 @@ export class ClinicsController {
       status: true,
     };
   }
-
+  @Get('permissions')
+  async getPermissions(@CurrentUser('id') userId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.GET_PERMISSIONS, {
+        userId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
   @Get(':id')
   @ApiOkResponse()
   async getClinicDetail(@Param('id') clinicId: string) {
@@ -247,30 +269,6 @@ export class ClinicsController {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.GET_USERS_BY_CLINIC, {
         clinicId,
-      }),
-    );
-    if (clinicServiceResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: clinicServiceResponse.message,
-          data: null,
-          status: false,
-        },
-        clinicServiceResponse.status,
-      );
-    }
-    return {
-      message: clinicServiceResponse.message,
-      data: clinicServiceResponse.data,
-      status: true,
-    };
-  }
-
-  @Get('permissions')
-  async getPermissions(@CurrentUser('id') userId: string) {
-    const clinicServiceResponse = await firstValueFrom(
-      this.clinicServiceClient.send(ClinicCommand.GET_PERMISSIONS, {
-        userId,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
