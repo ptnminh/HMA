@@ -203,9 +203,45 @@ export class ClinicService {
   }
 
   async findClinicById(id: string) {
-    return this.prismaService.clinics.findFirst({
+    return this.prismaService.clinics.findUnique({
       where: {
         id,
+      },
+      include: {
+        subscriptions: {
+          where: {
+            NOT: {
+              status: {
+                in: [4],
+              },
+            },
+          },
+          orderBy: {
+            updatedAt: 'desc',
+          },
+          include: {
+            plans: true,
+          },
+        },
+        userInClinics: {
+          select: {
+            users: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+            role: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            isOwner: true,
+          },
+        },
       },
     });
   }

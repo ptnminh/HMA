@@ -481,4 +481,44 @@ export class ClinicController {
       };
     }
   }
+
+  @MessagePattern(ClinicCommand.GET_CLINIC_DETAIL)
+  async getClinicDetail(data: any) {
+    try {
+      const { clinicId } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const { subscriptions, userInClinics, ...rest } = clinic;
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy thông tin clinic thành công',
+        data: {
+          ...rest,
+          subscriptions: subscriptions?.map((subscription) => ({
+            ...subscription,
+            plans: subscription.plans,
+          })),
+          userInClinics: userInClinics?.map((user) => {
+            return {
+              role: user.role,
+              isOwner: user.isOwner,
+              ...(user?.users || {}),
+            };
+          }),
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
 }

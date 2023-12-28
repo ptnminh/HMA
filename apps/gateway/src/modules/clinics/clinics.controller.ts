@@ -78,6 +78,32 @@ export class ClinicsController {
     };
   }
 
+  @Get(':id')
+  @ApiOkResponse()
+  async getClinicDetail(@Param('id') clinicId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.GET_CLINIC_DETAIL, {
+        clinicId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
   @Get()
   @ApiOkResponse({ type: ListClinicResponse })
   async findAll(@CurrentUser('id') userId: string) {
