@@ -241,14 +241,10 @@ export class ClinicsController {
   }
 
   @Get('permissions')
-  async getPermissions(
-    @CurrentUser('id') userId: string,
-    @Query('clinicId') clinicId: string,
-  ) {
+  async getPermissions(@CurrentUser('id') userId: string) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.GET_PERMISSIONS, {
         userId,
-        clinicId,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {

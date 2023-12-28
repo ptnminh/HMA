@@ -280,31 +280,13 @@ export class ClinicController {
   }
 
   @MessagePattern(ClinicCommand.GET_PERMISSIONS)
-  async getPermissions(data: { userId: string; clinicId: string }) {
+  async getPermissions() {
     try {
-      const { userId, clinicId } = data;
-      const permissions =
-        await this.clinicService.getPermissionOfClinicByOwnerId(
-          userId,
-          clinicId,
-        );
-      if (!permissions) {
-        return {
-          status: HttpStatus.UNAUTHORIZED,
-          message: 'Không tìm thấy permissions',
-        };
-      }
+      const permissions = await this.clinicService.getPermissions();
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách permissions thành công',
-        data: permissions?.clinicGroupRoles?.map((role) => {
-          return {
-            id: role.id,
-            name: role.name,
-            description: role.description,
-            permissions: map(role.rolePermissions, 'permission'),
-          };
-        }),
+        data: permissions,
       };
     } catch (error) {
       console.log(error);

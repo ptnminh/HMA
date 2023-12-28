@@ -9,7 +9,6 @@ export class ClinicService {
   async getPermissionOfClinicByOwnerId(ownerId: string, clinicId: string) {
     return this.prismaService.clinics.findFirst({
       where: {
-        ownerId,
         id: clinicId,
       },
       select: {
