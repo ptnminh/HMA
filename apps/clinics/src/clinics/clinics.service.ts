@@ -94,18 +94,10 @@ export class ClinicService {
     return this.prismaService.clinics.findMany({
       where: {
         isActive: true,
-        subscriptions: {
-          some: {
-            NOT: {
-              status: {
-                in: [4],
-              },
-            },
-          },
-        },
         userInClinics: {
           some: {
             userId,
+            isDisabled: false,
           },
         },
       },
@@ -212,13 +204,6 @@ export class ClinicService {
       },
       include: {
         subscriptions: {
-          where: {
-            NOT: {
-              status: {
-                in: [4],
-              },
-            },
-          },
           orderBy: {
             updatedAt: 'desc',
           },
