@@ -114,6 +114,9 @@ export class ClinicService {
           orderBy: {
             createdAt: 'desc',
           },
+          include: {
+            plans: true,
+          },
         },
       },
       orderBy: {
