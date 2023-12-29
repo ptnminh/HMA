@@ -53,7 +53,7 @@ export class PaymentController {
                     clinicId: subscription.clinicId,
                     subscribePlanId: subscription.id,
                     data: {
-                        status: 2
+                        status: 4
                     }
                 }
                 await this.delayedUpdateSubcriptions(inputData)
@@ -147,7 +147,7 @@ export class PaymentController {
         try {
             const {data, clinicId, subscribePlanId} = inputData
             const subscription = await this.paymenService.findSubcriptionById(subscribePlanId)
-            if (subscription.status !== 3 && subscription.status !== 4) {
+            if (subscription.status !== 3 && subscription.status !== 4 && subscription.status !== 2) {
                 const response = await firstValueFrom(this.clinicServiceClient.send(PaymentCommand.UPDATE_SUBSCRIBE_PLAN, {
                     data,
                     clinicId,
