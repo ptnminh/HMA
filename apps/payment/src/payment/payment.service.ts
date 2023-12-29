@@ -68,6 +68,9 @@ export class PaymentService {
         else if (provider === 'InternationalCard') {
             params['vnp_BankCode'] = 'INTCARD'
         }
+        else {
+            params['vnp_BankCode'] = 'VNPAYQR'
+        }
         params = this.sortObject(params)
 
         const signData = qs.stringify(params, {encode: false})
@@ -201,7 +204,4 @@ export class PaymentService {
             }
         })
     }
- 
-
-
 }
