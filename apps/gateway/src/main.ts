@@ -3,7 +3,7 @@ import { AppModule } from './app/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpStatus, ValidationPipe } from '@nestjs/common';
-import { join, resolve } from 'path';
+import { resolve } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SecuritySchemeObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
