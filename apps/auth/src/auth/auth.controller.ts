@@ -54,15 +54,15 @@ export class AuthController {
       const registerToken = await this.jwtService.signAsync(
         {
           id: user.id,
+          isMobile,
         },
         {
           secret: jwtSercret,
           expiresIn: '30d',
         },
       );
-      const linkComfirm = isMobile
-        ? 'clinus://abc.myapp.io/verify-account?token=' + registerToken
-        : backendUrl + '/api/auth/verify?token=' + registerToken;
+      const linkComfirm =
+        backendUrl + '/api/auth/verify?token=' + registerToken;
 
       if (!rest.emailVerified) {
         await lastValueFrom(

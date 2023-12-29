@@ -199,11 +199,10 @@ export class AuthController {
       );
     }
     const frontEndUrl = this.configService.get<string>('FRONTEND_URL');
-    return isMobile
-      ? {
-          status: true,
-          message: 'Verify user thành công',
-        }
+    return decoded.isMobile
+      ? res.redirect(
+          'https://clinus.page.link?link=https%3A%2F%2Fclinus.page.link%2Fverify-account',
+        )
       : res.redirect(`${frontEndUrl}/dang-nhap`);
   }
 
