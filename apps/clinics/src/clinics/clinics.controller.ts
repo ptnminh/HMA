@@ -297,6 +297,27 @@ export class ClinicController {
     }
   }
 
+  @MessagePattern(ClinicCommand.GET_SUBSCRIBE_PLAN)
+  async getSubscription(data: any) {
+    try {
+      const { subscribePlanId } = data;
+      const subscriptions =
+        await this.clinicService.getSubscription(subscribePlanId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách subscriptions thành công',
+        data: subscriptions,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
+
   @MessagePattern(ClinicCommand.CREATE_USER_GROUP_ROLE)
   async createUserGroupRole(data: any) {
     try {

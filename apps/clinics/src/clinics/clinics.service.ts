@@ -237,6 +237,18 @@ export class ClinicService {
     });
   }
 
+  async getSubscription(subscribePlanId: string) {
+    return this.prismaService.subscriptions.findUnique({
+      where: {
+        id: subscribePlanId,
+      },
+      include: {
+        plans: true,
+        clinics: true,
+      },
+    });
+  }
+
   async subcribePlan(data: Prisma.subscriptionsUncheckedCreateInput) {
     return this.prismaService.subscriptions.create({
       data,

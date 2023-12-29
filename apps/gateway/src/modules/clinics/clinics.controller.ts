@@ -210,6 +210,30 @@ export class ClinicsController {
     };
   }
 
+  @Get('subscribe-plan/:subscribePlanId')
+  async getSubscription(@Param('subscribePlanId') subscribePlanId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.GET_SUBSCRIBE_PLAN, {
+        subscribePlanId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
   @Post(':clinicId/subscribe-plan/:planId')
   @ApiOkResponse({ type: SubcribePlanResponse })
   async subscribePlan(@Body() data: SubcribePlanDTO) {
