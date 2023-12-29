@@ -45,7 +45,10 @@ export class AuthController {
           role: undefined,
         });
       } else {
-        await this.authService.signUpByEmail(data);
+        await this.authService.signUpByEmail({
+          ...rest,
+          email,
+        });
       }
       const user = await this.authService.findUserByEmail(email);
 
