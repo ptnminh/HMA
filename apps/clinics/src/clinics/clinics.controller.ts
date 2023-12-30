@@ -177,9 +177,10 @@ export class ClinicController {
         status: HttpStatus.OK,
         message: 'Thêm user vào clinic thành công',
         data: usersInClinic.map((user) => {
+          const { users, ...rest } = user;
           return {
-            ...user,
-            ...user.users,
+            ...rest,
+            ...(users || {}),
           };
         }),
       };

@@ -26,7 +26,7 @@ export class AuthController {
   @MessagePattern(AuthCommand.USER_CREATE)
   async register(data: RegisterDto) {
     try {
-      const { email, isMobile, ...rest } = data;
+      const { email, isMobile, noActionSendEmail, ...rest } = data;
 
       const exUser = await this.authService.findUserByEmail(email);
       if (exUser?.emailVerified) {
@@ -68,12 +68,14 @@ export class AuthController {
         backendUrl + '/api/auth/verify?token=' + registerToken;
 
       if (!rest.emailVerified) {
-        await lastValueFrom(
-          this.mailService.emit(EVENTS.AUTH_REGISTER, {
-            email,
-            link: linkComfirm,
-          }),
-        );
+        if (!noActionSendEmail) {
+          await lastValueFrom(
+            this.mailService.emit(EVENTS.AUTH_REGISTER, {
+              email,
+              link: linkComfirm,
+            }),
+          );
+        }
       }
       return {
         message: 'Tạo tài khoản thành công',
@@ -174,12 +176,13 @@ export class AuthController {
       // create user with email and password is email
       const frontEndUrl = this.configService.get<string>('FRONTEND_URL');
       const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
-      const { email, role } = data;
-
+      const { email } = data;
+      const verifiedUser =
+        await this.authService.findUserVerifiedByEmail(email);
       const confirmToken = await this.jwtService.signAsync(
         {
-          email,
-          role,
+          ...data,
+          id: verifiedUser?.id,
         },
         {
           secret: jwtSercret,

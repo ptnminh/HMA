@@ -59,12 +59,15 @@ import { Request } from 'express';
 import { FindUserByEmailResponse } from './dto/common.dto';
 import { IsMobile } from 'src/decorators/device.decorator';
 import { Response } from 'express';
+import { ClinicCommand } from '../clinics/command';
 
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(
     @Inject('AUTH_SERVICE') private readonly authServiceClient: ClientProxy,
+    @Inject('CLINIC_SERVICE')
+    private readonly clinicServiceClient: ClientProxy,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -231,37 +234,103 @@ export class AuthController {
     };
   }
 
-  // @Get()
-  // @UseGuards(GoogleOAuthGuard)
-  // async googleAuth(@Request() req) {}
+  @Get('verify-account')
+  async verifyInvitationAccount(
+    @Query('token') token: string,
+    @IsMobile() isMobile: boolean,
+  ) {
+    if (!token) {
+      throw new HttpException(
+        {
+          message: 'Lỗi xác thực',
+          data: null,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
+    const decoded = await this.jwtService.verifyAsync(token, {
+      secret: jwtSercret,
+    });
+    if (!decoded) {
+      throw new HttpException(
+        {
+          message: 'Lỗi xác thực',
+          data: null,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-  // @Get('google-redirect')
-  // @UseGuards(GoogleOAuthGuard)
-  // async googleAuthRedirect(@Request() req) {
-  //   const { user } = req;
-  //   if (!user) {
-  //     throw new HttpException(
-  //       {
-  //         message: 'Lỗi xác thực',
-  //         data: null,
-  //       },
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  //   const oauthResponse = await firstValueFrom(
-  //     this.authServiceClient.send(AuthCommand.USER_OAUTH_LOGIN, {
-  //       user,
-  //     }),
-  //   );
-  //   return {
-  //     message: oauthResponse.message,
-  //     data: {
-  //       user: oauthResponse.user,
-  //       token: oauthResponse.token,
-  //     },
-  //     status: true,
-  //   };
-  // }
+    // Validate expired token
+    const isTokenExpired = Date.now() >= decoded.exp * 1000;
+    if (isTokenExpired) {
+      throw new HttpException(
+        {
+          message: 'Đường dẫn đã hết hạn. Vui lòng thử lại sau',
+          data: null,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    let exUserId = decoded.id;
+    const {
+      clinicId,
+      roleId,
+      email,
+      firstName,
+      lastName,
+      id: userId,
+    } = decoded;
+    if (!userId) {
+      const verifyResponse = await firstValueFrom(
+        this.authServiceClient.send(AuthCommand.USER_CREATE, {
+          password: email,
+          firstName,
+          lastName,
+          isInputPassword: false,
+          emailVerified: true,
+          email,
+          noActionSendEmail: true,
+        }),
+      );
+
+      if (verifyResponse.status !== HttpStatus.CREATED) {
+        throw new HttpException(
+          {
+            message: verifyResponse.message,
+            data: null,
+            status: false,
+          },
+          verifyResponse.status,
+        );
+      }
+      exUserId = verifyResponse.user.id;
+    }
+
+    const updateResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.ADD_USER_TO_CLINIC, {
+        userId: exUserId,
+        clinicId,
+        roleId: +roleId,
+      }),
+    );
+    if (updateResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: updateResponse.message,
+          data: null,
+          status: false,
+        },
+        updateResponse.status,
+      );
+    }
+    return {
+      message: updateResponse.message,
+      data: updateResponse.data,
+      status: true,
+    };
+  }
 
   @Post('link-account')
   @ApiCreatedResponse({
