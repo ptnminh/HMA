@@ -189,7 +189,7 @@ export class AuthController {
           expiresIn: '30d',
         },
       );
-      const linkComfirm = frontEndUrl + '/verify-account?token=' + confirmToken;
+      const linkComfirm = frontEndUrl + '/invite-account?token=' + confirmToken;
 
       await lastValueFrom(
         this.mailService.emit(EVENTS.AUTH_REGISTER, {
