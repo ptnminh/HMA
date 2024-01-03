@@ -87,6 +87,7 @@ export class PaymentController {
   ) {
     try {
       var params = req.query;
+      params['isMobile'] = isMobile? "true":"false"
       params['body'] = req.body;
       const paymentServiceResponse = await firstValueFrom(
         this.paymentServiceClient.send(PaymentCommand.HANDLE_CALLBACK, {

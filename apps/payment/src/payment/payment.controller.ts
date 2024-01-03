@@ -81,6 +81,7 @@ export class PaymentController {
                 clinicId: '',
                 status: '',
                 subscribePlanId: '',
+                isMobile: data['isMobile']
             }
             if(data['amount'] && this.paymenService.zalopayValidateCallback(data)) {
                 returnQuery.amount = data['amount']
