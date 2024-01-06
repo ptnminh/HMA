@@ -30,8 +30,8 @@ import { time } from 'console';
 
 @Controller('schedules')
 @ApiTags('Schedules')
-/*@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('Bearer')*/
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('Bearer')
 export class ScheduleController {
   constructor(
     @Inject('SCHEDULE_SERVICE') private readonly scheduleServiceClient: ClientProxy,
