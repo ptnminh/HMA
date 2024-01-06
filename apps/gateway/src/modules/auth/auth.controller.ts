@@ -61,7 +61,7 @@ import { IsMobile } from 'src/decorators/device.decorator';
 import { Response } from 'express';
 import { ClinicCommand } from '../clinics/command';
 import { ScheduleDto } from './dto/schedule.dto';
-import { UpdateScheduleDto } from '../schedule/dto';
+import { UpdateScheduleDto } from './dto/update-schedule.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
