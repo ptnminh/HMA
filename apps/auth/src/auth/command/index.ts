@@ -18,4 +18,9 @@ export enum AuthCommand {
   CREATE_USER_TOKEN = 'create_user_token',
   DELETE_USER_TOKEN = 'delete_user_token',
   GET_USER_TOKEN = 'get_user_token',
+  FIND_SCHEDULE_BY_ID = 'find_schedule_by_id',
+  FIND_SCHEDULE_BY_USER_ID = 'find_schedule_by_user_id',
+  CREATE_SCHEDULE = 'create_schedule',
+  UPDATE_SCHEDULE = 'update_schedule',
+  DELETE_SCHEDULE = 'delete_schedule',
 }

@@ -15,4 +15,9 @@ export enum AuthCommand {
   RESET_PASSWORD_VERIFY = 'reset_password_verify',
   ADD_NEW_PASSWORD = 'add_new_password',
   FIND_USER_BY_EMAIL = 'find_user_by_email',
+  FIND_SCHEDULE_BY_ID = 'find_schedule_by_id',
+  FIND_SCHEDULE_BY_USER_ID = 'find_schedule_by_user_id',
+  CREATE_SCHEDULE = 'create_schedule',
+  UPDATE_SCHEDULE = 'update_schedule',
+  DELETE_SCHEDULE = 'delete_schedule',
 }
