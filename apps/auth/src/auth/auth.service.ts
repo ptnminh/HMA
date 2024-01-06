@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { RegisterDto } from './dto/create-user.dto';
 import { MODULES, hashPassword } from '../shared/';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -236,4 +237,52 @@ export class AuthService {
       },
     });
   }
+
+  async findScheduleById(id: number) {
+    return this.prismaService.userSchedules.findUnique({
+        where: {
+            id,
+            isDisabled: false
+        }
+    })
+}
+
+async findScheduleByUserId(userId: string) {
+    return this.prismaService.userSchedules.findMany({
+        where: {
+            userId,
+            isDisabled: false
+        }
+    })
+}
+
+async createSchedule(payload: Prisma.userSchedulesUncheckedCreateInput) {
+    return this.prismaService.userSchedules.create({
+        data: {
+            ...payload,
+        }
+    })
+}
+
+async deleteSchedule(id: number) {
+    return this.prismaService.userSchedules.update({
+        where: {
+            id,
+        },
+        data: {
+            isDisabled: true,
+        }
+    })
+}
+
+async updateSchedule(id: number, data: Prisma.userSchedulesUncheckedUpdateInput) {
+    return this.prismaService.userSchedules.update({
+        where: {
+            id,
+        },
+        data,
+    })
+}
+
+
 }
