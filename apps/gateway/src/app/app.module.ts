@@ -15,6 +15,7 @@ import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
 import { NotificationController } from 'src/modules/notification/notification.controller';
 import { PaymentController } from 'src/modules/payment/payment.controller';
 import { PlansController } from 'src/modules/plans/plans.controller';
+import { StaffController } from 'src/modules/staff/staff.controller';
 import { GoogleStrategy } from 'src/stategies/google.strategy';
 
 @Module({
@@ -53,6 +54,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
     ChatsController,
     NotificationController,
     PaymentController,
+    StaffController,
   ],
   providers: [
     ConfigService,
@@ -129,6 +131,19 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
       inject: [ConfigService],
     },
 
+    {
+      provide: 'STAFF_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          options: {
+            host: configService.get('STAFF_SERVICE_HOST'),
+            port: configService.get('STAFF_SERVICE_PORT'),
+          },
+        });
+      },
+
+      inject: [ConfigService],
+    },
   ],
 })
 export class AppModule {}
