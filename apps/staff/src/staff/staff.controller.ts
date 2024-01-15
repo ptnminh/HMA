@@ -160,10 +160,16 @@ export class StaffController {
                     status: HttpStatus.BAD_REQUEST
                 }
             }
+            const {startTime, endTime, ...rest} = schedule
+            const responseData = {
+                startTime: startTime.toISOString().substring(0, 16).replace("T", " "),
+                endTime: endTime.toISOString().substring(0,16).replace("T", " "),
+                ...rest,
+            }
             return {
                 message: "Tạo lịch làm việc thành công",
                 status: HttpStatus.OK,
-                data: schedule
+                data: responseData,
             }
         }
         catch (error){
@@ -188,10 +194,16 @@ export class StaffController {
                 }
             }
             const updatedSchedule = await this.staffService.updateSchedule(payload, id)
+            const {startTime, endTime, ...rest} = updatedSchedule
+            const responseData = {
+                startTime: startTime.toISOString().substring(0, 16).replace("T", " "),
+                endTime: endTime.toISOString().substring(0,16).replace("T", " "),
+                ...rest,
+            }
             return {
                 message: "Cập nhật lịch làm việc thành công",
                 status: HttpStatus.OK,
-                data: updatedSchedule
+                data: responseData
             }
         }
         catch (error){
@@ -241,10 +253,16 @@ export class StaffController {
                     status: HttpStatus.BAD_REQUEST
                 }
             }
+            const {startTime, endTime, ...rest} = schedule
+            const responseData = {
+                startTime: startTime.toISOString().substring(0, 16).replace("T", " "),
+                endTime: endTime.toISOString().substring(0,16).replace("T", " "),
+                ...rest,
+            }
             return {
                 message: "Tìm lịch làm việc thành công",
                 status: HttpStatus.OK,
-                data: schedule
+                data: responseData,
             }
         }
         catch (error){
@@ -260,11 +278,21 @@ export class StaffController {
     async findScheduleByStaffId(data: any) {
         try {
             const { staffId } =  data
-            const schedule = await this.staffService.findScheduleByStaffId(staffId)
+            var responseList = []
+            const schedules = await this.staffService.findScheduleByStaffId(staffId)
+            for(var schedule of schedules ){
+                const {startTime, endTime, ...rest} = schedule
+                const responseData = {
+                    startTime: startTime.toISOString().substring(0, 16).replace("T", " "),
+                    endTime: endTime.toISOString().substring(0,16).replace("T", " "),
+                    ...rest,
+                }
+                responseList.push(responseData)
+            }
             return {
                 message: "Tìm lịch làm việc thành công",
                 status: HttpStatus.OK,
-                data: schedule
+                data: responseList,
             }
         }
         catch (error){

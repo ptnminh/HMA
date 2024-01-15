@@ -131,12 +131,12 @@ export declare class StaffController {
         data: {
             id: number;
             staffId: number;
-            startTime: Date;
-            endTime: Date;
             createAt: Date;
             updateAt: Date;
             isDisabled: boolean;
             disabledAt: Date;
+            startTime: string;
+            endTime: string;
         };
     }>;
     updateSchedule(data: any): Promise<{
@@ -149,12 +149,12 @@ export declare class StaffController {
         data: {
             id: number;
             staffId: number;
-            startTime: Date;
-            endTime: Date;
             createAt: Date;
             updateAt: Date;
             isDisabled: boolean;
             disabledAt: Date;
+            startTime: string;
+            endTime: string;
         };
     }>;
     deleteSchedule(data: any): Promise<{
@@ -176,27 +176,18 @@ export declare class StaffController {
         data: {
             id: number;
             staffId: number;
-            startTime: Date;
-            endTime: Date;
             createAt: Date;
             updateAt: Date;
             isDisabled: boolean;
             disabledAt: Date;
+            startTime: string;
+            endTime: string;
         };
     }>;
     findScheduleByStaffId(data: any): Promise<{
         message: string;
         status: HttpStatus;
-        data: {
-            id: number;
-            staffId: number;
-            startTime: Date;
-            endTime: Date;
-            createAt: Date;
-            updateAt: Date;
-            isDisabled: boolean;
-            disabledAt: Date;
-        }[];
+        data: any[];
     } | {
         message: string;
         status: HttpStatus;

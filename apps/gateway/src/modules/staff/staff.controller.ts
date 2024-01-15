@@ -142,8 +142,8 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
       const staffServiceResponse = await firstValueFrom(
         this.staffServiceClient.send(StaffCommand.CREATE_SCHEDULE, {
           staffId: parseInt(staffId),
-          startTime: new Date(dto.startTime),
-          endTime: new Date(dto.endTime)
+          startTime: new Date(dto.startTime.replace(" ", "T") + ":00.000Z"),
+          endTime: new Date(dto.endTime.replace(" ", "T") + ":00.000Z")
         })
       );
       if (staffServiceResponse.status !== HttpStatus.OK) {
@@ -168,8 +168,8 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
       const staffServiceResponse = await firstValueFrom(
         this.staffServiceClient.send(StaffCommand.UPDATE_SCHEDULE, {
           id: parseInt(id),
-          startTime: new Date(dto.startTime),
-          endTime: new Date(dto.endTime)
+          startTime: new Date(dto.startTime.replace(" ", "T") + ":00.000Z"),
+          endTime: new Date(dto.endTime.replace(" ", "T") + ":00.000Z")
         })
       );
       if (staffServiceResponse.status !== HttpStatus.OK) {
