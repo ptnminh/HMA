@@ -102,6 +102,16 @@ let StaffService = class StaffService {
             where: {
                 staffId,
                 isDisabled: false
+            },
+            select: {
+                id: true,
+                staffId: true,
+                day: true,
+                startTime: true,
+                endTime: true,
+            },
+            orderBy: {
+                day: "asc",
             }
         });
     }
@@ -113,7 +123,7 @@ let StaffService = class StaffService {
             }
         });
     }
-    async deleteSchdule(id) {
+    async deleteSchedule(id) {
         return this.prismaService.staffSchedules.update({
             where: {
                 id,

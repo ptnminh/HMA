@@ -291,8 +291,9 @@ model appointments {
 model staffSchedules {
   id              Int         @id @default(autoincrement())
   staffId         Int         @map(name: "staff_id") 
-  startTime       DateTime    
-  endTime         DateTime    
+  startTime       String    
+  endTime         String
+  day             Int         
   createAt        DateTime    @default(now()) @map(name: "created_at")
   updateAt        DateTime    @default(now()) @updatedAt @map(name: "updated_at")
   isDisabled      Boolean     @default(false) @map(name: "is_disabled")

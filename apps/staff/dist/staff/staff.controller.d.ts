@@ -41,8 +41,9 @@ export declare class StaffController {
             staffSchedules: {
                 id: number;
                 staffId: number;
-                startTime: Date;
-                endTime: Date;
+                startTime: string;
+                endTime: string;
+                day: number;
                 createAt: Date;
                 updateAt: Date;
                 isDisabled: boolean;
@@ -131,12 +132,13 @@ export declare class StaffController {
         data: {
             id: number;
             staffId: number;
+            startTime: string;
+            endTime: string;
+            day: number;
             createAt: Date;
             updateAt: Date;
             isDisabled: boolean;
             disabledAt: Date;
-            startTime: string;
-            endTime: string;
         };
     }>;
     updateSchedule(data: any): Promise<{
@@ -144,18 +146,15 @@ export declare class StaffController {
         status: HttpStatus;
         data?: undefined;
     } | {
-        message: string;
-        status: HttpStatus;
         data: {
             id: number;
             staffId: number;
-            createAt: Date;
-            updateAt: Date;
-            isDisabled: boolean;
-            disabledAt: Date;
             startTime: string;
             endTime: string;
-        };
+            day: number;
+        }[];
+        message: string;
+        status: HttpStatus;
     }>;
     deleteSchedule(data: any): Promise<{
         message: string;
@@ -176,18 +175,25 @@ export declare class StaffController {
         data: {
             id: number;
             staffId: number;
+            startTime: string;
+            endTime: string;
+            day: number;
             createAt: Date;
             updateAt: Date;
             isDisabled: boolean;
             disabledAt: Date;
-            startTime: string;
-            endTime: string;
         };
     }>;
     findScheduleByStaffId(data: any): Promise<{
         message: string;
         status: HttpStatus;
-        data: any[];
+        data: {
+            id: number;
+            staffId: number;
+            startTime: string;
+            endTime: string;
+            day: number;
+        }[];
     } | {
         message: string;
         status: HttpStatus;
