@@ -154,10 +154,11 @@ let StaffController = class StaffController {
                     status: common_1.HttpStatus.BAD_REQUEST
                 };
             }
+            const { startTime, endTime, ...rest } = schedule;
             return {
                 message: "Tạo lịch làm việc thành công",
                 status: common_1.HttpStatus.OK,
-                data: schedule
+                data: schedule,
             };
         }
         catch (error) {
@@ -170,19 +171,33 @@ let StaffController = class StaffController {
     }
     async updateSchedule(data) {
         try {
-            const { id, ...payload } = data;
-            const schedule = await this.staffService.findScheduleById(id);
-            if (!schedule) {
+            const { staffId, scheduleList } = data;
+            console.log(data);
+            const staff = await this.staffService.findStaffById(staffId);
+            if (!staff) {
                 return {
-                    message: "Lịch làm việc không tồn tại",
-                    status: common_1.HttpStatus.BAD_REQUEST
+                    message: "Nhân viên không tồn tại",
+                    status: common_1.HttpStatus.BAD_REQUEST,
                 };
             }
-            const updatedSchedule = await this.staffService.updateSchedule(payload, id);
+            const currentSChedules = await this.staffService.findScheduleByStaffId(staffId);
+            for (var element of currentSChedules) {
+                await this.staffService.deleteSchedule(element.id);
+            }
+            for (var schedule of scheduleList) {
+                const payload = {
+                    staffId: staffId,
+                    startTime: schedule['startTime'],
+                    endTime: schedule['endTime'],
+                    day: schedule['day']
+                };
+                await this.staffService.createSchedule(payload);
+            }
+            const updatedSchedule = await this.staffService.findScheduleByStaffId(staffId);
             return {
-                message: "Cập nhật lịch làm việc thành công",
+                data: updatedSchedule,
+                message: "Cập nhật thành công",
                 status: common_1.HttpStatus.OK,
-                data: updatedSchedule
             };
         }
         catch (error) {
@@ -196,7 +211,7 @@ let StaffController = class StaffController {
     async deleteSchedule(data) {
         try {
             const { id } = data;
-            await this.staffService.deleteSchdule(id);
+            await this.staffService.deleteSchedule(id);
             const schedule = await this.staffService.findScheduleById(id);
             if (schedule) {
                 return {
@@ -231,7 +246,7 @@ let StaffController = class StaffController {
             return {
                 message: "Tìm lịch làm việc thành công",
                 status: common_1.HttpStatus.OK,
-                data: schedule
+                data: schedule,
             };
         }
         catch (error) {
@@ -245,11 +260,11 @@ let StaffController = class StaffController {
     async findScheduleByStaffId(data) {
         try {
             const { staffId } = data;
-            const schedule = await this.staffService.findScheduleByStaffId(staffId);
+            const schedules = await this.staffService.findScheduleByStaffId(staffId);
             return {
                 message: "Tìm lịch làm việc thành công",
                 status: common_1.HttpStatus.OK,
-                data: schedule
+                data: schedules,
             };
         }
         catch (error) {

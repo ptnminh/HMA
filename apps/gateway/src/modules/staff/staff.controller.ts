@@ -27,7 +27,7 @@ import { CreateStaffDto } from './dto/create-staff.dto';
 import { StaffCommand } from './command';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreeateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { ScheduleList, UpdateScheduleDto } from './dto/update-schedule.dto';
   
   @Controller('staffs')
   @ApiTags('Staff')
@@ -63,7 +63,7 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
       };
     }
 
-    @Put('/:id')
+    /*@Put('/:id')
     async updateStaff(@Body() dto: UpdateStaffDto, @Param('id') id: string) {
       const staffServiceResponse = await firstValueFrom(
         this.staffServiceClient.send(StaffCommand.UPDATE_STAFF, {
@@ -86,7 +86,7 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
         data: staffServiceResponse.data,
         status: true,
       };
-    }
+    }*/
 
     @Delete('/:id')
     async deleteStaff(@Param('id') id: string) {
@@ -137,13 +137,13 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
  }
 
 
-    @Post('/:staffId/schedule')
+    /*@Post('/:staffId/schedule')
     async createSchedule(@Param('staffId') staffId: string, @Body() dto: CreeateScheduleDto) {
       const staffServiceResponse = await firstValueFrom(
         this.staffServiceClient.send(StaffCommand.CREATE_SCHEDULE, {
           staffId: parseInt(staffId),
-          startTime: new Date(dto.startTime),
-          endTime: new Date(dto.endTime)
+          startTime: new Date(dto.startTime.replace(" ", "T") + ":00.000Z"),
+          endTime: new Date(dto.endTime.replace(" ", "T") + ":00.000Z")
         })
       );
       if (staffServiceResponse.status !== HttpStatus.OK) {
@@ -163,31 +163,6 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
       };
     }
 
-    @Put('schedule/:id')
-    async updateSchdule(@Param('id') id: string, @Body() dto: UpdateScheduleDto) {
-      const staffServiceResponse = await firstValueFrom(
-        this.staffServiceClient.send(StaffCommand.UPDATE_SCHEDULE, {
-          id: parseInt(id),
-          startTime: new Date(dto.startTime),
-          endTime: new Date(dto.endTime)
-        })
-      );
-      if (staffServiceResponse.status !== HttpStatus.OK) {
-        throw new HttpException(
-          {
-            message: staffServiceResponse.message,
-            data: null,
-            status: false,
-          },
-          staffServiceResponse.status,
-        );
-      }
-      return {
-        message: staffServiceResponse.message,
-        data: staffServiceResponse.data,
-        status: true,
-      };
-    }
 
     @Delete('/schedule/:id')
     async deleteSchedule(@Param('id') id: string) {
@@ -218,6 +193,33 @@ import { UpdateScheduleDto } from './dto/update-schedule.dto';
       const staffServiceResponse = await firstValueFrom(
         this.staffServiceClient.send(StaffCommand.FIND_SCHEDULE_BY_ID, {
           id: parseInt(id)
+        })
+      );
+      if (staffServiceResponse.status !== HttpStatus.OK) {
+        throw new HttpException(
+          {
+            message: staffServiceResponse.message,
+            data: null,
+            status: false,
+          },
+          staffServiceResponse.status,
+        );
+      }
+      return {
+        message: staffServiceResponse.message,
+        data: staffServiceResponse.data,
+        status: true,
+      };
+    }
+    */
+
+
+    @Put(':staffId/schedule/')
+    async updateSchdule(@Param('staffId') staffId: string, @Body() scheduleList: ScheduleList) {
+      const staffServiceResponse = await firstValueFrom(
+        this.staffServiceClient.send(StaffCommand.UPDATE_SCHEDULE, {
+          staffId: parseInt(staffId),
+          scheduleList: (scheduleList.schedules)? scheduleList.schedules : [],
         })
       );
       if (staffServiceResponse.status !== HttpStatus.OK) {

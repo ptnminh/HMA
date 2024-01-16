@@ -42,8 +42,9 @@ export declare class StaffService {
         staffSchedules: {
             id: number;
             staffId: number;
-            startTime: Date;
-            endTime: Date;
+            startTime: string;
+            endTime: string;
+            day: number;
             createAt: Date;
             updateAt: Date;
             isDisabled: boolean;
@@ -88,8 +89,9 @@ export declare class StaffService {
     createSchedule(payload: Prisma.staffSchedulesUncheckedCreateInput): Promise<{
         id: number;
         staffId: number;
-        startTime: Date;
-        endTime: Date;
+        startTime: string;
+        endTime: string;
+        day: number;
         createAt: Date;
         updateAt: Date;
         isDisabled: boolean;
@@ -98,8 +100,9 @@ export declare class StaffService {
     updateSchedule(payload: Prisma.staffSchedulesUncheckedUpdateInput, id: number): Promise<{
         id: number;
         staffId: number;
-        startTime: Date;
-        endTime: Date;
+        startTime: string;
+        endTime: string;
+        day: number;
         createAt: Date;
         updateAt: Date;
         isDisabled: boolean;
@@ -108,28 +111,27 @@ export declare class StaffService {
     findScheduleByStaffId(staffId: number): Promise<{
         id: number;
         staffId: number;
-        startTime: Date;
-        endTime: Date;
-        createAt: Date;
-        updateAt: Date;
-        isDisabled: boolean;
-        disabledAt: Date;
+        startTime: string;
+        endTime: string;
+        day: number;
     }[]>;
     findScheduleById(id: number): Promise<{
         id: number;
         staffId: number;
-        startTime: Date;
-        endTime: Date;
+        startTime: string;
+        endTime: string;
+        day: number;
         createAt: Date;
         updateAt: Date;
         isDisabled: boolean;
         disabledAt: Date;
     }>;
-    deleteSchdule(id: number): Promise<{
+    deleteSchedule(id: number): Promise<{
         id: number;
         staffId: number;
-        startTime: Date;
-        endTime: Date;
+        startTime: string;
+        endTime: string;
+        day: number;
         createAt: Date;
         updateAt: Date;
         isDisabled: boolean;

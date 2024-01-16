@@ -1,7 +1,8 @@
 import { Controller, HttpStatus } from '@nestjs/common';
 import { StaffService } from './staff.service';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { StaffCommand } from './command';
+import { Prisma } from '@prisma/client';
 
 @Controller('staff')
 export class StaffController {
@@ -160,10 +161,11 @@ export class StaffController {
                     status: HttpStatus.BAD_REQUEST
                 }
             }
+            const {startTime, endTime, ...rest} = schedule
             return {
                 message: "Tạo lịch làm việc thành công",
                 status: HttpStatus.OK,
-                data: schedule
+                data: schedule,
             }
         }
         catch (error){
@@ -179,19 +181,33 @@ export class StaffController {
     @MessagePattern(StaffCommand.UPDATE_SCHEDULE)
     async updateSchedule(data: any) {
         try {
-            const {id, ...payload} =  data
-            const schedule = await this.staffService.findScheduleById(id)
-            if (!schedule) {
+            const {staffId, scheduleList} = data
+            console.log(data)
+            const staff = await this.staffService.findStaffById(staffId)
+            if (!staff) {
                 return {
-                    message: "Lịch làm việc không tồn tại",
-                    status: HttpStatus.BAD_REQUEST
+                    message: "Nhân viên không tồn tại",
+                    status: HttpStatus.BAD_REQUEST,
                 }
             }
-            const updatedSchedule = await this.staffService.updateSchedule(payload, id)
+            const currentSChedules = await this.staffService.findScheduleByStaffId(staffId)
+            for (var element of currentSChedules) {
+                await this.staffService.deleteSchedule(element.id)
+            }
+            for (var schedule of scheduleList) {
+                const payload: Prisma.staffSchedulesUncheckedCreateInput = {
+                    staffId: staffId,
+                    startTime: schedule['startTime'],
+                    endTime: schedule['endTime'],
+                    day: schedule['day']
+                }
+                await this.staffService.createSchedule(payload)  
+            }
+            const updatedSchedule = await this.staffService.findScheduleByStaffId(staffId) 
             return {
-                message: "Cập nhật lịch làm việc thành công",
+                data: updatedSchedule,
+                message: "Cập nhật thành công",
                 status: HttpStatus.OK,
-                data: updatedSchedule
             }
         }
         catch (error){
@@ -207,7 +223,7 @@ export class StaffController {
     async deleteSchedule(data: any) {
         try {
             const {id} =  data
-            await this.staffService.deleteSchdule(id)
+            await this.staffService.deleteSchedule(id)
             const schedule = await this.staffService.findScheduleById(id)
             if (schedule) {
                 return {
@@ -244,7 +260,7 @@ export class StaffController {
             return {
                 message: "Tìm lịch làm việc thành công",
                 status: HttpStatus.OK,
-                data: schedule
+                data: schedule,
             }
         }
         catch (error){
@@ -260,11 +276,11 @@ export class StaffController {
     async findScheduleByStaffId(data: any) {
         try {
             const { staffId } =  data
-            const schedule = await this.staffService.findScheduleByStaffId(staffId)
+            const schedules = await this.staffService.findScheduleByStaffId(staffId)
             return {
                 message: "Tìm lịch làm việc thành công",
                 status: HttpStatus.OK,
-                data: schedule
+                data: schedules,
             }
         }
         catch (error){
@@ -275,4 +291,5 @@ export class StaffController {
             }
         }
     }
+
 }
