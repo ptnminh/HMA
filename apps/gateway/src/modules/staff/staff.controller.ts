@@ -214,7 +214,7 @@ import { ScheduleList, UpdateScheduleDto } from './dto/update-schedule.dto';
     */
 
 
-    @Put('schedule/:staffId')
+    @Put(':staffId/schedule/')
     async updateSchdule(@Param('staffId') staffId: string, @Body() scheduleList: ScheduleList) {
       const staffServiceResponse = await firstValueFrom(
         this.staffServiceClient.send(StaffCommand.UPDATE_SCHEDULE, {
