@@ -327,4 +327,52 @@ export class ClinicService {
       },
     });
   }
+
+
+  async createClinicService(data: Prisma.clinicServicesUncheckedCreateInput) {
+    return this.prismaService.clinicServices.create({
+      data,
+    })
+  }
+
+
+  async findClinicServiceByClinicId(clinicId: string) {
+    return this.prismaService.clinicServices.findMany({
+      where: {
+        isDisabled: false,
+        clinicId,
+      }
+    })
+  }
+
+
+  async findClinicServiceById(id: number) {
+    return this.prismaService.clinicServices.findFirst({
+      where: {
+        id, 
+        isDisabled: false
+      }
+    })
+  }
+
+
+  async updateClinicService(id: number, data: Prisma.staffServicesUncheckedUpdateInput) {
+    return this.prismaService.clinicServices.update({
+      where: {
+        id,
+      },
+      data,
+    })
+  }
+
+  async deleteClinicService(id: number) {
+    return this.prismaService.clinicServices.update({
+      where: {
+        id,
+      },
+      data: {
+        isDisabled: true,
+      }
+    })
+  }
 }

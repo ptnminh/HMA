@@ -23,11 +23,12 @@ import {
   import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
   import { ClientProxy } from '@nestjs/microservices';
   import { firstValueFrom } from 'rxjs';
-import { CreateStaffDto } from './dto/create-staff.dto';
 import { StaffCommand } from './command';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { CreeateScheduleDto } from './dto/create-schedule.dto';
 import { ScheduleList, UpdateScheduleDto } from './dto/update-schedule.dto';
+import { staffServiceListDto } from './dto/update-staff-service.dto';
+import { CreateStaffDto } from './dto/create-staff.dto';
   
   @Controller('staffs')
   @ApiTags('Staff')
@@ -38,12 +39,14 @@ import { ScheduleList, UpdateScheduleDto } from './dto/update-schedule.dto';
       @Inject('STAFF_SERVICE') private readonly staffServiceClient: ClientProxy,
     ) {}
 
-    @Post('/:memberId')
-    async createStaff(@Param('memberId') memberId: string) {
-      console.log(memberId)
+    @Post('/:UserInClinicId')
+    async createStaff(@Param('UserInClinicId') UserInClinicId: string, @Body() dto: CreateStaffDto) {
+      const {services, ...rest} = dto
       const staffServiceResponse = await firstValueFrom(
         this.staffServiceClient.send(StaffCommand.CREATE_STAFF, {
-          memberId: parseInt(memberId)
+          memberId: parseInt(UserInClinicId),
+          services: (dto.services)? dto.services : [],
+          ...rest
         })
       );
       if (staffServiceResponse.status !== HttpStatus.OK) {
@@ -63,12 +66,14 @@ import { ScheduleList, UpdateScheduleDto } from './dto/update-schedule.dto';
       };
     }
 
-    /*@Put('/:id')
+    @Put('/:id')
     async updateStaff(@Body() dto: UpdateStaffDto, @Param('id') id: string) {
+      const {services, ...rest} = dto
       const staffServiceResponse = await firstValueFrom(
         this.staffServiceClient.send(StaffCommand.UPDATE_STAFF, {
           id: parseInt(id),
-          ...dto
+          services: (dto.services)? dto.services : undefined,
+          ...rest
         })
       );
       if (staffServiceResponse.status !== HttpStatus.OK) {
@@ -86,7 +91,7 @@ import { ScheduleList, UpdateScheduleDto } from './dto/update-schedule.dto';
         data: staffServiceResponse.data,
         status: true,
       };
-    }*/
+    }
 
     @Delete('/:id')
     async deleteStaff(@Param('id') id: string) {
@@ -286,5 +291,54 @@ import { ScheduleList, UpdateScheduleDto } from './dto/update-schedule.dto';
       };
     }
 
+    
+    @Get(':staffId/services')
+    async findServiceByStaffId(@Param('staffId') staffId: string) {
+      const staffServiceResponse = await firstValueFrom(
+        this.staffServiceClient.send(StaffCommand.FIND_SERVICE_BY_STAFF_ID, {
+          staffId: parseInt(staffId),
+        })
+      );
+      if (staffServiceResponse.status !== HttpStatus.OK) {
+        throw new HttpException(
+          {
+            message: staffServiceResponse.message,
+            data: null,
+            status: false,
+          },
+          staffServiceResponse.status,
+        );
+      }
+      return {
+        message: staffServiceResponse.message,
+        data: staffServiceResponse.data,
+        status: true,
+      };
+    }
+    
 
+    // @Put(':staffId/services')
+    // async updateStaffService(@Param('staffId') staffId: string, @Body() services :staffServiceListDto) {
+    //   const staffServiceResponse = await firstValueFrom(
+    //     this.staffServiceClient.send(StaffCommand.UPDATE_STAFF_SERVICE, {
+    //       staffId: +staffId,
+    //       clinicServiceList: (services.clinicServices) ? services.clinicServices : [],
+    //     })
+    //   );
+    //   if (staffServiceResponse.status !== HttpStatus.OK) {
+    //     throw new HttpException(
+    //       {
+    //         message: staffServiceResponse.message,
+    //         data: null,
+    //         status: false,
+    //       },
+    //       staffServiceResponse.status,
+    //     );
+    //   }
+    //   return {
+    //     message: staffServiceResponse.message,
+    //     data: staffServiceResponse.data,
+    //     status: true,
+    //   };
+    // }
   }

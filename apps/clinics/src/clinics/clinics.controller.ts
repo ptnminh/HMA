@@ -557,4 +557,152 @@ export class ClinicController {
       };
     }
   }
+  
+  @MessagePattern(ClinicCommand.CREATE_CLINIC_SERVICE)
+  async createClinicService(data: any) {
+    try {
+      const {clinicId, ...payload} = data
+      const clinic = await this.clinicService.findClinicById(clinicId)
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Clinic không tồn tại",
+        }
+      }
+      const preparedPayload: Prisma.clinicServicesUncheckedCreateInput = {
+        clinicId,
+        ...payload,
+      }
+      const clinicService = await this.clinicService.createClinicService(preparedPayload)
+      if (!clinicService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tạo clinic service thất bại",
+        }
+      }
+      return {
+        status: HttpStatus.OK,
+        message: "Tạo clinic service thành công",
+        data: clinicService,
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
+
+  @MessagePattern(ClinicCommand.GET_CLINIC_SERVICE_BY_ID)
+  async findClinicServiceById(data: any) {
+    try { 
+      const {id} = data
+      const clinicService = await this.clinicService.findClinicServiceById(id)
+      if (!clinicService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Clinic service không tồn tại",
+        }
+      }
+      return {
+        status: HttpStatus.OK,
+        message: "Lấy thông tin clinic service thành công",
+        data: clinicService,
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
+
+  @MessagePattern(ClinicCommand.GET_CLINIC_SERVICE_BY_CLINIC_ID)
+  async findClinicServiceByClinicId(data: any) {
+    try { 
+      const {clinicId} = data
+      const clinic = await this.clinicService.findClinicById(clinicId)
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Clinic không tồn tại",
+        }
+      }
+      const clinicServices = await this.clinicService.findClinicServiceByClinicId(clinicId)
+      return {
+        status: HttpStatus.OK,
+        message: "Lấy thông tin clinic service thành công",
+        data: clinicServices,
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
+
+  @MessagePattern(ClinicCommand.UPDATE_CLINIC_SERVICE)
+  async updateClinicService(data: any) {
+    try { 
+      const {id, ...payload} = data
+      const clinicService = await this.clinicService.findClinicServiceById(id)
+      if (!clinicService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Clinic service không tồn tại",
+        }
+      }
+      const preparedPayload : Prisma.clinicServicesUncheckedUpdateInput = {
+        id,
+        ...payload,
+      } 
+      const updatedClinicServices = await this.clinicService.updateClinicService(id, preparedPayload)
+      return {
+        status: HttpStatus.OK,
+        message: "Cập nhật clinic service thành công",
+        data: updatedClinicServices,
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
+ 
+  @MessagePattern(ClinicCommand.DELETE_CLINIC_SERVICE)
+  async deleteClinicService(data: any) {   
+    try { 
+      const {id} = data
+      const clinicService = await this.clinicService.findClinicServiceById(id)
+      if (!clinicService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Clinic service không tồn tại",
+        }
+      }
+      await this.clinicService.deleteClinicService(id)
+      return {
+        status: HttpStatus.OK,
+        message: "Xóa clinic service thành công",
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
 }
+

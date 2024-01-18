@@ -12,19 +12,42 @@ export class StaffController {
     @MessagePattern(StaffCommand.CREATE_STAFF)
     async createStaff(data: any) {
         try {
-            const {memberId} = data
-            console.log(memberId)
-            const staff = await this.staffService.createStaff(memberId)
-            if (!staff) {
+            const {memberId, services, ...rest} = data
+            const userInClinics = await this.staffService.findUserInClinic(memberId)
+            if(!userInClinics) {
                 return {
-                    message: "Tạo thất bại",
+                    message: "UserInClinic không tồn tại",
                     status: HttpStatus.BAD_REQUEST
                 }
             }
+            const payload: Prisma.staffsUncheckedCreateInput = {
+                memberId,
+                ...rest,
+            }
+            const staff = await this.staffService.createStaff(payload)
+            if (!staff) {
+                return {
+                    message: "Tạo staff thất bại",
+                    status: HttpStatus.BAD_REQUEST
+                }
+            }
+            if (services !== null || services !== undefined) {
+                for (var clinciServiceId of services) {
+                    const clinicService = await this.staffService.findClinicServiceById(clinciServiceId)
+                    if(clinicService) {
+                        const payload: Prisma.staffServicesUncheckedCreateInput = {
+                            clinicServiceId: clinicService.id,
+                            staffId: staff.id,
+                        }
+                        await this.staffService.createStaffService(payload)
+                    }
+                }    
+            }
+            const createdStaff = await this.staffService.findStaffById(staff.id)
             return {
-                message: "Tạo thành công",
+                message: "Tạo staff thành công",
                 status: HttpStatus.OK,
-                data: staff
+                data: createdStaff,
             }
         }
         catch(error) {
@@ -44,7 +67,7 @@ export class StaffController {
             const staff = await this.staffService.findStaffById(id)
             if (!staff) {
                 return {
-                    message: "Tìm kiếm thất bại",
+                    message: "Nhân viên không tồn tại",
                     status: HttpStatus.BAD_REQUEST
                 }
             }
@@ -67,9 +90,16 @@ export class StaffController {
     async deleteStaff (data: any) {
         try {
             const {id} =  data
-            await this.staffService.deleteStaff(id)
             const staff = await this.staffService.findStaffById(id)
-            if (staff) {
+            if (!staff) {
+                return {
+                    message: "Nhân viên không tồn tại",
+                    status: HttpStatus.BAD_REQUEST
+                }
+            }
+            await this.staffService.deleteStaff(id)
+            const deletedStaff = await this.staffService.findStaffById(id)
+            if (deletedStaff) {
                 return {
                     message: "Xóa thất bại",
                     status: HttpStatus.BAD_REQUEST
@@ -93,12 +123,34 @@ export class StaffController {
     @MessagePattern(StaffCommand.UPDATE_STAFF)
     async updateStaff(data: any) {
         try {
-            const {id, ...payload} =  data
-            const staff = await this.staffService.updateStaff(id, payload)
+            const {id, services, ...payload} =  data
+            const staff = await this.staffService.findStaffById(id)
+            if (!staff) {
+                return {
+                    message: "Nhân viên không tồn tại",
+                    status: HttpStatus.BAD_REQUEST
+                }
+            }
+            if(services !== null && services !== undefined) {
+                await this.staffService.deleteStaffServiceByStaffId(id)
+                for (var clinciServiceId of services) {
+                    const clinicService = await this.staffService.findClinicServiceById(clinciServiceId)
+                    if(clinicService) {
+                        const payload: Prisma.staffServicesUncheckedCreateInput = {
+                            clinicServiceId: clinicService.id,
+                            staffId: id,
+                        }
+                        await this.staffService.createStaffService(payload)
+                    }
+                }    
+            }
+
+            await this.staffService.updateStaff(id, payload)
+            const updatedStaff = await this.staffService.findStaffById(id)
             return {
-                message: "Xóa thành công",
+                message: "Cập nhật staff thành công",
                 status: HttpStatus.OK,
-                data: staff
+                data: updatedStaff
             }
         }
         catch (error){
@@ -154,6 +206,13 @@ export class StaffController {
     async createSchedule(data: any) {
         try {
             const {...payload} =  data
+            const staff = await this.staffService.findStaffById(payload.staffId)
+            if (!staff) {
+                return {
+                    status: HttpStatus.BAD_REQUEST,
+                    message: true,
+                }
+            }
             const schedule = await this.staffService.createSchedule(payload)
             if (!schedule) {
                 return {
@@ -276,6 +335,13 @@ export class StaffController {
     async findScheduleByStaffId(data: any) {
         try {
             const { staffId } =  data
+            const staff = await this.staffService.findStaffById(staffId)
+            if (!staff) {
+                return {
+                    message: "Nhân viên không tồn tại",
+                    status: HttpStatus.BAD_REQUEST,
+                }
+            }
             const schedules = await this.staffService.findScheduleByStaffId(staffId)
             return {
                 message: "Tìm lịch làm việc thành công",
@@ -292,4 +358,61 @@ export class StaffController {
         }
     }
 
+    @MessagePattern(StaffCommand.UPDATE_STAFF_SERVICE)
+    async updateStaffService(data: any) {
+        try {
+            const {clinicServiceList , staffId} = data
+            await this.staffService.deleteStaffServiceByStaffId(staffId)
+            for (var clinciServiceId of clinicServiceList) {
+                const clinicService = await this.staffService.findClinicServiceById(clinciServiceId)
+                if(clinicService) {
+                    const payload: Prisma.staffServicesUncheckedCreateInput = {
+                        clinicServiceId: clinicService.id,
+                        staffId,
+                    }
+                    await this.staffService.createStaffService(payload)
+                }
+            }
+            const createdStaffService = await this.staffService.findStaffServiceByStaffId(staffId)
+            return {
+                data: createdStaffService,
+                message: "Cập nhật thành công",
+                status: HttpStatus.OK,
+            }    
+        }
+        catch(error) {
+            console.log(error)
+            return {
+                message: "Lỗi hệ thống",
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+            }
+        }
+    }
+
+    @MessagePattern(StaffCommand.FIND_SERVICE_BY_STAFF_ID)
+    async findServiceByStaffId(data: any) {
+        try {
+            const { staffId } =  data
+            const staff = await this.staffService.findStaffById(staffId)
+            if (!staff) {
+                return {
+                    message: "Nhân viên không tồn tại",
+                    status: HttpStatus.BAD_REQUEST,
+                }
+            }
+            const services = await this.staffService.findStaffServiceByStaffId(staffId)
+            return {
+                message: "Lấy danh sách thông tin service thành công",
+                status: HttpStatus.OK,
+                data: services,
+            }
+        }
+        catch (error){
+            console.log(error)
+            return {
+                message: "Lỗi hệ thống",
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+            }
+        }
+    }
 }

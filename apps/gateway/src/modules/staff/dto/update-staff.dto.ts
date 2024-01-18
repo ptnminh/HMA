@@ -1,10 +1,54 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { ArrayUnique, IsArray, IsIn, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, Min } from "class-validator";
 
 export class UpdateStaffDto {
+    @ApiProperty({
+        example: 1,
+        description: "Male: 1, Female: 0"
+    })
+    @IsOptional()
+    @IsIn([0, 1])
+    gender?: number;
+ 
+    @ApiProperty({
+        example: "84702928134",
+        description: "Vietnamese phone number of staff"
+    })
+    @IsPhoneNumber('VN')
+    @IsOptional()
+    phoneNumber?: string;
 
-    @ApiProperty({example: 1})
-    @IsNumber()
+    @ApiProperty({
+        example: "Đ. Nguyễn Văn Cứ, TP.Hồ Chí Minh",
+        description: "The address of staff",
+    })
+    @IsString()
     @IsNotEmpty()
-    memberId: number
+    address: string;
+
+    @ApiProperty({
+        example: "Tim mạch",
+    })
+    @IsString()
+    @IsOptional()
+    specialize?: string;
+
+    @ApiProperty({
+        example: 1,
+        description: "Years of experience. Minimum required: 0"
+    })
+    @IsNumber()
+    @IsOptional()
+    @Min(0)
+    experience: number;
+
+    @ApiProperty({
+        example: [1,2,4],
+        description: "The list contains clinic service id"
+    })
+    @IsArray()
+    @ArrayUnique()
+    @IsNumber({}, {each: true})
+    @IsOptional()    
+    services?: number[]
 }
