@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
+import { AppointmentStatus } from 'src/shared';
 
 @Injectable()
 export class StaffService {
@@ -141,6 +142,7 @@ export class StaffService {
     return this.prismaService.appointments.create({
       data: {
         ...payload,
+        status: AppointmentStatus.NOT_CONFIRMED,
       },
     });
   }
