@@ -60,7 +60,7 @@ services:
     networks:
       - some-network
   staff:
-    build: ./apps/staffs
+    build: ./apps/staff
     restart: always
     hostname: staff
     env_file:
