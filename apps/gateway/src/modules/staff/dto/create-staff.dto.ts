@@ -26,4 +26,13 @@ export class CreateAppoimentDto {
   @ApiProperty({ example: 11 })
   @IsNotEmpty()
   doctorId: number;
+
+  @ApiProperty({ example: '2021-09-01' })
+  @IsNotEmpty()
+  date: string;
+
+  @ApiProperty({ example: 'clinicid' })
+  @IsNotEmpty()
+  @IsString()
+  clinicId: string;
 }
