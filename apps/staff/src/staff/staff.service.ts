@@ -46,9 +46,14 @@ export class StaffService {
         id,
       },
       include: {
-        staffSchedules: {
+        staffServices: {
           where: {
             isDisabled: false
+          }
+        },
+        staffSchedules :{
+          where :{
+            isDisabled: false,
           }
         }
       }

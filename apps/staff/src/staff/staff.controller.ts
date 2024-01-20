@@ -51,6 +51,7 @@ export class StaffController {
                 }    
             }
             const createdStaff = await this.staffService.findStaffById(staff.id)
+            delete(createdStaff.staffSchedules)
             return {
                 message: "Tạo staff thành công",
                 status: HttpStatus.OK,
@@ -160,6 +161,7 @@ export class StaffController {
 
             await this.staffService.updateStaff(id, payload)
             const updatedStaff = await this.staffService.findStaffById(id)
+            delete(updatedStaff.staffSchedules)
             return {
                 message: "Cập nhật staff thành công",
                 status: HttpStatus.OK,
