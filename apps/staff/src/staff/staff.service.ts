@@ -36,19 +36,44 @@ export class StaffService {
       },
     });
   }
+      
+
 
   async findStaffById(id: number) {
     return this.prismaService.staffs.findFirst({
+      where: {
+        isDisabled: false,
+        id,
+      },
+      include: {
+        staffSchedules: {
+          where: {
+            isDisabled: false
+          }
+        }
+      }
+    })
+  }
+  async findStaffByMemberId(memberId: number) {
+    return this.prismaService.staffs.findFirst({
         where: {
-            id,
             isDisabled: false,
+            memberId,
         },
         include: {
-            staffServices: {
-                where: {
-                    isDisabled: false,
+            userInClinics: {
+              select: {
+                clinicId: true,
+                userId: true,
+                users: {
+                  select: {
+                    name: true,
+                    firstName: true,
+                    lastName: true,
+                  }
                 }
-            }
+              },
+            },
         }            
     })
   }

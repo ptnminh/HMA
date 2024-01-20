@@ -424,4 +424,15 @@ export class ClinicService {
       };
     });
   }
+
+  async findAllStaffInClinic(clinicId: string) {
+    return this.prismaService.staffs.findMany({
+      where: {
+        isDisabled: false,
+        userInClinics: {
+          clinicId,
+        }
+      }
+    })
+  }
 }

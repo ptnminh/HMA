@@ -20,6 +20,13 @@ export class StaffController {
                     status: HttpStatus.BAD_REQUEST
                 }
             }
+            const existedStaff = await this.staffService.findStaffByMemberId(memberId)
+            if(existedStaff) {
+              return {
+                  message: "MemeberId đã tồn tại tồn tại",
+                  status: HttpStatus.BAD_REQUEST
+              }
+          }
             const payload: Prisma.staffsUncheckedCreateInput = {
                 memberId,
                 ...rest,
@@ -64,17 +71,23 @@ export class StaffController {
     async findStaffById (data: any) {
         try {
             const {id} =  data
-            const staff = await this.staffService.findStaffById(id)
+            const staff = await this.staffService.findStaffByMemberId(id)
             if (!staff) {
                 return {
                     message: "Nhân viên không tồn tại",
                     status: HttpStatus.BAD_REQUEST
                 }
             }
+            const {userInClinics, ...rest} = staff 
             return {
                 message: "Tìm kiếm thành công",
                 status: HttpStatus.OK,
-                data: staff
+                data: {
+                  ...rest,
+                  userId: userInClinics.clinicId,
+                  clinicId: userInClinics.userId,
+                  ...userInClinics.users
+                }
             }
         }
         catch (error){

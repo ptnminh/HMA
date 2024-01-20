@@ -731,5 +731,32 @@ export class ClinicController {
       }
     }
   }
+
+  @MessagePattern(ClinicCommand.FIND_ALL_STAFF_IN_CLINIC)
+  async getAllStaffInClinic(data: any) {
+    try { 
+      const {clinicId} = data
+      const clinic = await this.clinicService.findClinicById(clinicId)
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Clinic service không tồn tại",
+        }
+      }
+      const staffs = await this.clinicService.findAllStaffInClinic(clinicId)
+      return {
+        data: staffs,
+        status: HttpStatus.OK,
+        message: "Lấy danh sách staff trong clinic thành công",
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
 }
 
