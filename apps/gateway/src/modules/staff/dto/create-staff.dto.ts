@@ -1,38 +1,83 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { ArrayUnique, IsArray, IsIn, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, Min } from "class-validator";
 
 export class CreateStaffDto {
-  @ApiProperty({ example: 1 })
-  @IsNumber()
-  @IsNotEmpty()
-  memberId: number;
+    @ApiProperty({
+        example: 1,
+        description: "Male: 1, Female: 0"
+    })
+    @IsNotEmpty()
+    @IsIn([0, 1])
+    gender: number;
+ 
+    @ApiProperty({
+        example: "84931231511",
+        description: "Vietnamese phone number of staff"
+    })
+    @IsPhoneNumber('VN')
+    @IsNotEmpty()
+    phoneNumber: string;
+
+    @ApiProperty({
+        example: "Đ. Nguyễn Văn Cứ, TP.Hồ Chí Minh",
+        description: "The address of staff",
+    })
+    @IsString()
+    @IsNotEmpty()
+    address: string;
+
+    @ApiProperty({
+        example: "Tim mạch",
+    })
+    @IsString()
+    @IsOptional()
+    specialize?: string;
+
+    @ApiProperty({
+        example: 1,
+        description: "Years of experience. Minimum required: 0"
+    })
+    @IsNumber()
+    @IsOptional()
+    @Min(0)
+    experience: number;
+
+    @ApiProperty({
+        example: [1,2,4],
+        description: "The list contains clinic service id"
+    })
+    @IsArray()
+    @ArrayUnique()
+    @IsNumber({}, {each: true})
+    @IsOptional()    
+    services?: number[]
 }
 
 export class CreateAppoimentDto {
-  @ApiProperty({ example: '7:00' })
-  @IsString()
-  @IsNotEmpty()
-  startTime: string;
-
-  @ApiProperty({ example: '7:00' })
-  @IsString()
-  @IsNotEmpty()
-  endTime: string;
-
-  @ApiProperty({ example: 'description' })
-  @IsOptional()
-  description?: string;
-
-  @ApiProperty({ example: 11 })
-  @IsNotEmpty()
-  doctorId: number;
-
-  @ApiProperty({ example: '2021-09-01' })
-  @IsNotEmpty()
-  date: string;
-
-  @ApiProperty({ example: 'clinicid' })
-  @IsNotEmpty()
-  @IsString()
-  clinicId: string;
+    @ApiProperty({ example: '7:00' })
+    @IsString()
+    @IsNotEmpty()
+    startTime: string;
+  
+    @ApiProperty({ example: '7:00' })
+    @IsString()
+    @IsNotEmpty()
+    endTime: string;
+  
+    @ApiProperty({ example: 'description' })
+    @IsOptional()
+    description?: string;
+  
+    @ApiProperty({ example: 11 })
+    @IsNotEmpty()
+    doctorId: number;
+  
+    @ApiProperty({ example: '2021-09-01' })
+    @IsNotEmpty()
+    date: string;
+  
+    @ApiProperty({ example: 'clinicid' })
+    @IsNotEmpty()
+    @IsString()
+    clinicId: string
 }

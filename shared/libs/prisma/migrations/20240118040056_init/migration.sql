@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "staffs" ALTER COLUMN "address" DROP DEFAULT,
+ALTER COLUMN "gender" DROP DEFAULT,
+ALTER COLUMN "phone_number" DROP DEFAULT;

@@ -39,6 +39,8 @@ import { firstValueFrom } from 'rxjs';
 import { ClinicCommand } from './command';
 import { CurrentUser } from 'src/decorators';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { CreateClinicServiceDto } from './dto/create-clinic-service.dto';
+import { UpdateClinicServiceDto } from './dto/update-clinic-service.dto';
 
 @Controller('clinics')
 @ApiTags('Clinics')
@@ -425,6 +427,31 @@ export class ClinicsController {
     };
   }
 
+  @Post(':clinicId/services')
+  async createClinicService(@Param('clinicId') clinicId: string, @Body() dto: CreateClinicServiceDto) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.CREATE_CLINIC_SERVICE, {
+        clinicId,
+        ...dto,
+      }),
+      );
+      if (clinicServiceResponse.status !== HttpStatus.OK) {
+        throw new HttpException(
+          {
+            message: clinicServiceResponse.message,
+            data: null,
+            status: false,
+          },
+          clinicServiceResponse.status,
+        );
+      }
+      return {
+        message: clinicServiceResponse.message,
+        data: clinicServiceResponse.data,
+        status: true,
+      };
+    }
+    
   @Get(':id/appoitments')
   async getAppoitments(
     @Param('id') clinicId: string,
@@ -443,7 +470,7 @@ export class ClinicsController {
           data: null,
           status: false,
         },
-        HttpStatus.BAD_REQUEST,
+        clinicServiceResponse.status,
       );
     }
     return {
@@ -451,5 +478,128 @@ export class ClinicsController {
       data: clinicServiceResponse.data,
       status: true,
     };
+  }
+
+
+  @Put('/services/:id')
+  async updateClinicService(@Param('id') id: string, @Body() dto: UpdateClinicServiceDto) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.UPDATE_CLINIC_SERVICE, {
+        id: +id,
+        ...dto,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Get('services/:id')
+  async findClinicServiceById(@Param('id') id: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.GET_CLINIC_SERVICE_BY_ID, {
+        id: +id,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Get(':clinicId/services')
+  async findClinicServiceByClinicId(@Param('clinicId') clinicId: string,) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.GET_CLINIC_SERVICE_BY_CLINIC_ID, {
+        clinicId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Delete('/services/:id')
+  async deleteClinicService(@Param('id') id: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.DELETE_CLINIC_SERVICE, {
+        id: +id,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Get('/:clinicId/staffs')
+  async findAllStaffInClinic(@Param('clinicId') clinicId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.FIND_ALL_STAFF_IN_CLINIC, {
+        clinicId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+
   }
 }
