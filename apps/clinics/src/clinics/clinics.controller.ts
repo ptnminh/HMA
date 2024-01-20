@@ -591,9 +591,36 @@ export class ClinicController {
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
-      }
+        data: null,
+      };
     }
   }
+
+  @MessagePattern(ClinicCommand.GET_APPOINMENTS)
+  async getAppointments(data: any) {
+    try {
+      const { clinicId, date, status, doctorId } = data;
+      const appointments = await this.clinicService.getAppointments({
+        date,
+        status,
+        doctorId,
+        clinicId,
+      });
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách appointments thành công',
+        data: appointments,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
+
 
   @MessagePattern(ClinicCommand.GET_CLINIC_SERVICE_BY_ID)
   async findClinicServiceById(data: any) {

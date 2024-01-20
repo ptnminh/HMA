@@ -226,3 +226,20 @@ export class GetUsersInClinicResponse {
   @ApiProperty({ example: 'Lấy danh sách user thành công.', nullable: true })
   message: { [key: string]: any };
 }
+
+export class GetAppoitmentsQueryDto {
+  @ApiProperty({ example: 1, required: false })
+  @IsString()
+  @IsOptional()
+  doctorId?: string;
+
+  @ApiProperty({ example: '2021-09-27', required: false })
+  @IsOptional()
+  @IsString()
+  date?: string;
+
+  @ApiProperty({ example: 'status', required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
+}

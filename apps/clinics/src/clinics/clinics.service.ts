@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { map } from 'lodash';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -374,5 +375,53 @@ export class ClinicService {
         isDisabled: true,
       }
     })
+  }
+
+  
+  async getAppointments({
+    doctorId,
+    date,
+    status,
+    clinicId,
+  }: {
+    doctorId?: string;
+    date?: string;
+    status?: string;
+    clinicId?: string;
+  }) {
+    const where: any = {
+      ...(doctorId ? { doctorId } : {}),
+      ...(date ? { date } : {}),
+      ...(status ? { status } : {}),
+      clinicId,
+    };
+    const appointments = this.prismaService.appointments.findMany({
+      where,
+      include: {
+        staffs: {
+          select: {
+            userInClinics: {
+              select: {
+                users: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    return map(appointments, (appointment: any) => {
+      const { staffs, ...rest }: any = appointment;
+      return {
+        ...rest,
+        user: staffs?.userInClinics?.users,
+      };
+    });
   }
 }

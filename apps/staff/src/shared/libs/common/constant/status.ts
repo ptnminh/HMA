@@ -1,0 +1,6 @@
+export const AppointmentStatus = {
+  NOT_CONFIRMED: 'NOT_CONFIRMED',
+  CONFIRMED: 'CONFIRMED',
+  CANCEL: 'CANCEL',
+  COMPLETED: 'COMPLETED',
+};

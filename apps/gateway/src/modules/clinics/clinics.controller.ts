@@ -17,6 +17,7 @@ import {
   CreateClinicDto,
   CreateClinicResponse,
   CreateUserGroupRoleDTO,
+  GetAppoitmentsQueryDto,
   GetUsersInClinicResponse,
   ListClinicResponse,
   SubcribePlanDTO,
@@ -432,6 +433,34 @@ export class ClinicsController {
       this.clinicServiceClient.send(ClinicCommand.CREATE_CLINIC_SERVICE, {
         clinicId,
         ...dto,
+      }),
+      );
+      if (clinicServiceResponse.status !== HttpStatus.OK) {
+        throw new HttpException(
+          {
+            message: clinicServiceResponse.message,
+            data: null,
+            status: false,
+          },
+          clinicServiceResponse.status,
+        );
+      }
+      return {
+        message: clinicServiceResponse.message,
+        data: clinicServiceResponse.data,
+        status: true,
+      };
+    }
+    
+  @Get(':id/appoitments')
+  async getAppoitments(
+    @Param('id') clinicId: string,
+    @Query() query: GetAppoitmentsQueryDto,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.GET_APPOINMENTS, {
+        clinicId,
+        ...query,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {

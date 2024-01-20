@@ -59,7 +59,14 @@ services:
       - .env
     networks:
       - some-network
-
+  staff:
+    build: ./apps/staff
+    restart: always
+    hostname: staff
+    env_file:
+      - .env
+    networks:
+      - some-network
   payment:
     build: ./apps/payment
     restart: always
