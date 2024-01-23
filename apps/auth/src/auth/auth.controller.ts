@@ -13,7 +13,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom } from 'rxjs';
-import { Prisma } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -591,6 +590,55 @@ export class AuthController {
           email: user.email,
           id: user.id,
         },
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(AuthCommand.FIND_ALL_USER_BY_EMAIL)
+  async findAllUserByEmail(data: { email: string }) {
+    try {
+      const { email } = data;
+      const user = await this.authService.findUserByEmail(email);
+      if (!user) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Email không tồn tại',
+        };
+      }
+      if (!user.emailVerified) {
+        const backendUrl = this.configService.get<string>('BACKEND_URL');
+        const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
+        const registerToken = await this.jwtService.signAsync(
+          {
+            id: user.id,
+          },
+          {
+            secret: jwtSercret,
+            expiresIn: '30d',
+          },
+        );
+        const linkComfirm =
+          backendUrl + '/api/auth/verify?token=' + registerToken;
+        await lastValueFrom(
+          this.mailService.emit(EVENTS.AUTH_REGISTER, {
+            email,
+            link: linkComfirm,
+          }),
+        );
+        return {
+          status: HttpStatus.OK,
+          message: 'Gửi email xác thực thành công',
+        };
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Tìm user thành công',
+        data: user,
       };
     } catch (error) {
       return {

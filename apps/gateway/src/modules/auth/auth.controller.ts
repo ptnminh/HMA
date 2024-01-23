@@ -637,11 +637,44 @@ export class AuthController {
     };
   }
 
+  @ApiOkResponse({
+    type: FindUserByEmailResponse,
+  })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
+  @Get('find-all-user')
+  async findAllUserByEmail(@Query('email') email: string) {
+    const findUserByEmailResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.FIND_ALL_USER_BY_EMAIL, {
+        email,
+      }),
+    );
+    if (findUserByEmailResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: findUserByEmailResponse.message,
+          data: null,
+          status: false,
+        },
+        findUserByEmailResponse.status,
+      );
+    }
+    return {
+      message: findUserByEmailResponse.message,
+      data: findUserByEmailResponse.data,
+      status: true,
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
   @Get('/schedule/:id')
-  async findScheduleById(@Query('id') id: string ) {
-    const scheduleServiceResponse = await firstValueFrom(this.authServiceClient.send(AuthCommand.FIND_SCHEDULE_BY_ID, {id: parseInt(id)}))
+  async findScheduleById(@Query('id') id: string) {
+    const scheduleServiceResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.FIND_SCHEDULE_BY_ID, {
+        id: parseInt(id),
+      }),
+    );
     if (scheduleServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
@@ -656,15 +689,18 @@ export class AuthController {
       message: scheduleServiceResponse.message,
       data: scheduleServiceResponse.data,
       status: true,
-    }
+    };
   }
-
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
   @Get('schedule//find-schedule-by-user/:userId')
-  async findScheduleByUserId(@Query('userId') userId: string ) {
-    const scheduleServiceResponse = await firstValueFrom(this.authServiceClient.send(AuthCommand.FIND_SCHEDULE_BY_USER_ID, {userId}))
+  async findScheduleByUserId(@Query('userId') userId: string) {
+    const scheduleServiceResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.FIND_SCHEDULE_BY_USER_ID, {
+        userId,
+      }),
+    );
     if (scheduleServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
@@ -679,14 +715,18 @@ export class AuthController {
       message: scheduleServiceResponse.message,
       data: scheduleServiceResponse.data,
       status: true,
-    }
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
   @Delete('/schedule/:id')
   async deleteSchedule(@Query('id') id: string) {
-    const scheduleServiceResponse = await firstValueFrom(this.authServiceClient.send(AuthCommand.DELETE_SCHEDULE, {id: parseInt(id)}))
+    const scheduleServiceResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.DELETE_SCHEDULE, {
+        id: parseInt(id),
+      }),
+    );
     if (scheduleServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
@@ -701,20 +741,25 @@ export class AuthController {
       message: scheduleServiceResponse.message,
       data: scheduleServiceResponse.data,
       status: true,
-    }
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
   @Post('schedule/:userId')
-  async createSchedule(@Query('userId') userId: string, @Body() dto: ScheduleDto) {
+  async createSchedule(
+    @Query('userId') userId: string,
+    @Body() dto: ScheduleDto,
+  ) {
     const data = {
       userId,
       day: dto.day,
       startTime: dto.startTime,
       endTime: dto.endTime,
-    }
-    const scheduleServiceResponse = await firstValueFrom(this.authServiceClient.send(AuthCommand.CREATE_SCHEDULE, {...data}))
+    };
+    const scheduleServiceResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.CREATE_SCHEDULE, { ...data }),
+    );
     if (scheduleServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
@@ -729,19 +774,23 @@ export class AuthController {
       message: scheduleServiceResponse.message,
       data: scheduleServiceResponse.data,
       status: true,
-    }    
+    };
   }
-
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
   @Put('/schedule/:id')
-  async updateSchedule(@Query('id') id: string, @Body() dto: UpdateScheduleDto) {
+  async updateSchedule(
+    @Query('id') id: string,
+    @Body() dto: UpdateScheduleDto,
+  ) {
     const data = {
       id: parseInt(id),
-      ...dto
-    }
-    const authServiceResponse = await firstValueFrom(this.authServiceClient.send(AuthCommand.UPDATE_SCHEDULE, {...data}))
+      ...dto,
+    };
+    const authServiceResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.UPDATE_SCHEDULE, { ...data }),
+    );
     if (authServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
@@ -756,7 +805,6 @@ export class AuthController {
       message: authServiceResponse.message,
       data: authServiceResponse.data,
       status: true,
-    }    
+    };
   }
-
 }

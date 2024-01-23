@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { RegisterDto } from './dto/create-user.dto';
 import { MODULES, hashPassword } from '../shared/';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -237,5 +236,4 @@ export class AuthService {
       },
     });
   }
-
 }
