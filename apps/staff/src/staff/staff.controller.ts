@@ -4,7 +4,7 @@ import { MessagePattern } from '@nestjs/microservices';
 import { StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
-import { find, some } from 'lodash';
+import { some } from 'lodash';
 
 @Controller('staff')
 export class StaffController {
