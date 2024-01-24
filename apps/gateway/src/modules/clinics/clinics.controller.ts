@@ -456,9 +456,9 @@ export class ClinicsController {
     };
   }
 
-  @Get(':id/appointments')
+  @Get(':clinicId/appointments')
   async getAppointments(
-    @Param('id') clinicId: string,
+    @Param('clinicId') clinicId: string,
     @Query() query: GetAppointmentsQueryDto,
   ) {
     const clinicServiceResponse = await firstValueFrom(
@@ -484,9 +484,9 @@ export class ClinicsController {
     };
   }
 
-  @Post(':id/appointments')
+  @Post(':clinicId/appointments')
   async createAppointment(
-    @Param('id') clinicId: string,
+    @Param('clinicId') clinicId: string,
     @Body() data: CreateAppoimentDto,
   ) {
     const clinicServiceResponse = await firstValueFrom(
