@@ -5,7 +5,7 @@ import { ClinicCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
-import { SUBSCRIPTION_STATUS } from 'src/shared';
+import { BookingStatus, SUBSCRIPTION_STATUS } from 'src/shared';
 import { map } from 'lodash';
 
 @Controller()
@@ -557,36 +557,36 @@ export class ClinicController {
       };
     }
   }
-  
+
   @MessagePattern(ClinicCommand.CREATE_CLINIC_SERVICE)
   async createClinicService(data: any) {
     try {
-      const {clinicId, ...payload} = data
-      const clinic = await this.clinicService.findClinicById(clinicId)
+      const { clinicId, ...payload } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
       if (!clinic) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Clinic không tồn tại",
-        }
+          message: 'Clinic không tồn tại',
+        };
       }
       const preparedPayload: Prisma.clinicServicesUncheckedCreateInput = {
         clinicId,
         ...payload,
-      }
-      const clinicService = await this.clinicService.createClinicService(preparedPayload)
+      };
+      const clinicService =
+        await this.clinicService.createClinicService(preparedPayload);
       if (!clinicService) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Tạo clinic service thất bại",
-        }
+          message: 'Tạo clinic service thất bại',
+        };
       }
       return {
         status: HttpStatus.OK,
-        message: "Tạo clinic service thành công",
+        message: 'Tạo clinic service thành công',
         data: clinicService,
-      }
-    }
-    catch(error) {
+      };
+    } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -621,142 +621,172 @@ export class ClinicController {
     }
   }
 
-
-  @MessagePattern(ClinicCommand.GET_CLINIC_SERVICE_BY_ID)
-  async findClinicServiceById(data: any) {
-    try { 
-      const {id} = data
-      const clinicService = await this.clinicService.findClinicServiceById(id)
-      if (!clinicService) {
+  @MessagePattern(ClinicCommand.CREATE_APPOINMENT)
+  async createAppointment(data: {
+    clinicId: string;
+    doctorId: number;
+    patientId: string;
+    startTime: string;
+    endTime?: string;
+    date: string;
+  }) {
+    try {
+      const appointment = await this.clinicService.createAppointment({
+        ...data,
+        status: BookingStatus.PENDING,
+      });
+      if (!appointment) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Clinic service không tồn tại",
-        }
+          message: 'Appointment không tồn tại',
+        };
       }
       return {
         status: HttpStatus.OK,
-        message: "Lấy thông tin clinic service thành công",
-        data: clinicService,
-      }
-    }
-    catch(error) {
+        message: 'Lấy thông tin appointment thành công',
+        data: appointment,
+      };
+    } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
+
+  @MessagePattern(ClinicCommand.GET_CLINIC_SERVICE_BY_ID)
+  async findClinicServiceById(data: any) {
+    try {
+      const { id } = data;
+      const clinicService = await this.clinicService.findClinicServiceById(id);
+      if (!clinicService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic service không tồn tại',
+        };
       }
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy thông tin clinic service thành công',
+        data: clinicService,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
     }
   }
 
   @MessagePattern(ClinicCommand.GET_CLINIC_SERVICE_BY_CLINIC_ID)
   async findClinicServiceByClinicId(data: any) {
-    try { 
-      const {clinicId} = data
-      const clinic = await this.clinicService.findClinicById(clinicId)
+    try {
+      const { clinicId } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
       if (!clinic) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Clinic không tồn tại",
-        }
+          message: 'Clinic không tồn tại',
+        };
       }
-      const clinicServices = await this.clinicService.findClinicServiceByClinicId(clinicId)
+      const clinicServices =
+        await this.clinicService.findClinicServiceByClinicId(clinicId);
       return {
         status: HttpStatus.OK,
-        message: "Lấy thông tin clinic service thành công",
+        message: 'Lấy thông tin clinic service thành công',
         data: clinicServices,
-      }
-    }
-    catch(error) {
+      };
+    } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
-      }
+      };
     }
   }
 
   @MessagePattern(ClinicCommand.UPDATE_CLINIC_SERVICE)
   async updateClinicService(data: any) {
-    try { 
-      const {id, ...payload} = data
-      const clinicService = await this.clinicService.findClinicServiceById(id)
+    try {
+      const { id, ...payload } = data;
+      const clinicService = await this.clinicService.findClinicServiceById(id);
       if (!clinicService) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Clinic service không tồn tại",
-        }
+          message: 'Clinic service không tồn tại',
+        };
       }
-      const preparedPayload : Prisma.clinicServicesUncheckedUpdateInput = {
+      const preparedPayload: Prisma.clinicServicesUncheckedUpdateInput = {
         id,
         ...payload,
-      } 
-      const updatedClinicServices = await this.clinicService.updateClinicService(id, preparedPayload)
+      };
+      const updatedClinicServices =
+        await this.clinicService.updateClinicService(id, preparedPayload);
       return {
         status: HttpStatus.OK,
-        message: "Cập nhật clinic service thành công",
+        message: 'Cập nhật clinic service thành công',
         data: updatedClinicServices,
-      }
-    }
-    catch(error) {
+      };
+    } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
-      }
+      };
     }
   }
- 
+
   @MessagePattern(ClinicCommand.DELETE_CLINIC_SERVICE)
-  async deleteClinicService(data: any) {   
-    try { 
-      const {id} = data
-      const clinicService = await this.clinicService.findClinicServiceById(id)
+  async deleteClinicService(data: any) {
+    try {
+      const { id } = data;
+      const clinicService = await this.clinicService.findClinicServiceById(id);
       if (!clinicService) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Clinic service không tồn tại",
-        }
+          message: 'Clinic service không tồn tại',
+        };
       }
-      await this.clinicService.deleteClinicService(id)
+      await this.clinicService.deleteClinicService(id);
       return {
         status: HttpStatus.OK,
-        message: "Xóa clinic service thành công",
-      }
-    }
-    catch(error) {
+        message: 'Xóa clinic service thành công',
+      };
+    } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
-      }
+      };
     }
   }
 
   @MessagePattern(ClinicCommand.FIND_ALL_STAFF_IN_CLINIC)
   async getAllStaffInClinic(data: any) {
-    try { 
-      const {clinicId} = data
-      const clinic = await this.clinicService.findClinicById(clinicId)
+    try {
+      const { clinicId } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
       if (!clinic) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Clinic service không tồn tại",
-        }
+          message: 'Clinic service không tồn tại',
+        };
       }
-      const staffs = await this.clinicService.findAllStaffInClinic(clinicId)
+      const staffs = await this.clinicService.findAllStaffInClinic(clinicId);
       return {
         data: staffs,
         status: HttpStatus.OK,
-        message: "Lấy danh sách staff trong clinic thành công",
-      }
-    }
-    catch(error) {
+        message: 'Lấy danh sách staff trong clinic thành công',
+      };
+    } catch (error) {
       console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
-      }
+      };
     }
   }
 }
-

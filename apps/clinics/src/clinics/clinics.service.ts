@@ -329,41 +329,40 @@ export class ClinicService {
     });
   }
 
-
   async createClinicService(data: Prisma.clinicServicesUncheckedCreateInput) {
     return this.prismaService.clinicServices.create({
       data,
-    })
+    });
   }
-
 
   async findClinicServiceByClinicId(clinicId: string) {
     return this.prismaService.clinicServices.findMany({
       where: {
         isDisabled: false,
         clinicId,
-      }
-    })
+      },
+    });
   }
-
 
   async findClinicServiceById(id: number) {
     return this.prismaService.clinicServices.findFirst({
       where: {
-        id, 
-        isDisabled: false
-      }
-    })
+        id,
+        isDisabled: false,
+      },
+    });
   }
 
-
-  async updateClinicService(id: number, data: Prisma.staffServicesUncheckedUpdateInput) {
+  async updateClinicService(
+    id: number,
+    data: Prisma.staffServicesUncheckedUpdateInput,
+  ) {
     return this.prismaService.clinicServices.update({
       where: {
         id,
       },
       data,
-    })
+    });
   }
 
   async deleteClinicService(id: number) {
@@ -373,11 +372,10 @@ export class ClinicService {
       },
       data: {
         isDisabled: true,
-      }
-    })
+      },
+    });
   }
 
-  
   async getAppointments({
     doctorId,
     date,
@@ -425,14 +423,20 @@ export class ClinicService {
     });
   }
 
+  async createAppointment(data: Prisma.appointmentsUncheckedCreateInput) {
+    return this.prismaService.appointments.create({
+      data,
+    });
+  }
+
   async findAllStaffInClinic(clinicId: string) {
     return this.prismaService.staffs.findMany({
       where: {
         isDisabled: false,
         userInClinics: {
           clinicId,
-        }
-      }
-    })
+        },
+      },
+    });
   }
 }
