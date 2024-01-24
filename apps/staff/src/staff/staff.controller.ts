@@ -417,28 +417,30 @@ export class StaffController {
       };
     }
   }
-  @MessagePattern(StaffCommand.CREATE_APPOINTMENT)
-  async createAppointment(data: any) {
+
+  @MessagePattern(StaffCommand.GET_APPOINMENTS_BY_STAFF_ID)
+  async getAppointmentsByStaffId(data: any) {
     try {
-      const { ...payload } = data;
-      const appointment = await this.staffService.createAppointment(payload);
-      if (!appointment) {
+      const { staffId } = data;
+      const staff = await this.staffService.findStaffById(staffId);
+      if (!staff) {
         return {
-          message: 'Tạo lịch hẹn thất bại',
+          message: 'Nhân viên không tồn tại',
           status: HttpStatus.BAD_REQUEST,
         };
       }
+      const appointments =
+        await this.staffService.findAppointmentByStaffId(staffId);
       return {
-        message: 'Tạo lịch hẹn thành công',
+        message: 'Lấy danh sách thông tin service thành công',
         status: HttpStatus.OK,
-        data: appointment,
+        data: appointments,
       };
     } catch (error) {
       console.log(error);
       return {
         message: 'Lỗi hệ thống',
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        data: null,
       };
     }
   }

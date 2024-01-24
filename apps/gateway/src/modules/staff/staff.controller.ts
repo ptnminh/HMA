@@ -234,4 +234,32 @@ export class StaffController {
       status: true,
     };
   }
+
+  @Get(':staffId/free-appointments')
+  async findFreeAppointmentByStaffId(@Param('staffId') staffId: string) {
+    const staffServiceResponse = await firstValueFrom(
+      this.staffServiceClient.send(
+        StaffCommand.FIND_FREE_APPOINTMENT_BY_STAFF_ID,
+        {
+          staffId: parseInt(staffId),
+        },
+      ),
+    );
+    if (staffServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: staffServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        staffServiceResponse.status,
+      );
+    }
+
+    return {
+      message: staffServiceResponse.message,
+      data: staffServiceResponse.data,
+      status: true,
+    };
+  }
 }

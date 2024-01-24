@@ -22,8 +22,8 @@ export class StaffService {
 
   async createStaff(data: Prisma.staffsUncheckedCreateInput) {
     return this.prismaService.staffs.create({
-        data,
-    })
+      data,
+    });
   }
 
   async deleteStaff(id: number) {
@@ -36,8 +36,6 @@ export class StaffService {
       },
     });
   }
-      
-
 
   async findStaffById(id: number) {
     return this.prismaService.staffs.findFirst({
@@ -48,42 +46,63 @@ export class StaffService {
       include: {
         staffServices: {
           where: {
-            isDisabled: false
-          }
-        },
-        staffSchedules :{
-          where :{
             isDisabled: false,
-          }
-        }
-      }
-    })
+          },
+        },
+        staffSchedules: {
+          where: {
+            isDisabled: false,
+          },
+        },
+      },
+    });
   }
+
+  async findAppointmentByStaffId(staffId: number) {
+    return this.prismaService.appointments.findMany({
+      where: {
+        doctorId: staffId,
+        isDisabled: false,
+      },
+      include: {
+        patients: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        date: 'desc',
+      },
+    });
+  }
+
   async findStaffByMemberId(memberId: number) {
     return this.prismaService.staffs.findFirst({
-        where: {
-            isDisabled: false,
-            memberId,
-        },
-        include: {
-            userInClinics: {
+      where: {
+        isDisabled: false,
+        memberId,
+      },
+      include: {
+        userInClinics: {
+          select: {
+            clinicId: true,
+            userId: true,
+            users: {
               select: {
-                clinicId: true,
-                userId: true,
-                users: {
-                  select: {
-                    name: true,
-                    firstName: true,
-                    lastName: true,
-                  }
-                }
+                name: true,
+                firstName: true,
+                lastName: true,
               },
             },
-        }            
-    })
+          },
+        },
+      },
+    });
   }
-
-
 
   async updateStaff(id: number, data: Prisma.staffsUncheckedUpdateInput) {
     return this.prismaService.staffs.update({
@@ -159,62 +178,60 @@ export class StaffService {
     });
   }
 
-
   async deleteSchedule(id: number) {
     return this.prismaService.staffSchedules.update({
-        where: {
-            id,
-        },
-        data: {
-            isDisabled: true,
-        }
-    })
+      where: {
+        id,
+      },
+      data: {
+        isDisabled: true,
+      },
+    });
   }
 
   async findUserInClinic(id: number) {
     return this.prismaService.userInClinics.findFirst({
-        where: {
-            isDisabled: false,
-            id,
-        }
-    })
+      where: {
+        isDisabled: false,
+        id,
+      },
+    });
   }
 
-    async findClinicServiceById(id: number) {
-        return this.prismaService.clinicServices.findFirst({
-            where: {
-                id,
-                isDisabled: false,
-            }
-        })
-    }
+  async findClinicServiceById(id: number) {
+    return this.prismaService.clinicServices.findFirst({
+      where: {
+        id,
+        isDisabled: false,
+      },
+    });
+  }
 
-    async findStaffServiceByStaffId(staffId: number) {
-        return this.prismaService.staffServices.findMany({
-            where: {
-                staffId,
-                isDisabled: false,
-            }
-        })
-    }
+  async findStaffServiceByStaffId(staffId: number) {
+    return this.prismaService.staffServices.findMany({
+      where: {
+        staffId,
+        isDisabled: false,
+      },
+    });
+  }
 
-    async createStaffService(data: Prisma.staffServicesUncheckedCreateInput) {
-        return this.prismaService.staffServices.create({
-            data,
-        })
-    }
+  async createStaffService(data: Prisma.staffServicesUncheckedCreateInput) {
+    return this.prismaService.staffServices.create({
+      data,
+    });
+  }
 
-
-    async deleteStaffServiceByStaffId(staffId :number) {
-        return this.prismaService.staffServices.updateMany({
-            where: {
-                staffId
-            },
-            data: {
-                isDisabled: true
-            }
-        })
-    }
+  async deleteStaffServiceByStaffId(staffId: number) {
+    return this.prismaService.staffServices.updateMany({
+      where: {
+        staffId,
+      },
+      data: {
+        isDisabled: true,
+      },
+    });
+  }
   async createAppointment(payload: Prisma.appointmentsUncheckedCreateInput) {
     return this.prismaService.appointments.create({
       data: {
