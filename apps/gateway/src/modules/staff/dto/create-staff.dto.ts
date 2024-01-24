@@ -64,7 +64,7 @@ export class CreateStaffDto {
 }
 
 export class CreateAppoimentDto {
-  @ApiProperty({ example: '7:00' })
+  @ApiProperty({ example: '07:30' })
   @IsString()
   @IsNotEmpty()
   startTime: string;

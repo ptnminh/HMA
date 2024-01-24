@@ -4,7 +4,7 @@ import { MessagePattern } from '@nestjs/microservices';
 import { StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
-import { find } from 'lodash';
+import { find, some } from 'lodash';
 
 @Controller('staff')
 export class StaffController {
@@ -420,7 +420,7 @@ export class StaffController {
     }
   }
 
-  @MessagePattern(StaffCommand.GET_APPOINMENTS_BY_STAFF_ID)
+  @MessagePattern(StaffCommand.FIND_APPOINTMENT_BY_STAFF_ID)
   async getAppointmentsByStaffId(data: any) {
     try {
       const { staffId } = data;
@@ -470,9 +470,14 @@ export class StaffController {
       );
       const freeSchedule = scheduleInDay.filter((schedule) => {
         const startTime = schedule.startTime;
-        return !find(appointments, (appointment) => {
-          return appointment.startTime === startTime;
+        const endTime = schedule.endTime;
+        const isExistsAppointment = some(appointments, (appointment) => {
+          return (
+            appointment.startTime === startTime &&
+            appointment.endTime === endTime
+          );
         });
+        return !isExistsAppointment;
       });
       return {
         message: 'Lấy danh sách lịch trống thành công',
