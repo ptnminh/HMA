@@ -227,7 +227,7 @@ export class GetUsersInClinicResponse {
   message: { [key: string]: any };
 }
 
-export class GetAppoitmentsQueryDto {
+export class GetAppointmentsQueryDto {
   @ApiProperty({ example: 1, required: false })
   @IsString()
   @IsOptional()

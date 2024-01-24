@@ -640,9 +640,7 @@ export class AuthController {
   @ApiOkResponse({
     type: FindUserByEmailResponse,
   })
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
-  @Get('find-all-user')
+  @Get('resend-verify-email')
   async findAllUserByEmail(@Query('email') email: string) {
     const findUserByEmailResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.FIND_ALL_USER_BY_EMAIL, {

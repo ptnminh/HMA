@@ -17,7 +17,7 @@ import {
   CreateClinicDto,
   CreateClinicResponse,
   CreateUserGroupRoleDTO,
-  GetAppoitmentsQueryDto,
+  GetAppointmentsQueryDto,
   GetUsersInClinicResponse,
   ListClinicResponse,
   SubcribePlanDTO,
@@ -41,6 +41,7 @@ import { CurrentUser } from 'src/decorators';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CreateClinicServiceDto } from './dto/create-clinic-service.dto';
 import { UpdateClinicServiceDto } from './dto/update-clinic-service.dto';
+import { CreateAppoimentDto } from '../staff/dto/create-staff.dto';
 
 @Controller('clinics')
 @ApiTags('Clinics')
@@ -428,34 +429,37 @@ export class ClinicsController {
   }
 
   @Post(':clinicId/services')
-  async createClinicService(@Param('clinicId') clinicId: string, @Body() dto: CreateClinicServiceDto) {
+  async createClinicService(
+    @Param('clinicId') clinicId: string,
+    @Body() dto: CreateClinicServiceDto,
+  ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.CREATE_CLINIC_SERVICE, {
         clinicId,
         ...dto,
       }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
       );
-      if (clinicServiceResponse.status !== HttpStatus.OK) {
-        throw new HttpException(
-          {
-            message: clinicServiceResponse.message,
-            data: null,
-            status: false,
-          },
-          clinicServiceResponse.status,
-        );
-      }
-      return {
-        message: clinicServiceResponse.message,
-        data: clinicServiceResponse.data,
-        status: true,
-      };
     }
-    
-  @Get(':id/appoitments')
-  async getAppoitments(
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Get(':id/appointments')
+  async getAppointments(
     @Param('id') clinicId: string,
-    @Query() query: GetAppoitmentsQueryDto,
+    @Query() query: GetAppointmentsQueryDto,
   ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.GET_APPOINMENTS, {
@@ -480,9 +484,39 @@ export class ClinicsController {
     };
   }
 
+  @Post(':id/appointments')
+  async createAppointment(
+    @Param('id') clinicId: string,
+    @Body() data: CreateAppoimentDto,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.CREATE_APPOINMENT, {
+        clinicId,
+        ...data,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
 
   @Put('/services/:id')
-  async updateClinicService(@Param('id') id: string, @Body() dto: UpdateClinicServiceDto) {
+  async updateClinicService(
+    @Param('id') id: string,
+    @Body() dto: UpdateClinicServiceDto,
+  ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.UPDATE_CLINIC_SERVICE, {
         id: +id,
@@ -531,11 +565,14 @@ export class ClinicsController {
   }
 
   @Get(':clinicId/services')
-  async findClinicServiceByClinicId(@Param('clinicId') clinicId: string,) {
+  async findClinicServiceByClinicId(@Param('clinicId') clinicId: string) {
     const clinicServiceResponse = await firstValueFrom(
-      this.clinicServiceClient.send(ClinicCommand.GET_CLINIC_SERVICE_BY_CLINIC_ID, {
-        clinicId,
-      }),
+      this.clinicServiceClient.send(
+        ClinicCommand.GET_CLINIC_SERVICE_BY_CLINIC_ID,
+        {
+          clinicId,
+        },
+      ),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -600,6 +637,5 @@ export class ClinicsController {
       data: clinicServiceResponse.data,
       status: true,
     };
-
   }
 }

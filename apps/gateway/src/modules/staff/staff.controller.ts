@@ -30,11 +30,17 @@ export class StaffController {
     @Inject('STAFF_SERVICE') private readonly staffServiceClient: ClientProxy,
   ) {}
 
-  @Post('appointment')
-  async createAppointment(@Body() dto: CreateAppoimentDto) {
+  @Post(':memberId')
+  async createStaff(
+    @Param('memberId') UserInClinicId: string,
+    @Body() dto: CreateStaffDto,
+  ) {
+    const { services, ...rest } = dto;
     const staffServiceResponse = await firstValueFrom(
-      this.staffServiceClient.send(StaffCommand.CREATE_APPOINTMENT, {
-        ...dto,
+      this.staffServiceClient.send(StaffCommand.CREATE_STAFF, {
+        memberId: parseInt(UserInClinicId),
+        services: dto.services ? dto.services : [],
+        ...rest,
       }),
     );
     if (staffServiceResponse.status !== HttpStatus.OK) {
@@ -54,16 +60,16 @@ export class StaffController {
     };
   }
 
-  @Post('/:memberId')
-  async createStaff(@Param('memberId') UserInClinicId: string, @Body() dto: CreateStaffDto) {
-    const {services, ...rest} = dto
+  @Put(':staffId')
+  async updateStaff(@Body() dto: UpdateStaffDto, @Param('staffId') id: string) {
+    const { services, ...rest } = dto;
     const staffServiceResponse = await firstValueFrom(
-      this.staffServiceClient.send(StaffCommand.CREATE_STAFF, {
-        memberId: parseInt(UserInClinicId),
-        services: (dto.services)? dto.services : [],
-        ...rest
-      })
-    )
+      this.staffServiceClient.send(StaffCommand.UPDATE_STAFF, {
+        id: parseInt(id),
+        services: dto.services ? dto.services : undefined,
+        ...rest,
+      }),
+    );
     if (staffServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
@@ -80,35 +86,6 @@ export class StaffController {
       status: true,
     };
   }
-
-
-
-    @Put('/:staffId')
-    async updateStaff(@Body() dto: UpdateStaffDto, @Param('staffId') id: string) {
-      const {services, ...rest} = dto
-      const staffServiceResponse = await firstValueFrom(
-        this.staffServiceClient.send(StaffCommand.UPDATE_STAFF, {
-          id: parseInt(id),
-          services: (dto.services)? dto.services : undefined,
-          ...rest
-        })
-      );
-      if (staffServiceResponse.status !== HttpStatus.OK) {
-        throw new HttpException(
-          {
-            message: staffServiceResponse.message,
-            data: null,
-            status: false,
-          },
-          staffServiceResponse.status,
-        );
-      }
-      return {
-        message: staffServiceResponse.message,
-        data: staffServiceResponse.data,
-        status: true,
-      };
-    }
 
   @Delete(':staffId')
   async deleteStaff(@Param('staffId') id: string) {
@@ -158,83 +135,7 @@ export class StaffController {
     };
   }
 
-  /*@Post('/:staffId/schedule')
-    async createSchedule(@Param('staffId') staffId: string, @Body() dto: CreeateScheduleDto) {
-      const staffServiceResponse = await firstValueFrom(
-        this.staffServiceClient.send(StaffCommand.CREATE_SCHEDULE, {
-          staffId: parseInt(staffId),
-          startTime: new Date(dto.startTime.replace(" ", "T") + ":00.000Z"),
-          endTime: new Date(dto.endTime.replace(" ", "T") + ":00.000Z")
-        })
-      );
-      if (staffServiceResponse.status !== HttpStatus.OK) {
-        throw new HttpException(
-          {
-            message: staffServiceResponse.message,
-            data: null,
-            status: false,
-          },
-          staffServiceResponse.status,
-        );
-      }
-      return {
-        message: staffServiceResponse.message,
-        data: staffServiceResponse.data,
-        status: true,
-      };
-    }
-
-
-    @Delete('/schedule/:id')
-    async deleteSchedule(@Param('id') id: string) {
-      const staffServiceResponse = await firstValueFrom(
-        this.staffServiceClient.send(StaffCommand.DELETE_SCHEDULE, {
-          id: parseInt(id)
-        })
-      );
-      if (staffServiceResponse.status !== HttpStatus.OK) {
-        throw new HttpException(
-          {
-            message: staffServiceResponse.message,
-            data: null,
-            status: false,
-          },
-          staffServiceResponse.status,
-        );
-      }
-      return {
-        message: staffServiceResponse.message,
-        data: staffServiceResponse.data,
-        status: true,
-      };
-    }
-
-    @Get('schedule/:id')
-    async findScheduleById(@Param('id') id: string) {
-      const staffServiceResponse = await firstValueFrom(
-        this.staffServiceClient.send(StaffCommand.FIND_SCHEDULE_BY_ID, {
-          id: parseInt(id)
-        })
-      );
-      if (staffServiceResponse.status !== HttpStatus.OK) {
-        throw new HttpException(
-          {
-            message: staffServiceResponse.message,
-            data: null,
-            status: false,
-          },
-          staffServiceResponse.status,
-        );
-      }
-      return {
-        message: staffServiceResponse.message,
-        data: staffServiceResponse.data,
-        status: true,
-      };
-    }
-    */
-
-  @Put(':staffId/schedule/')
+  @Put(':staffId/schedule')
   async updateSchdule(
     @Param('staffId') staffId: string,
     @Body() scheduleList: ScheduleList,
@@ -286,71 +187,51 @@ export class StaffController {
     };
   }
 
-  // @Get()
-  // async findAllStaff() {
-  //   const staffServiceResponse = await firstValueFrom(
-  //     this.staffServiceClient.send(StaffCommand.FIND_ALL_STAFF, {}),
-  //   );
-  //   if (staffServiceResponse.status !== HttpStatus.OK) {
-  //     throw new HttpException(
-  //       {
-  //         message: staffServiceResponse.message,
-  //         data: null,
-  //         status: false,
-  //       },
-  //       staffServiceResponse.status,
-  //     );
-  //   }
-  // }
-
-    
-    @Get(':staffId/services')
-    async findServiceByStaffId(@Param('staffId') staffId: string) {
-      const staffServiceResponse = await firstValueFrom(
-        this.staffServiceClient.send(StaffCommand.FIND_SERVICE_BY_STAFF_ID, {
-          staffId: parseInt(staffId),
-        })
+  @Get(':staffId/services')
+  async findServiceByStaffId(@Param('staffId') staffId: string) {
+    const staffServiceResponse = await firstValueFrom(
+      this.staffServiceClient.send(StaffCommand.FIND_SERVICE_BY_STAFF_ID, {
+        staffId: parseInt(staffId),
+      }),
+    );
+    if (staffServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: staffServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        staffServiceResponse.status,
       );
-      if (staffServiceResponse.status !== HttpStatus.OK) {
-        throw new HttpException(
-          {
-            message: staffServiceResponse.message,
-            data: null,
-            status: false,
-          },
-          staffServiceResponse.status,
-        );
-      }
-      return {
-        message: staffServiceResponse.message,
-        data: staffServiceResponse.data,
-        status: true,
-      };
     }
-    
-
-    // @Put(':staffId/services')
-    // async updateStaffService(@Param('staffId') staffId: string, @Body() services :staffServiceListDto) {
-    //   const staffServiceResponse = await firstValueFrom(
-    //     this.staffServiceClient.send(StaffCommand.UPDATE_STAFF_SERVICE, {
-    //       staffId: +staffId,
-    //       clinicServiceList: (services.clinicServices) ? services.clinicServices : [],
-    //     })
-    //   );
-    //   if (staffServiceResponse.status !== HttpStatus.OK) {
-    //     throw new HttpException(
-    //       {
-    //         message: staffServiceResponse.message,
-    //         data: null,
-    //         status: false,
-    //       },
-    //       staffServiceResponse.status,
-    //     );
-    //   }
-    //   return {
-    //     message: staffServiceResponse.message,
-    //     data: staffServiceResponse.data,
-    //     status: true,
-    //   };
-    // }
+    return {
+      message: staffServiceResponse.message,
+      data: staffServiceResponse.data,
+      status: true,
+    };
   }
+
+  @Get(':staffId/appointments')
+  async findAppointmentByStaffId(@Param('staffId') staffId: string) {
+    const staffServiceResponse = await firstValueFrom(
+      this.staffServiceClient.send(StaffCommand.FIND_APPOINTMENT_BY_STAFF_ID, {
+        staffId: parseInt(staffId),
+      }),
+    );
+    if (staffServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: staffServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        staffServiceResponse.status,
+      );
+    }
+    return {
+      message: staffServiceResponse.message,
+      data: staffServiceResponse.data,
+      status: true,
+    };
+  }
+}
