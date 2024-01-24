@@ -10,6 +10,7 @@ import {
   HttpStatus,
   HttpException,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
@@ -20,6 +21,7 @@ import { ScheduleList } from './dto/update-schedule.dto';
 import { CreateAppoimentDto, CreateStaffDto } from './dto/create-staff.dto';
 import { CurrentUser } from 'src/decorators';
 import { UpdateStaffDto } from './dto/update-staff.dto';
+import { FindFreeAppointmentByStaffIdQueryDto } from './dto/query.dto';
 
 @Controller('staffs')
 @ApiTags('Staff')
@@ -236,12 +238,16 @@ export class StaffController {
   }
 
   @Get(':staffId/free-appointments')
-  async findFreeAppointmentByStaffId(@Param('staffId') staffId: string) {
+  async findFreeAppointmentByStaffId(
+    @Param('staffId') staffId: string,
+    @Query() query: FindFreeAppointmentByStaffIdQueryDto,
+  ) {
     const staffServiceResponse = await firstValueFrom(
       this.staffServiceClient.send(
         StaffCommand.FIND_FREE_APPOINTMENT_BY_STAFF_ID,
         {
           staffId: parseInt(staffId),
+          date: query.date ? query.date : new Date().toISOString(),
         },
       ),
     );

@@ -393,7 +393,7 @@ export class ClinicService {
       ...(status ? { status } : {}),
       clinicId,
     };
-    const appointments = this.prismaService.appointments.findMany({
+    const appointments = await this.prismaService.appointments.findMany({
       where,
       include: {
         staffs: {

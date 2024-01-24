@@ -3,6 +3,8 @@ import { StaffService } from './staff.service';
 import { MessagePattern } from '@nestjs/microservices';
 import { StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
+import { mapDateToNumber } from 'src/shared';
+import { find } from 'lodash';
 
 @Controller('staff')
 export class StaffController {
@@ -435,6 +437,47 @@ export class StaffController {
         message: 'Lấy danh sách thông tin service thành công',
         status: HttpStatus.OK,
         data: appointments,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        message: 'Lỗi hệ thống',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+
+  @MessagePattern(StaffCommand.FIND_FREE_APPOINTMENT_BY_STAFF_ID)
+  async findFreeAppointmentByStaffId(data: any) {
+    try {
+      const { staffId, date } = data;
+      const staff = await this.staffService.findStaffById(staffId);
+      if (!staff) {
+        return {
+          message: 'Nhân viên không tồn tại',
+          status: HttpStatus.BAD_REQUEST,
+        };
+      }
+      const appointments = await this.staffService.findAppointmentByStaffId(
+        staffId,
+        date,
+      );
+      const day = mapDateToNumber(date);
+      const staffSchedules =
+        await this.staffService.findScheduleByStaffId(staffId);
+      const scheduleInDay = staffSchedules.filter(
+        (schedule) => schedule.day === day,
+      );
+      const freeSchedule = scheduleInDay.filter((schedule) => {
+        const startTime = schedule.startTime;
+        return !find(appointments, (appointment) => {
+          return appointment.startTime === startTime;
+        });
+      });
+      return {
+        message: 'Lấy danh sách lịch trống thành công',
+        status: HttpStatus.OK,
+        data: freeSchedule,
       };
     } catch (error) {
       console.log(error);

@@ -495,7 +495,7 @@ export class ClinicsController {
         ...data,
       }),
     );
-    if (clinicServiceResponse.status !== HttpStatus.CREATED) {
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: clinicServiceResponse.message,

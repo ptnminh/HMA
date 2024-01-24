@@ -58,11 +58,12 @@ export class StaffService {
     });
   }
 
-  async findAppointmentByStaffId(staffId: number) {
+  async findAppointmentByStaffId(staffId: number, date?: string) {
     return this.prismaService.appointments.findMany({
       where: {
         doctorId: staffId,
         isDisabled: false,
+        ...(date ? { date } : {}),
       },
       include: {
         patients: {
