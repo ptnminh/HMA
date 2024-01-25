@@ -435,6 +435,18 @@ export class ClinicService {
     });
   }
 
+  async updateAppointment(
+    appointmentId: number,
+    data: Prisma.appointmentsUncheckedUpdateInput,
+  ) {
+    return this.prismaService.appointments.update({
+      where: {
+        id: appointmentId,
+      },
+      data,
+    });
+  }
+
   async findAppointmentById(appointmentId: number) {
     const appointment = await this.prismaService.appointments.findUnique({
       where: {

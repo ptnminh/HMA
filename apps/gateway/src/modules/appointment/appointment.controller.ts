@@ -7,6 +7,7 @@ import {
   Inject,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -16,7 +17,10 @@ import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { GetAppointmentsQueryDto } from '../clinics/dto/create-clinic.dto';
 import { firstValueFrom } from 'rxjs';
 import { ClinicCommand } from '../clinics/command';
-import { CreateAppoimentDto } from '../staff/dto/create-staff.dto';
+import {
+  CreateAppoimentDto,
+  UpdateAppointmentDto,
+} from '../staff/dto/create-staff.dto';
 
 @Controller('appointments')
 @ApiTags('Appointments')
@@ -79,7 +83,35 @@ export class AppointmentController {
   async getAppointmentById(@Param('appointmentId') appointmentId: string) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.GET_APPOINMENT_BY_ID, {
-        appointmentId,
+        appointmentId: +appointmentId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Put(':appointmentId')
+  async updateAppointment(
+    @Param('appointmentId') appointmentId: number,
+    @Body() data: UpdateAppointmentDto,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.UPDATE_APPOINMENT, {
+        appointmentId: +appointmentId,
+        ...data,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
