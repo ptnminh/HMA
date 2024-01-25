@@ -381,17 +381,20 @@ export class ClinicService {
     date,
     status,
     clinicId,
+    patientId,
   }: {
-    doctorId?: string;
+    doctorId?: number;
     date?: string;
     status?: string;
+    patientId?: string;
     clinicId?: string;
   }) {
     const where: any = {
       ...(doctorId ? { doctorId } : {}),
       ...(date ? { date } : {}),
       ...(status ? { status } : {}),
-      clinicId,
+      ...(patientId ? { patientId } : {}),
+      ...(clinicId ? { clinicId } : {}),
     };
     const appointments = await this.prismaService.appointments.findMany({
       where,
@@ -412,17 +415,68 @@ export class ClinicService {
             },
           },
         },
+        patients: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
       },
     });
     return map(appointments, (appointment: any) => {
-      const { staffs, ...rest }: any = appointment;
+      const { staffs, patients, ...rest }: any = appointment;
       return {
         ...rest,
-        user: staffs?.userInClinics?.users,
+        doctor: staffs?.userInClinics?.users,
+        patient: patients,
       };
     });
   }
 
+  async findAppointmentById(appointmentId: number) {
+    const appointment = await this.prismaService.appointments.findUnique({
+      where: {
+        id: appointmentId,
+      },
+      include: {
+        staffs: {
+          select: {
+            userInClinics: {
+              select: {
+                users: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        patients: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+    if (!appointment) {
+      return null;
+    }
+    const { staffs, patients, ...rest }: any = appointment;
+    return {
+      ...rest,
+      doctor: staffs?.userInClinics?.users,
+      patient: patients,
+    };
+  }
   async createAppointment(data: Prisma.appointmentsUncheckedCreateInput) {
     return this.prismaService.appointments.create({
       data,

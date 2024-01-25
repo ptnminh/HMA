@@ -242,4 +242,20 @@ export class GetAppointmentsQueryDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @ApiProperty({
+    example: '421433df-f3e5-44b7-a871-643f6a8ff36a',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  clinicId?: string;
+
+  @ApiProperty({
+    example: '01046db1-154f-41af-a2c0-61c6669a3e23',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  patientId?: string;
 }

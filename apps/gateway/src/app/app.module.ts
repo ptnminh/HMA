@@ -7,6 +7,7 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { AllExceptionFilter } from 'src/filters/all-exception.filter';
+import { AppointmentController } from 'src/modules/appointment/appointment.controller';
 import { AuthController } from 'src/modules/auth/auth.controller';
 import { JwtStrategy } from 'src/modules/auth/jwt.strategy';
 import { ChatsController } from 'src/modules/chats/chats.controller';
@@ -55,6 +56,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
     NotificationController,
     PaymentController,
     StaffController,
+    AppointmentController,
   ],
   providers: [
     ConfigService,

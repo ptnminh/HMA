@@ -603,13 +603,40 @@ export class ClinicController {
       const appointments = await this.clinicService.getAppointments({
         date,
         status,
-        doctorId,
+        doctorId: +doctorId,
         clinicId,
       });
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách appointments thành công',
         data: appointments,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
+
+  @MessagePattern(ClinicCommand.GET_APPOINMENT_BY_ID)
+  async getAppointmentById(data: any) {
+    try {
+      const { appointmentId } = data;
+      const appointment =
+        await this.clinicService.findAppointmentById(appointmentId);
+      if (!appointment) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Appointment không tồn tại',
+        };
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy thông tin appointment thành công',
+        data: appointment,
       };
     } catch (error) {
       console.log(error);

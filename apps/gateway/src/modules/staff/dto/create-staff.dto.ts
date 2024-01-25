@@ -84,7 +84,11 @@ export class CreateAppoimentDto {
 
   @ApiProperty({ example: '01046db1-154f-41af-a2c0-61c6669a3e23' })
   @IsNotEmpty()
-  patientId: number;
+  patientId: string;
+
+  @ApiProperty({ example: '01046db1-154f-41af-a2c0-61c6669a3e23' })
+  @IsNotEmpty()
+  clinicId: string;
 
   @ApiProperty({ example: '2021-09-01' })
   @IsNotEmpty()
