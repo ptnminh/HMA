@@ -455,63 +455,6 @@ export class ClinicsController {
       status: true,
     };
   }
-
-  @Get(':clinicId/appointments')
-  async getAppointments(
-    @Param('clinicId') clinicId: string,
-    @Query() query: GetAppointmentsQueryDto,
-  ) {
-    const clinicServiceResponse = await firstValueFrom(
-      this.clinicServiceClient.send(ClinicCommand.GET_APPOINMENTS, {
-        clinicId,
-        ...query,
-      }),
-    );
-    if (clinicServiceResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: clinicServiceResponse.message,
-          data: null,
-          status: false,
-        },
-        clinicServiceResponse.status,
-      );
-    }
-    return {
-      message: clinicServiceResponse.message,
-      data: clinicServiceResponse.data,
-      status: true,
-    };
-  }
-
-  @Post(':clinicId/appointments')
-  async createAppointment(
-    @Param('clinicId') clinicId: string,
-    @Body() data: CreateAppoimentDto,
-  ) {
-    const clinicServiceResponse = await firstValueFrom(
-      this.clinicServiceClient.send(ClinicCommand.CREATE_APPOINMENT, {
-        clinicId,
-        ...data,
-      }),
-    );
-    if (clinicServiceResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: clinicServiceResponse.message,
-          data: null,
-          status: false,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    return {
-      message: clinicServiceResponse.message,
-      data: clinicServiceResponse.data,
-      status: true,
-    };
-  }
-
   @Put('/services/:id')
   async updateClinicService(
     @Param('id') id: string,
