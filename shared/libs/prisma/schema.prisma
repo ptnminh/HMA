@@ -289,7 +289,7 @@ model appointments {
   clinicId    String    @map(name: "clinic_id")
   patientId   Int?
   doctorId    Int?
-  description String
+  description String?
   createAt    DateTime  @default(now()) @map(name: "created_at")
   updateAt    DateTime  @default(now()) @updatedAt @map(name: "updated_at")
   isDisabled  Boolean   @default(false) @map(name: "is_disabled")
