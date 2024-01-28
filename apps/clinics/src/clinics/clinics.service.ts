@@ -110,7 +110,7 @@ export class ClinicService {
             ? {
                 staffs: {
                   some: {
-                    id: staffId,
+                    id: +staffId,
                   },
                 },
               }
