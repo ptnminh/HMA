@@ -3,9 +3,12 @@ CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "module_id" INTEGER,
-    "name" TEXT,
     "avatar" TEXT,
     "first_name" TEXT,
+    "phone" TEXT,
+    "address" TEXT,
+    "gender" INTEGER,
+    "birthday" TIMESTAMP(3),
     "last_name" TEXT,
     "is_input_password" BOOLEAN NOT NULL DEFAULT true,
     "password" TEXT NOT NULL,
@@ -57,19 +60,6 @@ CREATE TABLE "clinic_group_roles" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "clinic_group_roles_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "permissions" (
-    "id" SERIAL NOT NULL,
-    "permission" TEXT NOT NULL,
-    "description" TEXT,
-    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
-    "disabled_at" TIMESTAMP(3),
-    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "permissions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -268,13 +258,8 @@ CREATE TABLE "invoices" (
 -- CreateTable
 CREATE TABLE "staffs" (
     "id" SERIAL NOT NULL,
-    "member_id" INTEGER NOT NULL,
     "specialize" TEXT,
     "experience" INTEGER,
-    "phone_number" TEXT,
-    "address" TEXT,
-    "gender" INTEGER,
-    "birthday" TIMESTAMP(3),
     "description" TEXT,
     "role_id" INTEGER,
     "clinic_id" TEXT,
@@ -295,7 +280,7 @@ CREATE TABLE "appointments" (
     "date" TEXT,
     "status" TEXT NOT NULL,
     "clinic_id" TEXT NOT NULL,
-    "patientId" TEXT,
+    "patientId" INTEGER,
     "doctorId" INTEGER,
     "description" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -327,6 +312,7 @@ CREATE TABLE "clinic_services" (
     "clinicId" TEXT NOT NULL,
     "service_name" TEXT NOT NULL,
     "price" INTEGER NOT NULL,
+    "category_id" INTEGER,
     "description" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -337,7 +323,7 @@ CREATE TABLE "clinic_services" (
 );
 
 -- CreateTable
-CREATE TABLE "patient" (
+CREATE TABLE "patients" (
     "id" SERIAL NOT NULL,
     "phone_number" TEXT,
     "address" TEXT,
@@ -350,7 +336,7 @@ CREATE TABLE "patient" (
     "clinic_id" TEXT,
     "user_id" TEXT,
 
-    CONSTRAINT "patient_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "patients_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -444,7 +430,16 @@ ALTER TABLE "invoices" ADD CONSTRAINT "invoices_subcription_id_fkey" FOREIGN KEY
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_plan_history_id_fkey" FOREIGN KEY ("plan_history_id") REFERENCES "plan_histories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "appointments" ADD CONSTRAINT "appointments_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "staffs" ADD CONSTRAINT "staffs_clinic_id_fkey" FOREIGN KEY ("clinic_id") REFERENCES "clinics"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "staffs" ADD CONSTRAINT "staffs_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "clinic_group_roles"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "staffs" ADD CONSTRAINT "staffs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "appointments" ADD CONSTRAINT "appointments_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "patients"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "appointments" ADD CONSTRAINT "appointments_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "staffs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -457,6 +452,12 @@ ALTER TABLE "staff_schedule" ADD CONSTRAINT "staff_schedule_staff_id_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "clinic_services" ADD CONSTRAINT "clinic_services_clinicId_fkey" FOREIGN KEY ("clinicId") REFERENCES "clinics"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "clinic_services" ADD CONSTRAINT "clinic_services_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "patients" ADD CONSTRAINT "patients_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "staff_service" ADD CONSTRAINT "staff_service_clinic_service_id_fkey" FOREIGN KEY ("clinic_service_id") REFERENCES "clinic_services"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

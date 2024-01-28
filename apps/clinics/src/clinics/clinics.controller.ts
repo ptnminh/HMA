@@ -64,10 +64,9 @@ export class ClinicController {
         ),
       );
       // add user to clinic
-      const payload: Prisma.userInClinicsUncheckedCreateInput = {
+      const payload: Prisma.staffsUncheckedCreateInput = {
         userId: data.ownerId,
         clinicId: clinic.id,
-        isOwner: true,
         roleId: clinicGroupRole.id,
       };
       await this.clinicService.addUserToClinic(payload);
@@ -156,10 +155,9 @@ export class ClinicController {
           message: 'User đã tồn tại trong clinic',
         };
       }
-      const payload: Prisma.userInClinicsUncheckedCreateInput = {
+      const payload: Prisma.staffsUncheckedCreateInput = {
         userId,
         clinicId,
-        isOwner: false,
         roleId: roleId || 4,
       };
       await this.clinicService.addUserToClinic(payload);
@@ -393,8 +391,8 @@ export class ClinicController {
           message: 'User group role không tồn tại',
         };
       }
-      const { userInClinics } = userGroupRole;
-      if (userInClinics && userInClinics.length > 0) {
+      const { staffs } = userGroupRole;
+      if (staffs && staffs.length > 0) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Không thể xóa role này',
@@ -529,7 +527,7 @@ export class ClinicController {
           message: 'Clinic không tồn tại',
         };
       }
-      const { subscriptions, userInClinics, ...rest } = clinic;
+      const { subscriptions, staffs, ownerId, ...rest } = clinic;
       return {
         status: HttpStatus.OK,
         message: 'Lấy thông tin clinic thành công',
@@ -539,11 +537,10 @@ export class ClinicController {
             ...subscription,
             plans: subscription.plans,
           })),
-          userInClinics: userInClinics?.map((user) => {
+          staffs: staffs?.map((user) => {
             return {
-              role: user.role,
-              isOwner: user.isOwner,
-              ...(user?.users || {}),
+              role: user.role.name,
+              isOwner: user.userId === ownerId,
             };
           }),
         },
@@ -683,7 +680,7 @@ export class ClinicController {
   async createAppointment(data: {
     clinicId: string;
     doctorId: number;
-    patientId: string;
+    patientId: number;
     startTime: string;
     endTime?: string;
     date: string;

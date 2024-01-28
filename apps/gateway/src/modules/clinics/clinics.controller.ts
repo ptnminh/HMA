@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Inject,
@@ -17,7 +16,6 @@ import {
   CreateClinicDto,
   CreateClinicResponse,
   CreateUserGroupRoleDTO,
-  GetAppointmentsQueryDto,
   GetUsersInClinicResponse,
   ListClinicResponse,
   SubcribePlanDTO,
@@ -28,10 +26,8 @@ import {
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
-  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { ClientProxy } from '@nestjs/microservices';
@@ -41,7 +37,6 @@ import { CurrentUser } from 'src/decorators';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CreateClinicServiceDto } from './dto/create-clinic-service.dto';
 import { UpdateClinicServiceDto } from './dto/update-clinic-service.dto';
-import { CreateAppoimentDto } from '../staff/dto/create-staff.dto';
 
 @Controller('clinics')
 @ApiTags('Clinics')

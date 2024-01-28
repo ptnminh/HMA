@@ -95,7 +95,7 @@ export class ClinicService {
     return this.prismaService.clinics.findMany({
       where: {
         isActive: true,
-        userInClinics: {
+        staffs: {
           some: {
             userId,
             isDisabled: false,
@@ -128,8 +128,8 @@ export class ClinicService {
       },
     });
   }
-  async addUserToClinic(data: Prisma.userInClinicsUncheckedCreateInput) {
-    return this.prismaService.userInClinics.create({
+  async addUserToClinic(data: Prisma.staffsUncheckedCreateInput) {
+    return this.prismaService.staffs.create({
       data,
     });
   }
@@ -146,7 +146,7 @@ export class ClinicService {
   }
 
   async findAllUserInClinic(clinicId: string) {
-    return this.prismaService.userInClinics.findMany({
+    return this.prismaService.staffs.findMany({
       where: {
         clinicId,
         isDisabled: false,
@@ -166,13 +166,12 @@ export class ClinicService {
             name: true,
           },
         },
-        isOwner: true,
       },
     });
   }
 
   async findUserInClinic(clinicId: string, userId: string) {
-    return this.prismaService.userInClinics.findFirst({
+    return this.prismaService.staffs.findFirst({
       where: {
         clinicId,
         userId,
@@ -193,7 +192,6 @@ export class ClinicService {
             name: true,
           },
         },
-        isOwner: true,
       },
     });
   }
@@ -212,26 +210,9 @@ export class ClinicService {
             plans: true,
           },
         },
-        userInClinics: {
-          where: {
-            isDisabled: false,
-          },
-          select: {
-            users: {
-              select: {
-                id: true,
-                email: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-            role: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-            isOwner: true,
+        staffs: {
+          include: {
+            role: true,
           },
         },
       },
@@ -287,7 +268,7 @@ export class ClinicService {
         id,
       },
       include: {
-        userInClinics: true,
+        staffs: true,
       },
     });
   }
@@ -401,36 +382,45 @@ export class ClinicService {
       include: {
         staffs: {
           select: {
-            userInClinics: {
+            users: {
               select: {
-                users: {
-                  select: {
-                    id: true,
-                    email: true,
-                    firstName: true,
-                    lastName: true,
-                  },
-                },
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
               },
             },
           },
         },
         patients: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+          include: {
+            patient: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                avatar: true,
+                phone: true,
+              },
+            },
           },
         },
       },
     });
     return map(appointments, (appointment: any) => {
       const { staffs, patients, ...rest }: any = appointment;
+      const { patient, ...restPatient }: any = patients;
+      const { id: userId, ...restPatientInfo }: any = patient;
       return {
         ...rest,
         doctor: staffs?.userInClinics?.users,
-        patient: patients,
+        patient: {
+          ...restPatient,
+          userId,
+          ...restPatientInfo,
+        },
       };
     });
   }
@@ -455,26 +445,29 @@ export class ClinicService {
       include: {
         staffs: {
           select: {
-            userInClinics: {
+            users: {
               select: {
-                users: {
-                  select: {
-                    id: true,
-                    email: true,
-                    firstName: true,
-                    lastName: true,
-                  },
-                },
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
               },
             },
           },
         },
         patients: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+          include: {
+            patient: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                avatar: true,
+                phone: true,
+              },
+            },
           },
         },
       },
@@ -483,10 +476,16 @@ export class ClinicService {
       return null;
     }
     const { staffs, patients, ...rest }: any = appointment;
+    const { patient, ...restPatient }: any = patients;
+    const { id: userId, ...restPatientInfo }: any = patient;
     return {
       ...rest,
       doctor: staffs?.userInClinics?.users,
-      patient: patients,
+      patient: {
+        ...restPatient,
+        userId,
+        ...restPatientInfo,
+      },
     };
   }
   async createAppointment(data: Prisma.appointmentsUncheckedCreateInput) {
@@ -499,9 +498,7 @@ export class ClinicService {
     return this.prismaService.staffs.findMany({
       where: {
         isDisabled: false,
-        userInClinics: {
-          clinicId,
-        },
+        clinicId,
       },
     });
   }
