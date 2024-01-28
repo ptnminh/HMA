@@ -37,6 +37,7 @@ import { CurrentUser } from 'src/decorators';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CreateClinicServiceDto } from './dto/create-clinic-service.dto';
 import { UpdateClinicServiceDto } from './dto/update-clinic-service.dto';
+import { GetClinicsDto } from './dto/query.dto';
 
 @Controller('clinics')
 @ApiTags('Clinics')
@@ -127,10 +128,14 @@ export class ClinicsController {
 
   @Get()
   @ApiOkResponse({ type: ListClinicResponse })
-  async findAll(@CurrentUser('id') userId: string) {
+  async findAll(
+    @CurrentUser('id') userId: string,
+    @Query() query: GetClinicsDto,
+  ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.CLINIC_LIST, {
         userId,
+        query,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {

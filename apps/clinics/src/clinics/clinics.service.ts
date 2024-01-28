@@ -91,7 +91,49 @@ export class ClinicService {
     });
   }
 
-  async findAll(userId: string) {
+  async findAll(
+    userId: string,
+    query: {
+      ownerId?: string;
+      staffId?: number;
+      name?: string;
+      address?: string;
+      isActive?: boolean;
+    } | null = {},
+  ) {
+    if (Object.keys(query).length !== 0) {
+      const { ownerId, staffId, name, address, isActive } = query;
+      return this.prismaService.clinics.findMany({
+        where: {
+          ...(ownerId ? { ownerId } : {}),
+          ...(staffId
+            ? {
+                staffs: {
+                  some: {
+                    id: staffId,
+                  },
+                },
+              }
+            : {}),
+          ...(name ? { name: { contains: name } } : {}),
+          ...(address ? { address: { contains: address } } : {}),
+          ...(isActive ? { isActive } : {}),
+        },
+        include: {
+          subscriptions: {
+            orderBy: {
+              createdAt: 'desc',
+            },
+            include: {
+              plans: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    }
     return this.prismaService.clinics.findMany({
       where: {
         isActive: true,

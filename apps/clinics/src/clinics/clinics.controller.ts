@@ -106,8 +106,8 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.CLINIC_LIST)
   async listClinic(data: any) {
     try {
-      const { userId } = data;
-      const clinics = await this.clinicService.findAll(userId);
+      const { userId, query } = data;
+      const clinics = await this.clinicService.findAll(userId, query);
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách clinic thành công',
