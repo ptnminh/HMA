@@ -4,6 +4,7 @@ CREATE TABLE "users" (
     "email" TEXT NOT NULL,
     "module_id" INTEGER,
     "name" TEXT,
+    "avatar" TEXT,
     "first_name" TEXT,
     "last_name" TEXT,
     "is_input_password" BOOLEAN NOT NULL DEFAULT true,
@@ -165,18 +166,53 @@ CREATE TABLE "clinics" (
 );
 
 -- CreateTable
-CREATE TABLE "user_in_clinics" (
+CREATE TABLE "clinic_news" (
     "id" SERIAL NOT NULL,
-    "user_id" TEXT NOT NULL,
+    "title" TEXT,
+    "content" TEXT,
+    "logo" TEXT,
     "clinic_id" TEXT NOT NULL,
-    "is_owner" BOOLEAN NOT NULL DEFAULT false,
-    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
-    "disabled_at" TIMESTAMP(3),
-    "roleId" INTEGER NOT NULL,
+    "is_show" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "user_in_clinics_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "clinic_news_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "medical_suppliers" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "address" TEXT,
+    "phone" TEXT,
+    "email" TEXT,
+    "stock" INTEGER,
+    "clinic_id" TEXT NOT NULL,
+    "category_id" INTEGER,
+    "expired_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
+    "disabled_at" TIMESTAMP(3),
+
+    CONSTRAINT "medical_suppliers_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "category" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "type" TEXT,
+    "note" TEXT,
+    "clinic_id" TEXT NOT NULL,
+    "description" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
+    "disabled_at" TIMESTAMP(3),
+
+    CONSTRAINT "category_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -229,6 +265,124 @@ CREATE TABLE "invoices" (
     CONSTRAINT "invoices_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "staffs" (
+    "id" SERIAL NOT NULL,
+    "member_id" INTEGER NOT NULL,
+    "specialize" TEXT,
+    "experience" INTEGER,
+    "phone_number" TEXT,
+    "address" TEXT,
+    "gender" INTEGER,
+    "birthday" TIMESTAMP(3),
+    "description" TEXT,
+    "role_id" INTEGER,
+    "clinic_id" TEXT,
+    "user_id" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
+    "disabled_at" TIMESTAMP(3),
+
+    CONSTRAINT "staffs_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "appointments" (
+    "id" SERIAL NOT NULL,
+    "startTime" TEXT,
+    "endTime" TEXT,
+    "date" TEXT,
+    "status" TEXT NOT NULL,
+    "clinic_id" TEXT NOT NULL,
+    "patientId" TEXT,
+    "doctorId" INTEGER,
+    "description" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
+    "disabled_at" TIMESTAMP(3),
+
+    CONSTRAINT "appointments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "staff_schedule" (
+    "id" SERIAL NOT NULL,
+    "staff_id" INTEGER NOT NULL,
+    "startTime" TEXT NOT NULL,
+    "endTime" TEXT NOT NULL,
+    "day" INTEGER NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
+    "disabled_at" TIMESTAMP(3),
+
+    CONSTRAINT "staff_schedule_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "clinic_services" (
+    "id" SERIAL NOT NULL,
+    "clinicId" TEXT NOT NULL,
+    "service_name" TEXT NOT NULL,
+    "price" INTEGER NOT NULL,
+    "description" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
+    "disabled_at" TIMESTAMP(3),
+
+    CONSTRAINT "clinic_services_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "patient" (
+    "id" SERIAL NOT NULL,
+    "phone_number" TEXT,
+    "address" TEXT,
+    "gender" INTEGER,
+    "birthday" TIMESTAMP(3),
+    "blood_group" TEXT,
+    "anamnesis" TEXT,
+    "id_card" TEXT,
+    "health_insurance_code" TEXT,
+    "clinic_id" TEXT,
+    "user_id" TEXT,
+
+    CONSTRAINT "patient_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "medicine" (
+    "id" SERIAL NOT NULL,
+    "medicine_name" TEXT NOT NULL,
+    "stock" INTEGER,
+    "price" DOUBLE PRECISION,
+    "expiredAt" TIMESTAMP(3),
+    "vendor" TEXT,
+    "description" TEXT,
+    "unit" TEXT,
+    "note" TEXT,
+    "category_id" INTEGER,
+    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "medicine_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "staff_service" (
+    "id" SERIAL NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "is_disabled" BOOLEAN NOT NULL DEFAULT false,
+    "disabled_at" TIMESTAMP(3),
+    "staff_id" INTEGER NOT NULL,
+    "clinic_service_id" INTEGER NOT NULL,
+
+    CONSTRAINT "staff_service_pkey" PRIMARY KEY ("id")
+);
+
 -- AddForeignKey
 ALTER TABLE "user_device_tokens" ADD CONSTRAINT "user_device_tokens_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -260,13 +414,16 @@ ALTER TABLE "group_chat_member" ADD CONSTRAINT "group_chat_member_user_id_fkey" 
 ALTER TABLE "clinics" ADD CONSTRAINT "clinics_owner_id_fkey" FOREIGN KEY ("owner_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_in_clinics" ADD CONSTRAINT "user_in_clinics_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "clinic_news" ADD CONSTRAINT "clinic_news_clinic_id_fkey" FOREIGN KEY ("clinic_id") REFERENCES "clinics"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_in_clinics" ADD CONSTRAINT "user_in_clinics_clinic_id_fkey" FOREIGN KEY ("clinic_id") REFERENCES "clinics"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "medical_suppliers" ADD CONSTRAINT "medical_suppliers_clinic_id_fkey" FOREIGN KEY ("clinic_id") REFERENCES "clinics"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_in_clinics" ADD CONSTRAINT "user_in_clinics_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "clinic_group_roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "medical_suppliers" ADD CONSTRAINT "medical_suppliers_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "category" ADD CONSTRAINT "category_clinic_id_fkey" FOREIGN KEY ("clinic_id") REFERENCES "clinics"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_clinic_id_fkey" FOREIGN KEY ("clinic_id") REFERENCES "clinics"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -285,3 +442,24 @@ ALTER TABLE "invoices" ADD CONSTRAINT "invoices_subcription_id_fkey" FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_plan_history_id_fkey" FOREIGN KEY ("plan_history_id") REFERENCES "plan_histories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "appointments" ADD CONSTRAINT "appointments_patientId_fkey" FOREIGN KEY ("patientId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "appointments" ADD CONSTRAINT "appointments_doctorId_fkey" FOREIGN KEY ("doctorId") REFERENCES "staffs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "appointments" ADD CONSTRAINT "appointments_clinic_id_fkey" FOREIGN KEY ("clinic_id") REFERENCES "clinics"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "staff_schedule" ADD CONSTRAINT "staff_schedule_staff_id_fkey" FOREIGN KEY ("staff_id") REFERENCES "staffs"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "clinic_services" ADD CONSTRAINT "clinic_services_clinicId_fkey" FOREIGN KEY ("clinicId") REFERENCES "clinics"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "staff_service" ADD CONSTRAINT "staff_service_clinic_service_id_fkey" FOREIGN KEY ("clinic_service_id") REFERENCES "clinic_services"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "staff_service" ADD CONSTRAINT "staff_service_staff_id_fkey" FOREIGN KEY ("staff_id") REFERENCES "staffs"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
