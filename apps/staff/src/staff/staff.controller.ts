@@ -5,6 +5,7 @@ import { StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
 import { some } from 'lodash';
+import { isAlpha, isAlphanumeric } from 'class-validator';
 
 @Controller('staff')
 export class StaffController {
@@ -465,6 +466,12 @@ export class StaffController {
           message: "Không có dữ liệu tìm kiếm",
         }
       }
+      if(name && !name.replace(/^\s+|\s+$/g,"")) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tên không hợp lệ",
+        }
+      }
       var staffList = []
       var staffs = await this.staffService.searchStaff(query)
 
@@ -479,7 +486,7 @@ export class StaffController {
         for (var value of role.rolePermissions ) {
           permissionList.push({...value.permission})
         }
-        const stringName = name? name: ''
+        var stringName = name? name: ''
         const fullName = users.firstName + " " + users.lastName
         if(fullName.includes(stringName)) dataList.push({
           ...rest,
