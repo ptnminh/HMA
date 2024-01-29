@@ -7,13 +7,6 @@ import { AppointmentStatus } from 'src/shared';
 export class StaffService {
   constructor(private prismaService: PrismaService) {}
 
-  async findAllStaff() {
-    return this.prismaService.staffs.findMany({
-      where: {
-        isDisabled: false,
-      },
-    });
-  }
 
   async createStaff(data: Prisma.staffsUncheckedCreateInput) {
     return this.prismaService.staffs.create({
@@ -31,6 +24,8 @@ export class StaffService {
       },
     });
   }
+
+
 
   async findStaffById(id: number) {
     return this.prismaService.staffs.findFirst({
@@ -279,6 +274,39 @@ export class StaffService {
         }
       }
     })
-
   }
+
+
+  async findAllStaff() {
+    return this.prismaService.staffs.findMany({
+      where: {
+        isDisabled: false
+      },
+      select: {
+        id: true,
+        experience:true,
+        description: true,
+        specialize: true,
+        users: true,
+        role:{
+          select: {
+            id: true,
+            name: true,
+            rolePermissions:{
+              select: {
+                permission: {
+                  select: {
+                    id: true,
+                    optionName: true,
+                    isServiceOption: true,
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+
 }

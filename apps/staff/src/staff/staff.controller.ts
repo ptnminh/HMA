@@ -457,30 +457,31 @@ export class StaffController {
   @MessagePattern(StaffCommand.SEARCH_STAFF)
   async searchStaff(data: any) {
     try {
-      const {...query} = data
-      const isEmpty = Object.values(query).every(value => value === null||value ==='')
+      const {name, ...query} = data
+      const isEmpty = Object.values(data).every(value => value === null||value ==='')
       if(isEmpty) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: "Không có dữ liệu tìm kiếm",
         }
       }
-      if (query === null || query === undefined) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: "Các trường dữ liệu đều đều trống"
-        }
-      }
-      const staffs = await this.staffService.searchStaff(query)
-      var returnDataList = []
-      for( var staff of staffs) {
+      var staffList = []
+      var staffs = await this.staffService.searchStaff(query)
+
+      if(name && staffs.length === 0) staffList = await this.staffService.findAllStaff()
+      else staffList = staffs
+
+      var dataList = []
+      for( var staff of staffList) {
         const {users, role, ...rest} = staff
         delete(users.password)
         var permissionList = []
         for (var value of role.rolePermissions ) {
           permissionList.push({...value.permission})
         }
-        returnDataList.push({
+        const stringName = name? name: ''
+        const fullName = users.firstName + " " + users.lastName
+        if(fullName.includes(stringName)) dataList.push({
           ...rest,
           users,
           role: {
@@ -489,12 +490,11 @@ export class StaffController {
             permissions: permissionList
           }
         })
-
       }
       return {
         status: HttpStatus.OK,
         message: "Lấy danh sách thông tin staff thành công",
-        data: returnDataList,
+        data: dataList,
       }
     }
     catch(error) {

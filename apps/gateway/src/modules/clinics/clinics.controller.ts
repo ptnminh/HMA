@@ -577,28 +577,4 @@ export class ClinicsController {
       status: true,
     };
   }
-
-  @Get('/:clinicId/staffs')
-  async findAllStaffInClinic(@Param('clinicId') clinicId: string) {
-    const clinicServiceResponse = await firstValueFrom(
-      this.clinicServiceClient.send(ClinicCommand.FIND_ALL_STAFF_IN_CLINIC, {
-        clinicId,
-      }),
-    );
-    if (clinicServiceResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: clinicServiceResponse.message,
-          data: null,
-          status: false,
-        },
-        clinicServiceResponse.status,
-      );
-    }
-    return {
-      message: clinicServiceResponse.message,
-      data: clinicServiceResponse.data,
-      status: true,
-    };
-  }
 }

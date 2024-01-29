@@ -277,6 +277,7 @@ export class StaffController {
   @ApiQuery({name: "gender", required: false})
   @ApiQuery({name: "phoneNumber", required: false})
   @ApiQuery({name: "email", required: false})
+  @ApiQuery({name: "name", required: false})
   @Get()
   async searchStaff(
     @Query('userId') userId: string,
@@ -285,6 +286,7 @@ export class StaffController {
     @Query('gender') gender?: number,
     @Query('phoneNumber') phoneNumber?: string,
     @Query('email') email?:string,
+    @Query('name') name?:string,
   ) {
     const staffServiceResponse = await firstValueFrom(
       this.staffServiceClient.send(
@@ -295,6 +297,7 @@ export class StaffController {
           clinicId,
           phoneNumber,
           email,
+          name,
         }
       ),
     );
