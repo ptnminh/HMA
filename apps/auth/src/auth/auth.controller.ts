@@ -130,6 +130,7 @@ export class AuthController {
         },
       );
       delete user.emailVerified;
+      delete user.password;
       return {
         status: HttpStatus.OK,
         message: 'Đăng nhập thành công',
@@ -573,23 +574,25 @@ export class AuthController {
   }
 
   @MessagePattern(AuthCommand.FIND_USER_BY_EMAIL)
-  async findUserByEmail(data: { email: string }) {
+  async findUserByEmail(data: { email: string; emailVerified: string }) {
     try {
-      const { email } = data;
-      const user = await this.authService.findUserVerifiedByEmail(email);
+      const { email, emailVerified } = data;
+      const user = await this.authService.findAllUserByEmail(
+        email,
+        emailVerified,
+      );
       if (!user) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Email không tồn tại',
         };
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...rest } = user;
       return {
         status: HttpStatus.OK,
         message: 'Tìm user thành công',
-        data: {
-          email: user.email,
-          id: user.id,
-        },
+        data: rest,
       };
     } catch (error) {
       return {

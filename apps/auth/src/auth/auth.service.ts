@@ -16,6 +16,15 @@ export class AuthService {
     });
   }
 
+  async findAllUserByEmail(email, emailVerified): Promise<any> {
+    return this.prismaService.users.findMany({
+      where: {
+        ...(emailVerified === 'true' ? { emailVerified: true } : {}),
+        email,
+      },
+    });
+  }
+
   async updateUser(id: string, data): Promise<any> {
     return this.prismaService.users.update({
       where: {
@@ -46,16 +55,6 @@ export class AuthService {
     return this.prismaService.users.findFirst({
       where: {
         email,
-      },
-      select: {
-        id: true,
-        email: true,
-        password: true,
-        isInputPassword: true,
-        emailVerified: true,
-        firstName: true,
-        lastName: true,
-        moduleId: true,
       },
     });
   }
@@ -152,15 +151,6 @@ export class AuthService {
       where: {
         id,
         emailVerified: true,
-      },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        emailVerified: true,
-        moduleId: true,
-        isInputPassword: true,
       },
     });
   }

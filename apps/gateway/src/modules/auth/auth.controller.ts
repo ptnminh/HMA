@@ -616,9 +616,15 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
   @Get('find-user-by-email')
-  async findUserByEmail(@Query('email') email: string) {
+  async findUserByEmail(
+    @Query('email') email: string,
+    @Query('emailVerified') emailVerified: string,
+  ) {
     const findUserByEmailResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.FIND_USER_BY_EMAIL, { email }),
+      this.authServiceClient.send(AuthCommand.FIND_USER_BY_EMAIL, {
+        email,
+        emailVerified,
+      }),
     );
     if (findUserByEmailResponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -663,5 +669,4 @@ export class AuthController {
       status: true,
     };
   }
-
 }
