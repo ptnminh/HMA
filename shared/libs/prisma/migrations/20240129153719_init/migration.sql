@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "clinics" ADD COLUMN     "lat" DOUBLE PRECISION,
+ADD COLUMN     "long" DOUBLE PRECISION;

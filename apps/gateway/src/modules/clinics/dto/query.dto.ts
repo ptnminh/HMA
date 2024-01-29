@@ -4,26 +4,29 @@ import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 export class GetClinicsDto {
   @ApiProperty({ required: false, example: 'uuid' })
   @IsOptional()
-  @IsString()
   ownerId?: string;
 
   @ApiProperty({ required: false, example: '1' })
   @IsOptional()
-  @IsNumber()
   staffId?: number;
 
   @ApiProperty({ required: false, example: 'name' })
   @IsOptional()
-  @IsString()
   name?: string;
 
   @ApiProperty({ required: false, example: 'address' })
   @IsOptional()
-  @IsString()
   address?: string;
 
-  @ApiProperty({ required: false, example: 'isActive' })
+  @ApiProperty({ required: false, example: 'true' })
   @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  isActive?: string;
+
+  @ApiProperty({ required: false, example: 'suid' })
+  @IsOptional()
+  suid?: string;
+
+  @ApiProperty({ required: false, example: 'puid' })
+  @IsOptional()
+  puid?: string;
 }

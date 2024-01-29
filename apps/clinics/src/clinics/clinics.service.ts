@@ -98,13 +98,15 @@ export class ClinicService {
       staffId?: number;
       name?: string;
       address?: string;
-      isActive?: boolean;
+      isActive?: string;
+      suid?: string;
+      puid?: string;
     } | null = {},
   ) {
-    if (Object.keys(query).length !== 0) {
-      const { ownerId, staffId, name, address, isActive } = query;
-      return this.prismaService.clinics.findMany({
-        where: {
+    try {
+      if (Object.keys(query).length !== 0) {
+        const { ownerId, staffId, name, address, isActive, suid, puid } = query;
+        const where = {
           ...(ownerId ? { ownerId } : {}),
           ...(staffId
             ? {
@@ -117,7 +119,53 @@ export class ClinicService {
             : {}),
           ...(name ? { name: { contains: name } } : {}),
           ...(address ? { address: { contains: address } } : {}),
-          ...(isActive ? { isActive } : {}),
+          ...(isActive ? { isActive: isActive === 'true' ? true : false } : {}),
+          ...(suid
+            ? {
+                staffs: {
+                  some: {
+                    userId: suid,
+                  },
+                },
+              }
+            : {}),
+          ...(puid
+            ? {
+                patients: {
+                  some: {
+                    userId: puid,
+                  },
+                },
+              }
+            : {}),
+        };
+        const clinics = await this.prismaService.clinics.findMany({
+          where,
+          include: {
+            subscriptions: {
+              orderBy: {
+                createdAt: 'desc',
+              },
+              include: {
+                plans: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        });
+        return clinics;
+      }
+      return this.prismaService.clinics.findMany({
+        where: {
+          isActive: true,
+          staffs: {
+            some: {
+              userId,
+              isDisabled: false,
+            },
+          },
         },
         include: {
           subscriptions: {
@@ -133,31 +181,9 @@ export class ClinicService {
           createdAt: 'desc',
         },
       });
+    } catch (error) {
+      console.log(error);
     }
-    return this.prismaService.clinics.findMany({
-      where: {
-        isActive: true,
-        staffs: {
-          some: {
-            userId,
-            isDisabled: false,
-          },
-        },
-      },
-      include: {
-        subscriptions: {
-          orderBy: {
-            createdAt: 'desc',
-          },
-          include: {
-            plans: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
   }
 
   async findClinics() {

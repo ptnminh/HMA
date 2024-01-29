@@ -163,6 +163,8 @@ model clinics {
   ownerId          String             @map(name: "owner_id")
   address          String?
   logo             String?
+  lat              Float?
+  long             Float?
   description      String?
   metadata         String?
   isActive         Boolean            @default(true) @map(name: "is_activated")
@@ -177,6 +179,7 @@ model clinics {
   medicalSuppliers medicalSuppliers[]
   category         category[]
   staffs           staffs[]
+  patients         patients[]
 }
 
 model clinicNews {
@@ -368,6 +371,7 @@ model patients {
   userId              String?        @map("user_id")
   appointments        appointments[]
   patient             users?         @relation(fields: [userId], references: [id])
+  clinics             clinics?       @relation(fields: [clinicId], references: [id])
 }
 
 model medicine {
