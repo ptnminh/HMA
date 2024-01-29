@@ -12,29 +12,7 @@ import {
 } from 'class-validator';
 
 export class CreateStaffDto {
-  @ApiProperty({
-    example: 1,
-    description: 'Male: 1, Female: 0',
-  })
-  @IsNotEmpty()
-  @IsIn([0, 1])
-  gender: number;
 
-  @ApiProperty({
-    example: '84931231511',
-    description: 'Vietnamese phone number of staff',
-  })
-  @IsPhoneNumber('VN')
-  @IsNotEmpty()
-  phoneNumber: string;
-
-  @ApiProperty({
-    example: 'Đ. Nguyễn Văn Cứ, TP.Hồ Chí Minh',
-    description: 'The address of staff',
-  })
-  @IsString()
-  @IsNotEmpty()
-  address: string;
 
   @ApiProperty({
     example: 'Tim mạch',

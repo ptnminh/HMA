@@ -12,11 +12,6 @@ export class StaffService {
       where: {
         isDisabled: false,
       },
-      orderBy: {
-        userInClinics: {
-          userId: 'desc',
-        },
-      },
     });
   }
 
@@ -69,9 +64,14 @@ export class StaffService {
         patients: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+            userId: true,
+            patient: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+              }
+            }
           },
         },
       },
@@ -81,29 +81,6 @@ export class StaffService {
     });
   }
 
-  async findStaffByMemberId(memberId: number) {
-    return this.prismaService.staffs.findFirst({
-      where: {
-        isDisabled: false,
-        memberId,
-      },
-      include: {
-        userInClinics: {
-          select: {
-            clinicId: true,
-            userId: true,
-            users: {
-              select: {
-                name: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
-      },
-    });
-  }
 
   async updateStaff(id: number, data: Prisma.staffsUncheckedUpdateInput) {
     return this.prismaService.staffs.update({
@@ -119,12 +96,6 @@ export class StaffService {
     return this.prismaService.staffs.findMany({
       where: {
         isDisabled: false,
-        userInClinics: {
-          userId,
-        },
-      },
-      include: {
-        userInClinics: true,
       },
     });
   }
@@ -190,14 +161,7 @@ export class StaffService {
     });
   }
 
-  async findUserInClinic(id: number) {
-    return this.prismaService.userInClinics.findFirst({
-      where: {
-        isDisabled: false,
-        id,
-      },
-    });
-  }
+
 
   async findClinicServiceById(id: number) {
     return this.prismaService.clinicServices.findFirst({
@@ -241,4 +205,5 @@ export class StaffService {
       },
     });
   }
+
 }

@@ -33,12 +33,11 @@ import { userListDto } from './dto/user-list.dto';
   
   @Controller('chats')
   @ApiTags('Chats')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
   export class ChatsController {
     constructor(
       @Inject('CHATS_SERVICE') private readonly ChatsServiceClient: ClientProxy,
     ) {}
+
 
     @Get(':id/users')
     async findAllGroupMembers(@Param('id') id: string) {
@@ -62,6 +61,8 @@ import { userListDto } from './dto/user-list.dto';
         };
     }
 
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('Bearer')
     @Post()
     async createGroup(
         @Body() dto: CreateGroupChatDto, 
@@ -88,6 +89,8 @@ import { userListDto } from './dto/user-list.dto';
 
     }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
     @Post(':groupChatId/user')
     async addGroupMember(@Param('groupChatId') groupChatId: string,@Body() dto: userListDto)  {
         const data = {
@@ -116,6 +119,8 @@ import { userListDto } from './dto/user-list.dto';
 
     }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
     @Put(':id')
     async updateGroup (
         @Body() dto: UpdatedGroupDto,
@@ -147,6 +152,8 @@ import { userListDto } from './dto/user-list.dto';
         };
     }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
     @Delete(':groupChatId/user')
     async deleteMember (@Param('groupChatId') groupChatId: string,@Body() dto: userListDto  ) {
         const data = {
@@ -173,6 +180,8 @@ import { userListDto } from './dto/user-list.dto';
         };
     }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
     @Delete(':id')
     async deleteGroup (@Param('id') id: string) {
         const data = {

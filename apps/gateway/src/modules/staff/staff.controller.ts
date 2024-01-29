@@ -25,22 +25,24 @@ import { FindFreeAppointmentByStaffIdQueryDto } from './dto/query.dto';
 
 @Controller('staffs')
 @ApiTags('Staff')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('Bearer')
 export class StaffController {
   constructor(
     @Inject('STAFF_SERVICE') private readonly staffServiceClient: ClientProxy,
   ) {}
 
-  @Post(':memberId')
+  @Post()
   async createStaff(
-    @Param('memberId') UserInClinicId: string,
+    @Query('userId') userId: string,
+    @Query('clinicId') clinicId: string,
+    @Query('roleId') roleId: string,
     @Body() dto: CreateStaffDto,
   ) {
     const { services, ...rest } = dto;
     const staffServiceResponse = await firstValueFrom(
       this.staffServiceClient.send(StaffCommand.CREATE_STAFF, {
-        memberId: parseInt(UserInClinicId),
+        clinicId,
+        userId,
+        roleId: +roleId,
         services: dto.services ? dto.services : [],
         ...rest,
       }),
@@ -113,11 +115,11 @@ export class StaffController {
     };
   }
 
-  @Get(':memberId')
-  async findStaffById(@Param('memberId') memberId: string) {
+  @Get(':staffId')
+  async findStaffById(@Param('staffId') staffId: string) {
     const staffServiceResponse = await firstValueFrom(
       this.staffServiceClient.send(StaffCommand.FIND_STAFF_BY_ID, {
-        id: parseInt(memberId),
+        id: +staffId,
       }),
     );
     if (staffServiceResponse.status !== HttpStatus.OK) {

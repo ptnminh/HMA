@@ -41,14 +41,14 @@ import { GetClinicsDto } from './dto/query.dto';
 
 @Controller('clinics')
 @ApiTags('Clinics')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('Bearer')
 export class ClinicsController {
   constructor(
     @Inject('CLINIC_SERVICE')
     private readonly clinicServiceClient: ClientProxy,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post()
   @ApiCreatedResponse({ type: CreateClinicResponse })
   async create(
@@ -154,6 +154,8 @@ export class ClinicsController {
       status: true,
     };
   }
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put(':id')
   @ApiOkResponse({ type: CreateClinicResponse })
   async update(
@@ -183,6 +185,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post(':id/add-user-to-clinic/:userId')
   @ApiOkResponse({ type: CreateClinicResponse })
   async addUserToClinic(
@@ -238,6 +242,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post(':clinicId/subscribe-plan/:planId')
   @ApiOkResponse({ type: SubcribePlanResponse })
   async subscribePlan(@Body() data: SubcribePlanDTO) {
@@ -261,6 +267,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put(':clinicId/subscribe-plan/:subscribePlanId')
   async updateSubscribePlan(
     @Param('clinicId') clinicId: string,
@@ -316,6 +324,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post(':id/create-user-group-role')
   async createUserGroupRole(
     @Body() data: CreateUserGroupRoleDTO,
@@ -343,7 +353,9 @@ export class ClinicsController {
       status: true,
     };
   }
-
+  
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Delete(':id/delete-user-group-role/:userGroupRoleId')
   async deleteUserGroupRole(
     @Param('id') clinicId: string,
@@ -374,6 +386,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put(':id/update-user-group-role/:userGroupRoleId')
   async updateUserGroupRole(
     @Param('id') clinicId: string,
@@ -428,6 +442,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post(':clinicId/services')
   async createClinicService(
     @Param('clinicId') clinicId: string,
@@ -455,6 +471,8 @@ export class ClinicsController {
       status: true,
     };
   }
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put('/services/:id')
   async updateClinicService(
     @Param('id') id: string,
@@ -534,6 +552,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+@ApiBearerAuth('Bearer')
   @Delete('/services/:id')
   async deleteClinicService(@Param('id') id: string) {
     const clinicServiceResponse = await firstValueFrom(

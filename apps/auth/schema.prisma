@@ -14,8 +14,12 @@ model users {
   id               String             @id @default(uuid())
   email            String
   moduleId         Int?               @map(name: "module_id")
-  name             String?
+  avatar           String?
   firstName        String?            @map(name: "first_name")
+  phone            String?
+  address          String?
+  gender           Int?
+  birthday         DateTime?
   lastName         String?            @map(name: "last_name")
   isInputPassword  Boolean            @default(true) @map(name: "is_input_password")
   password         String
@@ -27,9 +31,10 @@ model users {
   createdAt        DateTime           @default(now()) @map(name: "created_at")
   accounts         accounts[]
   groupChatMember  groupChatMember[]
-  userInClinics    userInClinics[]
   clinics          clinics[]
   userDeviceTokens userDeviceTokens[]
+  staffs           staffs[]
+  patients         patients[]
 }
 
 model userDeviceTokens {
@@ -67,8 +72,8 @@ model clinicGroupRoles {
   updatedAt       DateTime          @default(now()) @updatedAt @map(name: "updated_at")
   createdAt       DateTime          @default(now()) @map(name: "created_at")
   rolePermissions rolePermissions[]
-  userInClinics   userInClinics[]
   clinics         clinics           @relation(fields: [clinicId], references: [id])
+  staffs          staffs[]
 
   @@map("clinic_group_roles")
 }
@@ -173,27 +178,66 @@ model clinics {
   isActive         Boolean            @default(true) @map(name: "is_activated")
   createdAt        DateTime           @default(now()) @map(name: "created_at")
   updatedAt        DateTime           @default(now()) @updatedAt @map(name: "updated_at")
-  userInClinics    userInClinics[]
   owner            users              @relation(fields: [ownerId], references: [id])
   subscriptions    subscriptions[]
   clinicGroupRoles clinicGroupRoles[]
+  clinicServices   clinicServices[]
+  appointments     appointments[]
+  clinicNews       clinicNews[]
+  medicalSuppliers medicalSuppliers[]
+  category         category[]
+  staffs           staffs[]
 }
 
-model userInClinics {
-  id         Int              @id @default(autoincrement())
-  userId     String           @map(name: "user_id")
-  clinicId   String           @map(name: "clinic_id")
-  isOwner    Boolean          @default(false) @map(name: "is_owner")
-  isDisabled Boolean          @default(false) @map(name: "is_disabled")
-  disabledAt DateTime?        @map(name: "disabled_at")
-  roleId     Int
-  createdAt  DateTime         @default(now()) @map(name: "created_at")
-  updatedAt  DateTime         @default(now()) @updatedAt @map(name: "updated_at")
-  users      users            @relation(fields: [userId], references: [id])
-  clinics    clinics          @relation(fields: [clinicId], references: [id])
-  role       clinicGroupRoles @relation(fields: [roleId], references: [id])
-  staff      staffs[]
-  @@map(name: "user_in_clinics")
+model clinicNews {
+  id        Int      @id @default(autoincrement())
+  title     String?  @db.Text
+  content   String?  @db.Text
+  logo      String?
+  clinicId  String   @map(name: "clinic_id")
+  isShow    Boolean  @default(true) @map(name: "is_show")
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map(name: "updated_at")
+  clinics   clinics  @relation(fields: [clinicId], references: [id])
+
+  @@map(name: "clinic_news")
+}
+
+model medicalSuppliers {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  address     String?
+  phone       String?
+  email       String?
+  stock       Int?
+  clinicId    String    @map(name: "clinic_id")
+  categoryId  Int?      @map(name: "category_id")
+  expiredAt   DateTime? @map(name: "expired_at")
+  createdAt   DateTime  @default(now()) @map(name: "created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+  isDisabled  Boolean   @default(false) @map(name: "is_disabled")
+  disabledAt  DateTime? @map(name: "disabled_at")
+  clinics     clinics   @relation(fields: [clinicId], references: [id])
+  category    category? @relation(fields: [categoryId], references: [id])
+
+  @@map(name: "medical_suppliers")
+}
+
+model category {
+  id               Int                @id @default(autoincrement())
+  name             String
+  type             String?
+  note             String?
+  clinicId         String             @map(name: "clinic_id")
+  description      String?
+  createdAt        DateTime           @default(now()) @map(name: "created_at")
+  updatedAt        DateTime           @default(now()) @updatedAt @map(name: "updated_at")
+  isDisabled       Boolean            @default(false) @map(name: "is_disabled")
+  disabledAt       DateTime?          @map(name: "disabled_at")
+  clinics          clinics            @relation(fields: [clinicId], references: [id])
+  medicalSuppliers medicalSuppliers[]
+  clinicServices   clinicServices[]
 }
 
 model subscriptions {
@@ -249,28 +293,117 @@ model invoices {
 }
 
 model staffs {
-  id              Int             @id() @default(autoincrement())
-  memberId        Int             @map(name: "member_id")
-  createdAt       DateTime        @default(now()) @map(name: "created_at")
-  updatedAt       DateTime        @default(now()) @updatedAt() @map("updated_at")
-  isDisabled      Boolean        @default(false) @map(name: "is_disabled")
-  disabledAt      Boolean?         @map("disabled_at")
-  userInClinics   userInClinics   @relation(fields: [memberId], references: [id])
-  staffSchedules  staffSchedules[]
+  id             Int               @id() @default(autoincrement())
+  specialize     String?
+  experience     Int?
+  description    String?           @db.Text
+  roleId         Int?              @map(name: "role_id")
+  clinicId       String?           @map(name: "clinic_id")
+  userId         String?           @map(name: "user_id")
+  createdAt      DateTime          @default(now()) @map(name: "created_at")
+  updatedAt      DateTime          @default(now()) @updatedAt() @map("updated_at")
+  isDisabled     Boolean           @default(false) @map(name: "is_disabled")
+  disabledAt     DateTime?         @map("disabled_at")
+  staffSchedules staffSchedules[]
+  appointments   appointments[]
+  staffServices  staffServices[]
+  clinics        clinics?          @relation(fields: [clinicId], references: [id])
+  role           clinicGroupRoles? @relation(fields: [roleId], references: [id])
+  users          users?            @relation(fields: [userId], references: [id])
+}
+
+model appointments {
+  id          Int       @id @default(autoincrement())
+  startTime   String?
+  endTime     String?
+  date        String?
+  status      String
+  clinicId    String    @map(name: "clinic_id")
+  patientId   Int?
+  doctorId    Int?
+  description String?
+  createAt    DateTime  @default(now()) @map(name: "created_at")
+  updateAt    DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+  isDisabled  Boolean   @default(false) @map(name: "is_disabled")
+  disabledAt  DateTime? @map(name: "disabled_at")
+  patients    patients? @relation(fields: [patientId], references: [id])
+  staffs      staffs?   @relation(fields: [doctorId], references: [id])
+  clinics     clinics   @relation(fields: [clinicId], references: [id])
 }
 
 model staffSchedules {
-  id              Int         @id @default(autoincrement())
-  staffId         Int         @map(name: "staff_id") 
-  day             Int
-  startTime       String    
-  endTime         String    
-  createAt        DateTime    @default(now()) @map(name: "created_at")
-  updateAt        DateTime    @default(now()) @updatedAt @map(name: "updated_at")
-  isDisabled      Boolean     @default(false) @map(name: "is_disabled")
-  disabledAt      DateTime?   @map(name: "disabled_at")
-  staffs          staffs      @relation(fields: [staffId], references: [id])
+  id         Int       @id @default(autoincrement())
+  staffId    Int       @map(name: "staff_id")
+  startTime  String
+  endTime    String
+  day        Int
+  createAt   DateTime  @default(now()) @map(name: "created_at")
+  updateAt   DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+  isDisabled Boolean   @default(false) @map(name: "is_disabled")
+  disabledAt DateTime? @map(name: "disabled_at")
+  staffs     staffs    @relation(fields: [staffId], references: [id])
 
   @@map("staff_schedule")
 }
 
+model clinicServices {
+  id            Int             @id @default(autoincrement())
+  clinicId      String
+  serviceName   String          @map(name: "service_name")
+  price         Int
+  categoryId    Int?            @map(name: "category_id")
+  description   String
+  createdAt     DateTime        @default(now()) @map(name: "created_at")
+  updatedAt     DateTime        @default(now()) @updatedAt @map(name: "updated_at")
+  isDisabled    Boolean         @default(false) @map(name: "is_disabled")
+  disabledAt    DateTime?       @map(name: "disabled_at")
+  staffServices staffServices[]
+  clinics       clinics         @relation(fields: [clinicId], references: [id])
+  category      category?       @relation(fields: [categoryId], references: [id])
+
+  @@map("clinic_services")
+}
+
+model patients {
+  id                  Int            @id @default(autoincrement())
+  phoneNumber         String?        @map("phone_number")
+  address             String?
+  gender              Int?
+  birthday            DateTime?
+  bloodGroup          String?        @map("blood_group")
+  anamnesis           String?
+  idCard              String?        @map("id_card")
+  healthInsuranceCode String?        @map("health_insurance_code")
+  clinicId            String?        @map("clinic_id")
+  userId              String?        @map("user_id")
+  appointments        appointments[]
+  patient             users?         @relation(fields: [userId], references: [id])
+}
+
+model medicine {
+  id           Int       @id @default(autoincrement())
+  medicineName String    @map(name: "medicine_name")
+  stock        Int?
+  price        Float?
+  expiredAt    DateTime?
+  vendor       String?
+  description  String?
+  unit         String?
+  note         String?
+  categoryId   Int?      @map(name: "category_id")
+  isDisabled   Boolean   @default(false) @map(name: "is_disabled")
+}
+
+model staffServices {
+  id              Int            @id @default(autoincrement())
+  createdAt       DateTime       @default(now()) @map(name: "created_at")
+  updatedAt       DateTime       @default(now()) @updatedAt @map(name: "updated_at")
+  isDisabled      Boolean        @default(false) @map(name: "is_disabled")
+  disabledAt      DateTime?      @map(name: "disabled_at")
+  staffId         Int            @map(name: "staff_id")
+  clinicServiceId Int            @map(name: "clinic_service_id")
+  clinicServices  clinicServices @relation(fields: [clinicServiceId], references: [id])
+  staffs          staffs         @relation(fields: [staffId], references: [id])
+
+  @@map("staff_service")
+}

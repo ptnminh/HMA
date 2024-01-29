@@ -13,26 +13,15 @@ export class StaffController {
   @MessagePattern(StaffCommand.CREATE_STAFF)
   async createStaff(data: any) {
     try {
-      const { memberId, services, ...rest } = data;
-      const userInClinics = await this.staffService.findUserInClinic(memberId);
-      if (!userInClinics) {
-        return {
-          message: 'UserInClinic không tồn tại',
-          status: HttpStatus.BAD_REQUEST,
-        };
-      }
-      const existedStaff =
-        await this.staffService.findStaffByMemberId(memberId);
-      if (existedStaff) {
-        return {
-          message: 'MemeberId đã tồn tại tồn tại',
-          status: HttpStatus.BAD_REQUEST,
-        };
-      }
+      console.log(data)
+      const { userId, clinicId, roleId ,services, ...rest } = data;
       const payload: Prisma.staffsUncheckedCreateInput = {
-        memberId,
+        userId,
+        roleId,
+        clinicId,
         ...rest,
       };
+      console.log(payload)
       const staff = await this.staffService.createStaff(payload);
       if (!staff) {
         return {
@@ -72,23 +61,17 @@ export class StaffController {
   async findStaffById(data: any) {
     try {
       const { id } = data;
-      const staff = await this.staffService.findStaffByMemberId(id);
+      const staff = await this.staffService.findStaffById(id);
       if (!staff) {
         return {
           message: 'Nhân viên không tồn tại',
           status: HttpStatus.BAD_REQUEST,
         };
       }
-      const { userInClinics, ...rest } = staff;
       return {
         message: 'Tìm kiếm thành công',
         status: HttpStatus.OK,
-        data: {
-          ...rest,
-          userId: userInClinics.clinicId,
-          clinicId: userInClinics.userId,
-          ...userInClinics.users,
-        },
+        data: staff,
       };
     } catch (error) {
       console.log(error);
@@ -310,30 +293,7 @@ export class StaffController {
     }
   }
 
-  @MessagePattern(StaffCommand.FIND_SCHEDULE_BY_ID)
-  async findScheduleById(data: any) {
-    try {
-      const { id } = data;
-      const schedule = await this.staffService.findScheduleById(id);
-      if (!schedule) {
-        return {
-          message: 'Tỉm kiếm lịch làm việc thất bại',
-          status: HttpStatus.BAD_REQUEST,
-        };
-      }
-      return {
-        message: 'Tìm lịch làm việc thành công',
-        status: HttpStatus.OK,
-        data: schedule,
-      };
-    } catch (error) {
-      console.log(error);
-      return {
-        message: 'Lỗi hệ thống',
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
-  }
+
 
   @MessagePattern(StaffCommand.FIND_SCHEDULE_BY_STAFF_ID)
   async findScheduleByStaffId(data: any) {
@@ -492,4 +452,5 @@ export class StaffController {
       };
     }
   }
+
 }
