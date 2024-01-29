@@ -206,4 +206,46 @@ export class StaffService {
     });
   }
 
+  async searchStaff(query) {
+    const {userId, clinicId, roleId, gender, phoneNumber, email} = query
+    return this.prismaService.staffs.findMany({
+      where: {
+        clinicId: clinicId? clinicId : undefined,
+        roleId: roleId? roleId : undefined,
+        isDisabled: false,
+        AND:[
+          {
+            users: gender? {gender,} : undefined
+          },
+          {
+            users: phoneNumber? {phone: {contains: phoneNumber}} : undefined
+          },
+          {
+             users: userId? {id: userId} : undefined
+          },
+          {
+            users: email? {email: {contains: email} } : undefined
+          },
+        ]
+      },
+      select: {
+        id: true,
+        userId: true,
+        clinicId: true,
+        roleId: true,
+        experience:true,
+        description: true,
+        users: {
+          select: {
+            firstName: true,
+            lastName: true,
+            gender: true,
+            address:true,
+            email: true,
+          }
+        }
+      }
+    })
+
+  }
 }

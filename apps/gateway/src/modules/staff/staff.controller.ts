@@ -12,7 +12,7 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -251,6 +251,51 @@ export class StaffController {
           staffId: parseInt(staffId),
           date: query.date ? query.date : new Date().toISOString(),
         },
+      ),
+    );
+    if (staffServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: staffServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        staffServiceResponse.status,
+      );
+    }
+
+    return {
+      message: staffServiceResponse.message,
+      data: staffServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @ApiQuery({name: "userId", required: false})
+  @ApiQuery({name: "roleId", required: false})
+  @ApiQuery({name: "clinicId", required: false})
+  @ApiQuery({name: "gender", required: false})
+  @ApiQuery({name: "phoneNumber", required: false})
+  @ApiQuery({name: "email", required: false})
+  @Get()
+  async searchStaff(
+    @Query('userId') userId: string,
+    @Query('roleId') roleId: string,
+    @Query('clinicId') clinicId: string,
+    @Query('gender') gender?: number,
+    @Query('phoneNumber') phoneNumber?: string,
+    @Query('email') email?:string,
+  ) {
+    const staffServiceResponse = await firstValueFrom(
+      this.staffServiceClient.send(
+        StaffCommand.SEARCH_STAFF,{
+          userId,
+          roleId: +roleId,
+          gender: +gender,
+          clinicId,
+          phoneNumber,
+          email,
+        }
       ),
     );
     if (staffServiceResponse.status !== HttpStatus.OK) {

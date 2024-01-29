@@ -453,4 +453,33 @@ export class StaffController {
     }
   }
 
+  @MessagePattern(StaffCommand.SEARCH_STAFF)
+  async searchStaff(data: any) {
+    try {
+      const {...query} = data
+      console.log({...query})
+      const staffs = await this.staffService.searchStaff(query)
+      var returnData = []
+      for (var staff of staffs) {
+        const {users, ...rest} = staff
+        returnData.push({
+          ...users,
+          ...rest,
+        })
+      }
+      return {
+        status: HttpStatus.OK,
+        message: "Lấy danh sách thông tin staff thành công",
+        data: returnData,
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return {
+        message: "Lỗi hệ thống",
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      }
+    }
+  }
+
 }
