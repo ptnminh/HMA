@@ -68,6 +68,7 @@ export class StaffController {
           status: HttpStatus.BAD_REQUEST,
         };
       }
+      delete(staff.users.password)
       return {
         message: 'Tìm kiếm thành công',
         status: HttpStatus.OK,
@@ -457,20 +458,43 @@ export class StaffController {
   async searchStaff(data: any) {
     try {
       const {...query} = data
-      console.log({...query})
+      const isEmpty = Object.values(query).every(value => value === null||value ==='')
+      if(isEmpty) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Không có dữ liệu tìm kiếm",
+        }
+      }
+      if (query === null || query === undefined) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Các trường dữ liệu đều đều trống"
+        }
+      }
       const staffs = await this.staffService.searchStaff(query)
-      var returnData = []
-      for (var staff of staffs) {
-        const {users, ...rest} = staff
-        returnData.push({
-          ...users,
+      var returnDataList = []
+      for( var staff of staffs) {
+        const {users, role, ...rest} = staff
+        delete(users.password)
+        var permissionList = []
+        for (var value of role.rolePermissions ) {
+          permissionList.push({...value.permission})
+        }
+        returnDataList.push({
           ...rest,
+          users,
+          role: {
+            id: role.id,
+            name: role.name,
+            permissions: permissionList
+          }
         })
+
       }
       return {
         status: HttpStatus.OK,
         message: "Lấy danh sách thông tin staff thành công",
-        data: returnData,
+        data: returnDataList,
       }
     }
     catch(error) {

@@ -121,8 +121,7 @@ export class PlansController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
+
   @ApiQuery({
     name: 'isActive',
     required: false,
@@ -153,8 +152,7 @@ export class PlansController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
+
   @Get(':id')
   async getPlanByID(@Param('id') id: string) {
     const getPlanResponse = await firstValueFrom(

@@ -38,17 +38,43 @@ export class StaffService {
         isDisabled: false,
         id,
       },
-      include: {
+      select: {
+        id: true,
+        specialize: true,
+        experience: true,
+        description: true,
         staffServices: {
           where: {
             isDisabled: false,
           },
+          include: {
+            clinicServices: true
+          }
         },
         staffSchedules: {
           where: {
             isDisabled: false,
           },
+          select: {day: true, startTime: true, endTime: true,}
         },
+        clinics: {
+          select: { id: true, name: true, email: true, address: true, phone: true,}
+        },
+        users: true,
+        role: {
+          select: {id: true, name: true, rolePermissions: {
+           select: {
+            permission: {
+              select: {
+                id: true,
+                optionName: true,
+                isServiceOption: true
+              }
+            }            
+           } 
+          }},
+        }
+
       },
     });
   }
@@ -215,7 +241,7 @@ export class StaffService {
         isDisabled: false,
         AND:[
           {
-            users: gender? {gender,} : undefined
+            users: gender? {gender: gender,} : undefined
           },
           {
             users: phoneNumber? {phone: {contains: phoneNumber}} : undefined
@@ -230,18 +256,25 @@ export class StaffService {
       },
       select: {
         id: true,
-        userId: true,
-        clinicId: true,
-        roleId: true,
         experience:true,
         description: true,
-        users: {
+        specialize: true,
+        users: true,
+        role:{
           select: {
-            firstName: true,
-            lastName: true,
-            gender: true,
-            address:true,
-            email: true,
+            id: true,
+            name: true,
+            rolePermissions:{
+              select: {
+                permission: {
+                  select: {
+                    id: true,
+                    optionName: true,
+                    isServiceOption: true,
+                  }
+                }
+              }
+            }
           }
         }
       }
