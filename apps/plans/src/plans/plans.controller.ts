@@ -32,6 +32,7 @@ export class PlanController {
   @MessagePattern(PlanCommand.PLAN_UPDATE)
   async updatePlan(data: any) {
     try {
+      console.log(data)
       const { id, optionIds, ...rest } = data;
       const plan = await this.planService.updatePlan(id, rest);
       if (plan) {
@@ -130,9 +131,10 @@ export class PlanController {
   }
 
   @MessagePattern(PlanCommand.GET_ALL_PLAN)
-  async getAllPlans() {
+  async getAllPlans(data: any) {
     try {
-      const plan = await this.planService.findAllPlans();
+      const {getAll} = data
+      const plan = await this.planService.findAllPlans(getAll);
       for (let i = 0; i < plan.length; ++i) {
         const objarray = [];
         for (let j = 0; j < plan[i].planOptions.length; ++j) {

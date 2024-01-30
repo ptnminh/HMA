@@ -179,9 +179,11 @@ export class PlansController {
 
 
   @Get()
-  async getAllPlans() {
+  async getAllPlans(@Query('getAll') getAll: Boolean) {
     const planServiceResponse = await firstValueFrom(
-      this.planServiceClient.send(PlanCommand.GET_ALL_PLAN, {}),
+      this.planServiceClient.send(PlanCommand.GET_ALL_PLAN, {
+        getAll
+      }),
     );
     if (planServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(

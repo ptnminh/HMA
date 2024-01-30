@@ -438,15 +438,11 @@ export class AuthController {
   }
 
   @MessagePattern(AuthCommand.CHANGE_PASSWORD)
-  async changePassword(data: {
-    id: string;
-    currentPassword: string;
-    newPassword: string;
-    isReset: any;
-  }) {
+  async changePassword(data: any) {
     try {
-      const { id, currentPassword, newPassword } = data;
-      const user = await this.authService.findPasswordByUserID(id);
+      console.log(data)
+      const { id, currentPassword, newPassword, isReset } = data;
+      const user = await this.authService.findUserById(id)
       if (!user) {
         return {
           status: HttpStatus.BAD_REQUEST,
@@ -479,6 +475,7 @@ export class AuthController {
         data: null,
       };
     } catch (error) {
+      console.log(error)
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
@@ -554,17 +551,18 @@ export class AuthController {
 
       const encryptedPassword = await hashPassword(password);
       await this.authService.addNewPassword(user.id, encryptedPassword);
-      const newUser = await this.authService.findPasswordByUserID(user.id);
+      const newUser = await this.authService.findUserById(user.id);
       if (newUser.password != encryptedPassword) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Không thể thay đổi mật khẩu',
         };
       }
+      delete(newUser.password)
       return {
         status: HttpStatus.OK,
         message: 'Thay đổi mật khẩu thành công',
-        data: null,
+        data: newUser,
       };
     } catch (error) {
       return {

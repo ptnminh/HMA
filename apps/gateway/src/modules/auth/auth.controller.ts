@@ -527,22 +527,18 @@ export class AuthController {
     };
   }
 
-  @Post('change-password')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
+  @Post(':userId/change-password')
   @ApiCreatedResponse({
     type: ChangePasswordReponse,
   })
-  async ChangePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
-    const user = req.user;
-    const _dto = {
-      id: user['id'],
-      currentPassword: dto.currentPassword,
-      newPassword: dto.newPassword,
-      isReset: dto.isReset,
-    };
+  async ChangePassword(@Body() dto: ChangePasswordDto, @Param('userId') userId: String) {
     const ChangePasswordReponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, _dto),
+      this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, {
+        id: userId,
+        currentPassword: dto.currentPassword,
+        newPassword: dto.newPassword,
+        isReset: dto.isReset,
+      }),
     );
     if (ChangePasswordReponse.status !== HttpStatus.OK) {
       throw new HttpException(
