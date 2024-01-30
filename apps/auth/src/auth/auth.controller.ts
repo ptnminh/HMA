@@ -13,6 +13,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom } from 'rxjs';
+import { Prisma } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -655,13 +656,24 @@ export class AuthController {
   async updateUser(data: any) {
     try {
       const { id, ...payload } = data;
-      const user = await this.authService.updateUser(id, payload);
+      const foundUser = await this.authService.findUserById(id)
+      if(!foundUser) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "User không tồn tại"
+        }
+      }
+      const updateData: Prisma.usersUncheckedUpdateInput = {
+        ...payload
+      }
+      const user = await this.authService.updateUser(id, updateData);
       return {
         status: HttpStatus.OK,
         message: 'Cập nhật user thành công',
         data: user,
       };
     } catch (error) {
+      console.log(error)
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',

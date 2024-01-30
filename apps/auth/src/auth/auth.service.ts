@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { RegisterDto } from './dto/create-user.dto';
 import { MODULES, hashPassword } from '../shared/';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
     });
   }
 
-  async updateUser(id: string, data): Promise<any> {
+  async updateUser(id: string, data: Prisma.usersUncheckedUpdateInput): Promise<any> {
     return this.prismaService.users.update({
       where: {
         id,

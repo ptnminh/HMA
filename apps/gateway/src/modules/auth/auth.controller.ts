@@ -62,6 +62,8 @@ import { Response } from 'express';
 import { ClinicCommand } from '../clinics/command';
 import { ScheduleDto } from './dto/schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { dot } from 'node:test/reporters';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -668,5 +670,32 @@ export class AuthController {
       data: findUserByEmailResponse.data,
       status: true,
     };
+  }
+
+  @Put('/user/:userId')
+  async updateUser(@Param('userId') userId: string, @Body() dto: UpdateUserDto) {
+    const authResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.UPDATE_USER, {
+        id: userId,
+        ...dto
+      })
+    )
+    if (authResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: authResponse.message,
+          data: null,
+          status: false,
+        },
+        authResponse.status,
+      );
+    }
+    return {
+      message: authResponse.message,
+      data: authResponse.data,
+      status: true,
+    };
+
+    
   }
 }
