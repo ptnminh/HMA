@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
 import { some } from 'lodash';
 import { isAlpha, isAlphanumeric } from 'class-validator';
-import { convertVietnameseString } from './utils';
+import { convertVietnameseString, isContainSpecialChar } from './utils';
 
 @Controller('staff')
 export class StaffController {
@@ -468,7 +468,7 @@ export class StaffController {
         }
       }
       var stringName = name? convertVietnameseString(name): ''
-      if(name && !name.replace(/^\s+|\s+$/g,"")) {
+      if(name && !name.replace(/^\s+|\s+$/g,"") || name && isContainSpecialChar(name)) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: "Tên không hợp lệ",
