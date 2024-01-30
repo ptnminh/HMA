@@ -6,6 +6,7 @@ import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
 import { some } from 'lodash';
 import { isAlpha, isAlphanumeric } from 'class-validator';
+import { convertVietnameseString } from './utils';
 
 @Controller('staff')
 export class StaffController {
@@ -466,6 +467,7 @@ export class StaffController {
           message: "Không có dữ liệu tìm kiếm",
         }
       }
+      var stringName = name? convertVietnameseString(name): ''
       if(name && !name.replace(/^\s+|\s+$/g,"")) {
         return {
           status: HttpStatus.BAD_REQUEST,
@@ -486,8 +488,11 @@ export class StaffController {
         for (var value of role.rolePermissions ) {
           permissionList.push({...value.permission})
         }
-        var stringName = name? name: ''
-        const fullName = users.firstName + " " + users.lastName
+        const fullName =
+            convertVietnameseString(users.firstName)
+            + " "
+            + convertVietnameseString(users.lastName)
+        console.log(users)
         if(fullName.includes(stringName)) dataList.push({
           ...rest,
           users,
