@@ -844,4 +844,107 @@ export class ClinicController {
       };
     }
   }
+
+  async createCategory(data: any) {
+    try {
+      const {clinicId, ...rest} = data
+      const clinic  = await this.clinicService.findClinicById(clinicId)
+      if (!clinic ){
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Clinic không tồn tại"
+        }
+      }
+      const  payload: Prisma.categoryUncheckedCreateInput = {
+        clinicId,
+        ...rest
+      }
+
+      const category = await this.clinicService.createCategory(payload)
+      if (!category)  {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tạo categoty thất bại"
+        }
+      }
+      return {
+        data: category,
+        status: HttpStatus.BAD_REQUEST,
+        message: "Tạo category thành công"
+      }
+    } catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  async findCategoryById(id: number) {
+    try {
+      const category = await this.clinicService.findCategoryById(id)
+      if (!category) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tìm kíếm thất bại"
+        }
+      }
+      return {
+        status: HttpStatus.OK,
+        message: "Tìm kiếm thành công",
+        data: category
+      }
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: "Lỗi hệ thống",
+      }
+    }
+  }
+
+  async updateCategoty(data: any) {
+    try {
+      const {id, ...rest} = data
+      const category = await this.clinicService.findCategoryById(id)
+      if (!category) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Category không tồn tại"
+        }
+      }
+      const updatePayload: Prisma.categoryUncheckedUpdateInput = {
+        ...rest,
+      }
+      const updatedCategory = await this.clinicService.updateCategory(updatePayload, id)
+      return {
+        status: HttpStatus.OK,
+        message: "Cập nhật category thành công",
+        data: category,
+      }
+    } catch (error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  async searchCategory(data: any) {
+    try {
+      const {type, name} = data
+      
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }
+

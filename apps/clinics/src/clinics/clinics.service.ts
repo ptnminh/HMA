@@ -570,4 +570,30 @@ export class ClinicService {
       },
     });
   }
+
+  async createCategory(data: Prisma.categoryUncheckedCreateInput) {
+    return this.prismaService.category.create({
+      data,
+    })
+  }
+
+  async updateCategory(data: Prisma.categoryUncheckedUpdateInput, id: number) {
+    return this.prismaService.category.update({
+      where: {
+        id,
+      },
+      data,
+    })
+  }
+
+  async findCategoryById(id: number) {
+    return this.prismaService.category.findFirst({
+      where: {
+        id,
+        isDisabled: false,
+      }
+    })
+  }
+  
+
 }

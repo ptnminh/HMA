@@ -219,8 +219,8 @@ model medicalSuppliers {
 
 model category {
   id               Int                @id @default(autoincrement())
-  name             String
-  type             String?
+  name             String             @map(name: "category_name")
+  type             Int                @map(name: "category_type")
   note             String?
   clinicId         String             @map(name: "clinic_id")
   description      String?
