@@ -254,6 +254,7 @@ export class StaffService {
         experience:true,
         description: true,
         specialize: true,
+        clinicId: true,
         users: true,
         role:{
           select: {
@@ -284,6 +285,7 @@ export class StaffService {
       },
       select: {
         id: true,
+        clinicId: true,
         experience:true,
         description: true,
         specialize: true,
