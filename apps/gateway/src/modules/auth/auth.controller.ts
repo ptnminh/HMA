@@ -64,6 +64,7 @@ import { ScheduleDto } from './dto/schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { dot } from 'node:test/reporters';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FindUserByEmailDto } from './dto/query.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -459,7 +460,7 @@ export class AuthController {
     }
     return {
       message: accountResponse.message,
-      data: accountResponse.data,
+      data: accountResponse?.data,
       status: true,
     };
   }
@@ -531,7 +532,10 @@ export class AuthController {
   @ApiCreatedResponse({
     type: ChangePasswordReponse,
   })
-  async ChangePassword(@Body() dto: ChangePasswordDto, @Param('userId') userId: String) {
+  async ChangePassword(
+    @Body() dto: ChangePasswordDto,
+    @Param('userId') userId: String,
+  ) {
     const ChangePasswordReponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, {
         id: userId,
@@ -614,14 +618,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
   @Get('find-user-by-email')
-  async findUserByEmail(
-    @Query('email') email: string,
-    @Query('emailVerified') emailVerified: string,
-  ) {
+  async findUserByEmail(@Query() query: FindUserByEmailDto) {
     const findUserByEmailResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.FIND_USER_BY_EMAIL, {
-        email,
-        emailVerified,
+        ...query,
       }),
     );
     if (findUserByEmailResponse.status !== HttpStatus.OK) {
@@ -669,13 +669,16 @@ export class AuthController {
   }
 
   @Put('/user/:userId')
-  async updateUser(@Param('userId') userId: string, @Body() dto: UpdateUserDto) {
+  async updateUser(
+    @Param('userId') userId: string,
+    @Body() dto: UpdateUserDto,
+  ) {
     const authResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.UPDATE_USER, {
         id: userId,
-        ...dto
-      })
-    )
+        ...dto,
+      }),
+    );
     if (authResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
@@ -691,7 +694,5 @@ export class AuthController {
       data: authResponse.data,
       status: true,
     };
-
-    
   }
 }
