@@ -595,5 +595,45 @@ export class ClinicService {
     })
   }
   
+  async searchCategory(clinicId: string, name: string, type: number) {
+    return this.prismaService.category.findMany({
+      where: {
+        type: type? type: undefined,
+        name: name? {
+          contains: name,
+        } : undefined,
+        isDisabled: false,
+        clinicId,
+      }
+    })
+  }
 
+  async deleteCategory(id: number) {
+    return this.prismaService.category.update({
+      where: {
+        id,
+      },
+      data: {
+        isDisabled: true,
+      }
+    })
+  }
+
+  async updateClinicServiceByCategoryId(categoryId: number, data,) {
+    return this.prismaService.clinicServices.updateMany({
+      where: {
+        categoryId,
+      },
+      data,
+    })
+  }
+
+  async updateMedicalSuppliersByCategoryId(categoryId: number, data) {
+    return this.prismaService.medicalSuppliers.updateMany({
+      where: {
+        categoryId,
+      },
+      data
+    })
+  }
 }

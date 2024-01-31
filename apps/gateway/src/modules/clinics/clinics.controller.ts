@@ -28,6 +28,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { ClientProxy } from '@nestjs/microservices';
@@ -38,6 +39,8 @@ import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CreateClinicServiceDto } from './dto/create-clinic-service.dto';
 import { UpdateClinicServiceDto } from './dto/update-clinic-service.dto';
 import { GetClinicsDto } from './dto/query.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('clinics')
 @ApiTags('Clinics')
@@ -559,6 +562,136 @@ export class ClinicsController {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.DELETE_CLINIC_SERVICE, {
         id: +id,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Get('/categories/:categoryId')
+  async findCategoryById(@Param('categoryId') categoryId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.FIND_CATEGORY_BY_ID, {
+        id: +categoryId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Post(':clinicId/categories')
+  async createCategory(@Param('clinicId') clinicId: string, @Body() dto: CreateCategoryDto) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.CREATE_CATEGORY, {
+        clinicId,
+        ...dto
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Put('/categories/:categoryId')
+  async updateCategoryById(@Param('categoryId') categoryId: string, @Body() dto: UpdateCategoryDto) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.UPDATE_CATEGORY, {
+        id: +categoryId,
+        ...dto
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Delete('/categories/:categoryId')
+  async deleteCategoryById(@Param('categoryId') categoryId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.DELETE_CATEGORY, {
+        id: +categoryId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @ApiQuery({name: "name", required: false})
+  @ApiQuery({name: "type", required: false})
+  @Get('/:clinicId/categories/')
+  async searchCategory(
+    @Param('clinicId') clinicId: string,
+    @Query('name') name: string,
+    @Query('type') type: string
+    ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.SEARCH_CATEGORY, {
+        clinicId: clinicId,
+        name: name,
+        type: +type,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {

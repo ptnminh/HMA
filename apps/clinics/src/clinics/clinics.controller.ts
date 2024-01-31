@@ -845,6 +845,7 @@ export class ClinicController {
     }
   }
 
+  @MessagePattern(ClinicCommand.CREATE_CATEGORY)
   async createCategory(data: any) {
     try {
       const {clinicId, ...rest} = data
@@ -869,7 +870,7 @@ export class ClinicController {
       }
       return {
         data: category,
-        status: HttpStatus.BAD_REQUEST,
+        status: HttpStatus.CREATED,
         message: "Tạo category thành công"
       }
     } catch(error) {
@@ -881,8 +882,10 @@ export class ClinicController {
     }
   }
 
-  async findCategoryById(id: number) {
+  @MessagePattern(ClinicCommand.FIND_CATEGORY_BY_ID)
+  async findCategoryById(data: any) {
     try {
+      const {id} = data
       const category = await this.clinicService.findCategoryById(id)
       if (!category) {
         return {
@@ -905,6 +908,7 @@ export class ClinicController {
     }
   }
 
+  @MessagePattern(ClinicCommand.UPDATE_CATEGORY)
   async updateCategoty(data: any) {
     try {
       const {id, ...rest} = data
@@ -922,7 +926,7 @@ export class ClinicController {
       return {
         status: HttpStatus.OK,
         message: "Cập nhật category thành công",
-        data: category,
+        data: updatedCategory,
       }
     } catch (error) {
       console.log(error)
@@ -933,10 +937,51 @@ export class ClinicController {
     }
   }
 
+  @MessagePattern(ClinicCommand.SEARCH_CATEGORY)
   async searchCategory(data: any) {
     try {
-      const {type, name} = data
-      
+      const {clinicId, name, type} = data
+      const categories = await this.clinicService.searchCategory(clinicId, name, type)
+      return {
+        status: HttpStatus.OK,
+        message: "Tìm kiếm thành công",
+        data: categories,
+      }
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(ClinicCommand.DELETE_CATEGORY)
+  async deleteCategory(data: any) {
+    try {
+      const {id} = data
+      const category = await this.clinicService.findCategoryById(id)
+      if (!category) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Category không tồn tại"
+        }
+      }
+      await this.clinicService.deleteCategory(id)
+      const deletedCategory = await this.clinicService.findCategoryById(id)
+      if (deletedCategory) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Xóa Category thất bại"
+        }
+      }
+      await this.clinicService.updateClinicServiceByCategoryId(category.id, {categoryId: null})
+      await this.clinicService.updateMedicalSuppliersByCategoryId(category.id, {categoryId: null})
+      return {
+        status: HttpStatus.OK,
+        message: "Xóa Category thành công",
+      }
     }
     catch(error) {
       console.log(error)
