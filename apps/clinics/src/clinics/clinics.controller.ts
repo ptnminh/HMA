@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, SUBSCRIPTION_STATUS } from 'src/shared';
 import { map } from 'lodash';
+import { isContainSpecialChar } from './utils';
 
 @Controller()
 export class ClinicController {
@@ -850,7 +851,7 @@ export class ClinicController {
     try {
       const {clinicId, ...rest} = data
       const clinic  = await this.clinicService.findClinicById(clinicId)
-      if (!clinic ){
+      if (!clinic){
         return {
           status: HttpStatus.BAD_REQUEST,
           message: "Clinic không tồn tại"
@@ -941,6 +942,12 @@ export class ClinicController {
   async searchCategory(data: any) {
     try {
       const {clinicId, name, type} = data
+      if(name && isContainSpecialChar(name)) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tên phân loại không hợp lệ",
+        }
+      }
       const categories = await this.clinicService.searchCategory(clinicId, name, type)
       return {
         status: HttpStatus.OK,
@@ -991,5 +998,179 @@ export class ClinicController {
       };
     }
   }
-}
+
+  @MessagePattern(ClinicCommand.CREATE_NEWS)
+  async createNews(data: any) {
+    try{
+      const {clinicId, ...rest} = data
+      const clinic = await this.clinicService.findClinicById(clinicId)
+      if(!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Clinic không tồn tại",
+        }
+      }
+      const payload: Prisma.clinicNewsUncheckedCreateInput = {
+        clinicId,
+        ...rest,
+      }
+      const news = await this.clinicService.createNews(payload)
+      if (!news) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tạo tin tức thất bại",
+        }
+      }
+      return {
+        status: HttpStatus.CREATED,
+        message: "Tạo tin tức thành công",
+        data: news,
+      }
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
+
+  @MessagePattern(ClinicCommand.FIND_NEWS_BY_ID)
+  async getNewsById(data: any) {
+    try {
+      const {id} = data
+      const news = await this.clinicService.findNewsById(id)
+      if (!news) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tin tức không tồn tại",
+        }
+      }
+      return {
+        status: HttpStatus.OK,
+        message: "Tìm kiếm tin tức thành công",
+        data: news,
+      }
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
+
+  @MessagePattern(ClinicCommand.UPDATE_NEWS)
+  async updateNews(data: any) {
+    try {
+      const {id, ...rest} =data
+      const news = await this.clinicService.findNewsById(id)
+      if (!news) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tin tức không tồn tại",
+        }
+      }
+      const updatedNews = await this.clinicService.updateNews(id, rest)
+      return {
+        status: HttpStatus.OK,
+        message: "Cập nhật tin tức thành công",
+        data: updatedNews,
+      }
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
+
+  @MessagePattern(ClinicCommand.DELETE_NEWS)
+  async deleteNews(data: any) {
+    try {
+      const {id} = data
+      const news = await this.clinicService.findNewsById(id)
+      if (!news) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tin tức không tồn tại",
+        }
+      }
+      await this.clinicService.deleteNews(id)
+      const deletedNews = await this.clinicService.findNewsById(id)
+      if (deletedNews) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Xóa tin tức thất bại",
+        }
+      }
+      return {
+        data: null,
+        status: HttpStatus.OK,
+        message: "Xóa tin tức thành công",
+      }
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
+    }
+  }
+
+
+  @MessagePattern(ClinicCommand.SEARCH_NEWS)
+  async searchNews(data: any) {
+    try {
+      const {clinicId, title, isShow, page, size} = data
+      if(!clinicId && !title && !isShow) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Không có dữ liệu tìm kiếm",
+        }
+      }
+      if(title && isContainSpecialChar(title)) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Tên phân loại không hợp lệ",
+        }
+      }
+      const news = await this.clinicService.searchNews(
+        clinicId,
+        title,
+        isShow,
+      )
+      const total = news.length
+
+      const result = []
+      var minIndex = page*size
+      var maxIndex = ((page+1)*size<total)? (page+1)*size : total
+      for(var i = minIndex; i< maxIndex; i++) {
+        result.push(news[i])
+      }
+
+      return {
+        status: HttpStatus.OK,
+        message: "Tìm kiếm thành công",
+        data: {
+          data: result,
+          pageSize: size,
+          currentPage: page+1,
+          total,
+        }
+      }
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }}
 

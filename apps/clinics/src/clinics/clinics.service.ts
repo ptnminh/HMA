@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { map } from 'lodash';
+import { identity, map } from 'lodash';
 import { PrismaService } from 'src/prisma.service';
+import { convertVietnameseString } from './utils';
 
 @Injectable()
 export class ClinicService {
@@ -595,17 +596,32 @@ export class ClinicService {
     })
   }
   
-  async searchCategory(clinicId: string, name: string, type: number) {
-    return this.prismaService.category.findMany({
-      where: {
-        type: type? type: undefined,
-        name: name? {
-          contains: name,
-        } : undefined,
-        isDisabled: false,
-        clinicId,
+  async searchCategory(clinicId: string, name?: string, type?: number) {
+    try {
+      var result  = []
+      const categories = await this.prismaService.category.findMany({
+        where: {
+          type: type? type: undefined,
+          isDisabled: false,
+          clinicId,
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
+      if(name) {
+        for(var category of categories) {
+          const strName = convertVietnameseString(category.name)
+          if(strName.includes(convertVietnameseString(name))) {
+            result.push(category)
+          }
+        }
       }
-    })
+      return name? result : categories;
+    }
+    catch(error) {
+      console.log(error)
+    }
   }
 
   async deleteCategory(id: number) {
@@ -635,5 +651,68 @@ export class ClinicService {
       },
       data
     })
+  }
+
+
+  async createNews(data: Prisma.clinicNewsUncheckedCreateInput) {
+    return this.prismaService.clinicNews.create({
+      data,
+    })
+  }
+
+  async findNewsById(id: number) {
+    return this.prismaService.clinicNews.findFirst({
+      where: {
+        id,
+      }
+    })
+  }
+
+  async updateNews(id: number, data: Prisma.clinicNewsUncheckedUpdateInput) {
+    return this.prismaService.clinicNews.update({
+      where: {
+        id,
+      },
+      data,
+    })
+  }
+
+  async deleteNews(id: number) {
+    return this.prismaService.clinicNews.delete({
+      where: {
+        id,
+      }
+    })
+  }
+
+  async searchNews(
+    clinicId?: string,
+    title?: string,
+    isShow?: boolean,
+  ) {
+    try {
+      const result = []
+      const newsList = await this.prismaService.clinicNews.findMany({
+        where: {
+          isShow: isShow? isShow: undefined,
+          clinicId: clinicId? clinicId: undefined,
+        },
+        orderBy: {
+          createdAt: "desc"
+        }
+      })
+      if(title) {
+        for(var news of newsList) {
+          const titleStr = convertVietnameseString(news.title)
+          if(titleStr.includes(convertVietnameseString(title))) {
+            result.push(news)
+          }
+        }
+      }
+      return title? result: newsList;
+    }
+    catch(error) {
+      console.log(error)
+    }
   }
 }
