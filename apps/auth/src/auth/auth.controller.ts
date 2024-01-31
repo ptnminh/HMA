@@ -324,11 +324,9 @@ export class AuthController {
       );
       if (!account) {
         return {
-          status: HttpStatus.OK,
+          status: HttpStatus.BAD_REQUEST,
           message: 'Tài khoản không tồn tại',
-          data: {
-            user: null,
-          },
+          data: null,
         };
       }
       const jwtSercret = this.configService.get<string>('JWT_SECRET_KEY');
@@ -341,7 +339,6 @@ export class AuthController {
           secret: jwtSercret,
         },
       );
-      delete user.emailVerified;
       return {
         status: HttpStatus.OK,
         data: {
@@ -440,9 +437,9 @@ export class AuthController {
   @MessagePattern(AuthCommand.CHANGE_PASSWORD)
   async changePassword(data: any) {
     try {
-      console.log(data)
-      const { id, currentPassword, newPassword, isReset } = data;
-      const user = await this.authService.findUserById(id)
+      console.log(data);
+      const { id, currentPassword, newPassword } = data;
+      const user = await this.authService.findUserById(id);
       if (!user) {
         return {
           status: HttpStatus.BAD_REQUEST,
@@ -475,7 +472,7 @@ export class AuthController {
         data: null,
       };
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
@@ -558,7 +555,7 @@ export class AuthController {
           message: 'Không thể thay đổi mật khẩu',
         };
       }
-      delete(newUser.password)
+      delete newUser.password;
       return {
         status: HttpStatus.OK,
         message: 'Thay đổi mật khẩu thành công',
@@ -576,22 +573,14 @@ export class AuthController {
   async findUserByEmail(data: { email: string; emailVerified: string }) {
     try {
       const { email, emailVerified } = data;
-      const user = await this.authService.findAllUserByEmail(
+      const users = await this.authService.findAllUserByEmail(
         email,
         emailVerified,
       );
-      if (!user) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Email không tồn tại',
-        };
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...rest } = user;
       return {
         status: HttpStatus.OK,
         message: 'Tìm user thành công',
-        data: rest,
+        data: users.map(({ password, ...user }) => user),
       };
     } catch (error) {
       return {
@@ -654,16 +643,16 @@ export class AuthController {
   async updateUser(data: any) {
     try {
       const { id, ...payload } = data;
-      const foundUser = await this.authService.findUserById(id)
-      if(!foundUser) {
+      const foundUser = await this.authService.findUserById(id);
+      if (!foundUser) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "User không tồn tại"
-        }
+          message: 'User không tồn tại',
+        };
       }
       const updateData: Prisma.usersUncheckedUpdateInput = {
-        ...payload
-      }
+        ...payload,
+      };
       const user = await this.authService.updateUser(id, updateData);
       return {
         status: HttpStatus.OK,
@@ -671,7 +660,7 @@ export class AuthController {
         data: user,
       };
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',

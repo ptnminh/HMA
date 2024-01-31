@@ -21,12 +21,15 @@ export class AuthService {
     return this.prismaService.users.findMany({
       where: {
         ...(emailVerified === 'true' ? { emailVerified: true } : {}),
-        email,
+        ...(email ? { email } : {}),
       },
     });
   }
 
-  async updateUser(id: string, data: Prisma.usersUncheckedUpdateInput): Promise<any> {
+  async updateUser(
+    id: string,
+    data: Prisma.usersUncheckedUpdateInput,
+  ): Promise<any> {
     return this.prismaService.users.update({
       where: {
         id,
