@@ -284,6 +284,7 @@ export class ClinicService {
             role: true,
           },
         },
+        owner: true,
       },
     });
   }
@@ -393,11 +394,11 @@ export class ClinicService {
       },
       include: {
         category: {
-          select : {
+          select: {
             name: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
@@ -411,9 +412,9 @@ export class ClinicService {
         category: {
           select: {
             name: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
@@ -589,7 +590,7 @@ export class ClinicService {
   async createCategory(data: Prisma.categoryUncheckedCreateInput) {
     return this.prismaService.category.create({
       data,
-    })
+    });
   }
 
   async updateCategory(data: Prisma.categoryUncheckedUpdateInput, id: number) {
@@ -598,7 +599,7 @@ export class ClinicService {
         id,
       },
       data,
-    })
+    });
   }
 
   async findCategoryById(id: number) {
@@ -606,35 +607,34 @@ export class ClinicService {
       where: {
         id,
         isDisabled: false,
-      }
-    })
+      },
+    });
   }
-  
+
   async searchCategory(clinicId: string, name?: string, type?: number) {
     try {
-      var result  = []
+      var result = [];
       const categories = await this.prismaService.category.findMany({
         where: {
-          type: type? type: undefined,
+          type: type ? type : undefined,
           isDisabled: false,
           clinicId,
         },
         orderBy: {
-          createdAt: 'desc'
-        }
-      })
-      if(name) {
-        for(var category of categories) {
-          const strName = convertVietnameseString(category.name)
-          if(strName.includes(convertVietnameseString(name))) {
-            result.push(category)
+          createdAt: 'desc',
+        },
+      });
+      if (name) {
+        for (var category of categories) {
+          const strName = convertVietnameseString(category.name);
+          if (strName.includes(convertVietnameseString(name))) {
+            result.push(category);
           }
         }
       }
-      return name? result : categories;
-    }
-    catch(error) {
-      console.log(error)
+      return name ? result : categories;
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -645,17 +645,17 @@ export class ClinicService {
       },
       data: {
         isDisabled: true,
-      }
-    })
+      },
+    });
   }
 
-  async updateClinicServiceByCategoryId(categoryId: number, data,) {
+  async updateClinicServiceByCategoryId(categoryId: number, data) {
     return this.prismaService.clinicServices.updateMany({
       where: {
         categoryId,
       },
       data,
-    })
+    });
   }
 
   async updateMedicalSuppliersByCategoryId(categoryId: number, data) {
@@ -663,23 +663,22 @@ export class ClinicService {
       where: {
         categoryId,
       },
-      data
-    })
+      data,
+    });
   }
-
 
   async createNews(data: Prisma.clinicNewsUncheckedCreateInput) {
     return this.prismaService.clinicNews.create({
       data,
-    })
+    });
   }
 
   async findNewsById(id: number) {
     return this.prismaService.clinicNews.findFirst({
       where: {
         id,
-      }
-    })
+      },
+    });
   }
 
   async updateNews(id: number, data: Prisma.clinicNewsUncheckedUpdateInput) {
@@ -688,45 +687,40 @@ export class ClinicService {
         id,
       },
       data,
-    })
+    });
   }
 
   async deleteNews(id: number) {
     return this.prismaService.clinicNews.delete({
       where: {
         id,
-      }
-    })
+      },
+    });
   }
 
-  async searchNews(
-    clinicId?: string,
-    title?: string,
-    isShow?: boolean,
-  ) {
+  async searchNews(clinicId?: string, title?: string, isShow?: boolean) {
     try {
-      const result = []
+      const result = [];
       const newsList = await this.prismaService.clinicNews.findMany({
         where: {
-          isShow: isShow? isShow: undefined,
-          clinicId: clinicId? clinicId: undefined,
+          isShow: isShow ? isShow : undefined,
+          clinicId: clinicId ? clinicId : undefined,
         },
         orderBy: {
-          createdAt: "desc"
-        }
-      })
-      if(title) {
-        for(var news of newsList) {
-          const titleStr = convertVietnameseString(news.title)
-          if(titleStr.includes(convertVietnameseString(title))) {
-            result.push(news)
+          createdAt: 'desc',
+        },
+      });
+      if (title) {
+        for (var news of newsList) {
+          const titleStr = convertVietnameseString(news.title);
+          if (titleStr.includes(convertVietnameseString(title))) {
+            result.push(news);
           }
         }
       }
-      return title? result: newsList;
-    }
-    catch(error) {
-      console.log(error)
+      return title ? result : newsList;
+    } catch (error) {
+      console.log(error);
     }
   }
 }
