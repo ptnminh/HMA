@@ -559,7 +559,7 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.CREATE_CLINIC_SERVICE)
   async createClinicService(data: any) {
     try {
-      const { clinicId, ...payload } = data;
+      const { clinicId, categoryId, ...payload } = data;
       const clinic = await this.clinicService.findClinicById(clinicId);
       if (!clinic) {
         return {
@@ -567,8 +567,16 @@ export class ClinicController {
           message: 'Clinic không tồn tại',
         };
       }
+      const category = await this.clinicService.findCategoryById(categoryId)
+      if(!category) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Category không tồn tại",
+        }
+      }
       const preparedPayload: Prisma.clinicServicesUncheckedCreateInput = {
         clinicId,
+        categoryId,
         ...payload,
       };
       const clinicService =
@@ -723,10 +731,14 @@ export class ClinicController {
           message: 'Clinic service không tồn tại',
         };
       }
+      const {category, ...rest} = clinicService
       return {
         status: HttpStatus.OK,
         message: 'Lấy thông tin clinic service thành công',
-        data: clinicService,
+        data: {
+          ...rest,
+          categoryName: category.name
+        },
       };
     } catch (error) {
       console.log(error);
@@ -753,7 +765,13 @@ export class ClinicController {
       return {
         status: HttpStatus.OK,
         message: 'Lấy thông tin clinic service thành công',
-        data: clinicServices,
+        data: clinicServices.map((service) => {
+          const {category, ...rest} = service
+          return {
+            ...rest,
+            categoryName: category.name,
+          }
+        }),
       };
     } catch (error) {
       console.log(error);
@@ -767,7 +785,7 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.UPDATE_CLINIC_SERVICE)
   async updateClinicService(data: any) {
     try {
-      const { id, ...payload } = data;
+      const { id, categoryId,...payload } = data;
       const clinicService = await this.clinicService.findClinicServiceById(id);
       if (!clinicService) {
         return {
@@ -775,8 +793,16 @@ export class ClinicController {
           message: 'Clinic service không tồn tại',
         };
       }
+      const category = await this.clinicService.findCategoryById(categoryId)
+      if(!category) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Category không tồn tại",
+        }
+      }
       const preparedPayload: Prisma.clinicServicesUncheckedUpdateInput = {
         id,
+        categoryId,
         ...payload,
       };
       const updatedClinicServices =

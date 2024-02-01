@@ -25,4 +25,9 @@ export class UpdateClinicServiceDto {
     @IsString()
     @IsOptional()
     description?: string;
+
+    @ApiProperty({example: 1})
+    @IsNumber()
+    @IsOptional()
+    categoryId?: number
 }

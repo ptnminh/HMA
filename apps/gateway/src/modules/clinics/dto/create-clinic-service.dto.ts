@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsNumber, IsPhoneNumber, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
 export class CreateClinicServiceDto {
     @ApiProperty({
@@ -25,4 +25,9 @@ export class CreateClinicServiceDto {
     @IsString()
     @IsNotEmpty()
     description: string;
+
+    @ApiProperty({example: 1})
+    @IsNumber()
+    @IsOptional()
+    categoryId?: number
 }

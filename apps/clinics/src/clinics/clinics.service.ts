@@ -391,6 +391,13 @@ export class ClinicService {
         isDisabled: false,
         clinicId,
       },
+      include: {
+        category: {
+          select : {
+            name: true,
+          }
+        }
+      }
     });
   }
 
@@ -400,6 +407,13 @@ export class ClinicService {
         id,
         isDisabled: false,
       },
+      include: {
+        category: {
+          select: {
+            name: true,
+          }
+        }
+      }
     });
   }
 
