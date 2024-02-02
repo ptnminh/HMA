@@ -324,7 +324,7 @@ export class AuthController {
       );
       if (!account) {
         return {
-          status: HttpStatus.BAD_REQUEST,
+          status: HttpStatus.OK,
           message: 'Tài khoản không tồn tại',
           data: null,
         };
