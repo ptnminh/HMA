@@ -17,10 +17,14 @@ export class AuthService {
     });
   }
 
-  async findAllUserByEmail(email, emailVerified): Promise<any> {
+  async findAllUserByEmail(email: string, emailVerified: string): Promise<any> {
+    let emailVerifiedBool = false;
+    if (emailVerified) {
+      emailVerifiedBool = emailVerified === 'true' ? true : false;
+    }
     return this.prismaService.users.findMany({
       where: {
-        ...(emailVerified === 'true' ? { emailVerified: true } : {}),
+        ...(emailVerified ? { emailVerified: emailVerifiedBool } : {}),
         ...(email ? { email } : {}),
       },
     });
@@ -56,11 +60,15 @@ export class AuthService {
   }
 
   async findUserByEmail(email: string): Promise<any> {
-    return this.prismaService.users.findFirst({
-      where: {
-        email,
-      },
-    });
+    try {
+      return this.prismaService.users.findFirst({
+        where: {
+          email,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
   async updateUserByEmail(email: string, data): Promise<any> {
     return this.prismaService.users.updateMany({
