@@ -567,12 +567,14 @@ export class ClinicController {
           message: 'Clinic không tồn tại',
         };
       }
-      const category = await this.clinicService.findCategoryById(categoryId);
-      if (!category) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Category không tồn tại',
-        };
+      if (categoryId) {
+        const category = await this.clinicService.findCategoryById(categoryId);
+        if (!category) {
+          return {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'Category không tồn tại',
+          };
+        }
       }
       const preparedPayload: Prisma.clinicServicesUncheckedCreateInput = {
         clinicId,
@@ -794,7 +796,7 @@ export class ClinicController {
         };
       }
       const category = await this.clinicService.findCategoryById(categoryId);
-      if (!category) {
+      if (categoryId && !category) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Category không tồn tại',
