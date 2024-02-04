@@ -739,7 +739,7 @@ export class ClinicController {
         message: 'Lấy thông tin clinic service thành công',
         data: {
           ...rest,
-          categoryName: category.name,
+          categoryName: category? category.name : null,
         },
       };
     } catch (error) {
@@ -771,7 +771,7 @@ export class ClinicController {
           const { category, ...rest } = service;
           return {
             ...rest,
-            categoryName: category.name,
+            categoryName: category? category.name : null,
           };
         }),
       };
@@ -804,7 +804,7 @@ export class ClinicController {
       }
       const preparedPayload: Prisma.clinicServicesUncheckedUpdateInput = {
         id,
-        categoryId,
+        categoryId: categoryId? categoryId : null,
         ...payload,
       };
       const updatedClinicServices =
