@@ -447,7 +447,7 @@ export class AuthController {
           message: 'Người dùng không tồn tại',
         };
       }
-      if (data.isReset !== true && !isNotEmpty(currentPassword)) {
+      if (data.isReset !== 'true' && !isNotEmpty(currentPassword)) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: "Chưa nhập mật khẩu cũ"
