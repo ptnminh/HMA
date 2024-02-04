@@ -204,14 +204,14 @@ model medicalSuppliers {
   phone       String?
   email       String?
   stock       Int?
-  clinicId    String    @map(name: "clinic_id")
+  clinicId    String?   @map(name: "clinic_id")
   categoryId  Int?      @map(name: "category_id")
   expiredAt   DateTime? @map(name: "expired_at")
   createdAt   DateTime  @default(now()) @map(name: "created_at")
   updatedAt   DateTime  @default(now()) @updatedAt @map(name: "updated_at")
   isDisabled  Boolean   @default(false) @map(name: "is_disabled")
   disabledAt  DateTime? @map(name: "disabled_at")
-  clinics     clinics   @relation(fields: [clinicId], references: [id])
+  clinics     clinics?  @relation(fields: [clinicId], references: [id])
   category    category? @relation(fields: [categoryId], references: [id])
 
   @@map(name: "medical_suppliers")

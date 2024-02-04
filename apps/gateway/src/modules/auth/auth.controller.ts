@@ -18,7 +18,6 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -26,7 +25,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import {
   RegisterDto,
   RegisterResponse,
@@ -38,7 +37,6 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto, LoginReponse } from './dto/login.dto';
 import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
-import { GoogleOAuthGuard } from 'src/guards/google-oauth.guard';
 import {
   DeleteAccountsResponse,
   GetAccountsResponse,
@@ -55,14 +53,9 @@ import {
   ResetPasswordVerifyResponse,
   addNewPasswordDto,
 } from './dto/reset-password.dto';
-import { Request } from 'express';
 import { FindUserByEmailResponse } from './dto/common.dto';
 import { IsMobile } from 'src/decorators/device.decorator';
-import { Response } from 'express';
 import { ClinicCommand } from '../clinics/command';
-import { ScheduleDto } from './dto/schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
-import { dot } from 'node:test/reporters';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUserByEmailDto } from './dto/query.dto';
 

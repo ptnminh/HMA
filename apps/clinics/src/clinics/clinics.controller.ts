@@ -1,7 +1,7 @@
 import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { ClinicService } from './clinics.service';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
-import { ClinicCommand } from './command';
+import { ClinicCommand, MedicalSupplierCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
@@ -739,7 +739,7 @@ export class ClinicController {
         message: 'Lấy thông tin clinic service thành công',
         data: {
           ...rest,
-          categoryName: category? category.name : null,
+          categoryName: category ? category.name : null,
         },
       };
     } catch (error) {
@@ -771,7 +771,7 @@ export class ClinicController {
           const { category, ...rest } = service;
           return {
             ...rest,
-            categoryName: category? category.name : null,
+            categoryName: category ? category.name : null,
           };
         }),
       };
@@ -804,7 +804,7 @@ export class ClinicController {
       }
       const preparedPayload: Prisma.clinicServicesUncheckedUpdateInput = {
         id,
-        categoryId: categoryId? categoryId : null,
+        categoryId: categoryId ? categoryId : null,
         ...payload,
       };
       const updatedClinicServices =
@@ -1175,9 +1175,9 @@ export class ClinicController {
       const total = news.length;
 
       const result = [];
-      var minIndex = page * size;
-      var maxIndex = (page + 1) * size < total ? (page + 1) * size : total;
-      for (var i = minIndex; i < maxIndex; i++) {
+      const minIndex = page * size;
+      const maxIndex = (page + 1) * size < total ? (page + 1) * size : total;
+      for (let i = minIndex; i < maxIndex; i++) {
         result.push(news[i]);
       }
 
@@ -1196,6 +1196,134 @@ export class ClinicController {
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_CREATE)
+  async createMedicalSupplier(data: any) {
+    try {
+      const { clinicId, expiredAt, ...rest } = data;
+      if (clinicId) {
+        const clinic = await this.clinicService.findClinicById(clinicId);
+        if (!clinic) {
+          return {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'Clinic không tồn tại',
+          };
+        }
+      }
+
+      const payload: Prisma.medicalSuppliersUncheckedCreateInput = {
+        clinicId,
+        ...rest,
+        ...(expiredAt && { expiredAt: new Date(expiredAt).toISOString() }),
+      };
+      const medicalSupplier =
+        await this.clinicService.createMedicalSupplier(payload);
+      if (!medicalSupplier) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tạo nhà cung cấp thất bại',
+        };
+      }
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Tạo nhà cung cấp thành công',
+        data: medicalSupplier,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
+
+  @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_LIST)
+  async listMedicalSupplier(data: any) {
+    try {
+      const { clinicId, name, email, isDisabled } = data;
+      const medicalSuppliers = await this.clinicService.listMedicalSupplier({
+        clinicId,
+        name,
+        email,
+        isDisabled,
+      });
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Tìm kiếm thành công',
+        data: medicalSuppliers,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
+
+  @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_UPDATE)
+  async updateMedicalSupplier(data: any) {
+    try {
+      const { id, expiredAt, ...rest } = data;
+      const medicalSupplier =
+        await this.clinicService.findMedicalSupplierById(id);
+      if (!medicalSupplier) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Nhà cung cấp không tồn tại',
+        };
+      }
+      const payload: Prisma.medicalSuppliersUncheckedUpdateInput = {
+        ...rest,
+        ...(expiredAt && { expiredAt: new Date(expiredAt).toISOString() }),
+      };
+      const updatedMedicalSupplier =
+        await this.clinicService.updateMedicalSupplier(id, payload);
+      return {
+        status: HttpStatus.OK,
+        message: 'Cập nhật nhà cung cấp thành công',
+        data: updatedMedicalSupplier,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
+
+  @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_GET)
+  async getMedicalSupplier(data: any) {
+    try {
+      const { id } = data;
+      const medicalSupplier =
+        await this.clinicService.findMedicalSupplierById(id);
+      if (!medicalSupplier) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Nhà cung cấp không tồn tại',
+        };
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy thông tin nhà cung cấp thành công',
+        data: medicalSupplier,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
       };
     }
   }

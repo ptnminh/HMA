@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { identity, map } from 'lodash';
+import { map } from 'lodash';
 import { PrismaService } from 'src/prisma.service';
 import { convertVietnameseString } from './utils';
 
@@ -613,7 +613,7 @@ export class ClinicService {
 
   async searchCategory(clinicId: string, name?: string, type?: number) {
     try {
-      var result = [];
+      const result = [];
       const categories = await this.prismaService.category.findMany({
         where: {
           type: type ? type : undefined,
@@ -625,7 +625,7 @@ export class ClinicService {
         },
       });
       if (name) {
-        for (var category of categories) {
+        for (const category of categories) {
           const strName = convertVietnameseString(category.name);
           if (strName.includes(convertVietnameseString(name))) {
             result.push(category);
@@ -711,7 +711,7 @@ export class ClinicService {
         },
       });
       if (title) {
-        for (var news of newsList) {
+        for (const news of newsList) {
           const titleStr = convertVietnameseString(news.title);
           if (titleStr.includes(convertVietnameseString(title))) {
             result.push(news);
@@ -722,5 +722,59 @@ export class ClinicService {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async createMedicalSupplier(
+    data: Prisma.medicalSuppliersUncheckedCreateInput,
+  ) {
+    return this.prismaService.medicalSuppliers.create({
+      data,
+    });
+  }
+
+  async listMedicalSupplier({
+    name,
+    email,
+    clinicId,
+    isDisabled,
+  }: {
+    name?: string;
+    email?: string;
+    clinicId?: string;
+    isDisabled?: string;
+  }) {
+    let isDisabledValue = null;
+    if (isDisabledValue) {
+      isDisabledValue = isDisabled === 'true' ? true : false;
+    }
+    return this.prismaService.medicalSuppliers.findMany({
+      where: {
+        ...(name ? { name: { contains: name } } : {}),
+        ...(email ? { email: { contains: email } } : {}),
+        ...(clinicId ? { clinicId } : {}),
+        ...(isDisabledValue ? { isDisabled: isDisabledValue } : {}),
+      },
+    });
+  }
+
+  async findMedicalSupplierById(id: number) {
+    return this.prismaService.medicalSuppliers.findUnique({
+      where: {
+        id,
+        isDisabled: false,
+      },
+    });
+  }
+
+  async updateMedicalSupplier(
+    id: number,
+    data: Prisma.medicalSuppliersUncheckedUpdateInput,
+  ) {
+    return this.prismaService.medicalSuppliers.update({
+      where: {
+        id,
+      },
+      data,
+    });
   }
 }
