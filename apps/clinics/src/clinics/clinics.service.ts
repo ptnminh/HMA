@@ -741,18 +741,14 @@ export class ClinicService {
     name?: string;
     email?: string;
     clinicId?: string;
-    isDisabled?: string;
+    isDisabled?: boolean;
   }) {
-    let isDisabledValue = null;
-    if (isDisabledValue) {
-      isDisabledValue = isDisabled === 'true' ? true : false;
-    }
     return this.prismaService.medicalSuppliers.findMany({
       where: {
         ...(name ? { name: { contains: name } } : {}),
         ...(email ? { email: { contains: email } } : {}),
         ...(clinicId ? { clinicId } : {}),
-        ...(isDisabledValue ? { isDisabled: isDisabledValue } : {}),
+        ...(isDisabled ? { isDisabled } : {}),
       },
     });
   }
