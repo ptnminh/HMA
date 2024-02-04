@@ -447,13 +447,13 @@ export class AuthController {
           message: 'Người dùng không tồn tại',
         };
       }
-      if (data.isReset !== 'true' && !isNotEmpty(currentPassword)) {
+      if (!data.isReset && !isNotEmpty(currentPassword)) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: "Chưa nhập mật khẩu cũ"
         }
       }
-      if (data.isReset != 'true') {
+      if (!data.isReset) {
         const isMatch = await comparePassword(currentPassword, user.password);
         if (!isMatch) {
           return {

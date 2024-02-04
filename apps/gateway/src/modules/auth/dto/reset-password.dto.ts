@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {IsNotEmpty,  IsString, IsEmail, IsOptional, IsIn } from 'class-validator';
 
 export class ChangePasswordDto { 
@@ -17,9 +18,10 @@ export class ChangePasswordDto {
   @IsNotEmpty()
   newPassword: string;
 
+  @Type(() => Boolean)
   @ApiProperty({example: "true"})
-  @IsIn(['true', 'false'])
-  isReset: string;
+  @IsNotEmpty()
+  isReset: boolean;
 }
 
 export class ResetPasswordVerifyDto{
