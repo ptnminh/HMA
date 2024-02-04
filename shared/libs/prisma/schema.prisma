@@ -345,7 +345,7 @@ model clinicServices {
   serviceName   String          @map(name: "service_name")
   price         Int
   categoryId    Int?            @map(name: "category_id")
-  description   String
+  description   String?
   createdAt     DateTime        @default(now()) @map(name: "created_at")
   updatedAt     DateTime        @default(now()) @updatedAt @map(name: "updated_at")
   isDisabled    Boolean         @default(false) @map(name: "is_disabled")

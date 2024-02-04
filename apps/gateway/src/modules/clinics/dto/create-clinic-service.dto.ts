@@ -23,8 +23,8 @@ export class CreateClinicServiceDto {
         description: "The description for clinic service"
     })
     @IsString()
-    @IsNotEmpty()
-    description: string;
+    @IsOptional()
+    description?: string;
 
     @ApiProperty({example: 1})
     @IsNumber()

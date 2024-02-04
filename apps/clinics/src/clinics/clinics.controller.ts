@@ -754,7 +754,7 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.GET_CLINIC_SERVICE_BY_CLINIC_ID)
   async findClinicServiceByClinicId(data: any) {
     try {
-      const { clinicId } = data;
+      const { clinicId, isDisabled } = data;
       const clinic = await this.clinicService.findClinicById(clinicId);
       if (!clinic) {
         return {
@@ -763,7 +763,7 @@ export class ClinicController {
         };
       }
       const clinicServices =
-        await this.clinicService.findClinicServiceByClinicId(clinicId);
+        await this.clinicService.findClinicServiceByClinicId(clinicId, isDisabled);
       return {
         status: HttpStatus.OK,
         message: 'Lấy thông tin clinic service thành công',

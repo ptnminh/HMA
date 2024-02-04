@@ -386,10 +386,10 @@ export class ClinicService {
     });
   }
 
-  async findClinicServiceByClinicId(clinicId: string) {
+  async findClinicServiceByClinicId(clinicId: string, isDisabled: boolean) {
     return this.prismaService.clinicServices.findMany({
       where: {
-        isDisabled: false,
+        isDisabled: (isDisabled !== undefined)? isDisabled : undefined,
         clinicId,
       },
       include: {

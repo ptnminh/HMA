@@ -528,13 +528,18 @@ export class ClinicsController {
     };
   }
 
+  @ApiQuery({name: "isDisabled", required: false})
   @Get(':clinicId/services')
-  async findClinicServiceByClinicId(@Param('clinicId') clinicId: string) {
+  async findClinicServiceByClinicId(
+    @Param('clinicId') clinicId: string,
+    @Query('isDisabled') isDisabled: boolean
+  ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(
         ClinicCommand.GET_CLINIC_SERVICE_BY_CLINIC_ID,
         {
           clinicId,
+          isDisabled
         },
       ),
     );
