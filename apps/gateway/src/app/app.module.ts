@@ -13,6 +13,7 @@ import { JwtStrategy } from 'src/modules/auth/jwt.strategy';
 import { ChatsController } from 'src/modules/chats/chats.controller';
 import { ClinicsController } from 'src/modules/clinics/clinics.controller';
 import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
+import { MedicalSuppliersController } from 'src/modules/medicalSuppliers/medical-suppliers.controller';
 import { NewsController } from 'src/modules/news/news.controller';
 import { NotificationController } from 'src/modules/notification/notification.controller';
 import { PaymentController } from 'src/modules/payment/payment.controller';
@@ -59,6 +60,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
     StaffController,
     AppointmentController,
     NewsController,
+    MedicalSuppliersController,
   ],
   providers: [
     ConfigService,
