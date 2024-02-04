@@ -1213,7 +1213,15 @@ export class ClinicController {
           };
         }
       }
-
+      const exSupplier = await this.clinicService.findMedicalSupplierByEmail(
+        rest.email,
+      );
+      if (exSupplier) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Email nhà cung cấp đã tồn tại',
+        };
+      }
       const payload: Prisma.medicalSuppliersUncheckedCreateInput = {
         clinicId,
         ...rest,

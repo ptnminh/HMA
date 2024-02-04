@@ -732,6 +732,14 @@ export class ClinicService {
     });
   }
 
+  async findMedicalSupplierByEmail(email: string) {
+    return this.prismaService.medicalSuppliers.findFirst({
+      where: {
+        email,
+      },
+    });
+  }
+
   async listMedicalSupplier({
     name,
     email,
@@ -744,7 +752,7 @@ export class ClinicService {
     isDisabled?: string;
   }) {
     let isDisabledValue = null;
-    if (isDisabledValue) {
+    if (isDisabled) {
       isDisabledValue = isDisabled === 'true' ? true : false;
     }
     return this.prismaService.medicalSuppliers.findMany({
