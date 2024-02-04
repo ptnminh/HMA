@@ -94,6 +94,8 @@ export class MedicalSuppliersController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put(':medicalSupplierId')
   @ApiOkResponse({ type: CreateMedicalSupplierResponse })
   async updateMedicalSupplier(
