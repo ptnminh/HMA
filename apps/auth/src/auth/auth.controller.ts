@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom } from 'rxjs';
 import { Prisma } from '@prisma/client';
+import { isNotEmpty } from 'class-validator';
 
 @Controller('auth')
 export class AuthController {
@@ -445,6 +446,12 @@ export class AuthController {
           status: HttpStatus.BAD_REQUEST,
           message: 'Người dùng không tồn tại',
         };
+      }
+      if (data.isReset !== true && !isNotEmpty(currentPassword)) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: "Chưa nhập mật khẩu cũ"
+        }
       }
       if (data.isReset != 'true') {
         const isMatch = await comparePassword(currentPassword, user.password);

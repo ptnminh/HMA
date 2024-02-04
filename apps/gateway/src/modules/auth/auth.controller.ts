@@ -539,9 +539,7 @@ export class AuthController {
     const ChangePasswordReponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, {
         id: userId,
-        currentPassword: dto.currentPassword,
-        newPassword: dto.newPassword,
-        isReset: dto.isReset,
+        ...dto,
       }),
     );
     if (ChangePasswordReponse.status !== HttpStatus.OK) {
