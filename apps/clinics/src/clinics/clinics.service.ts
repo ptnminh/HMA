@@ -703,7 +703,7 @@ export class ClinicService {
       const result = [];
       const newsList = await this.prismaService.clinicNews.findMany({
         where: {
-          isShow: isShow ? isShow : undefined,
+          isShow: (isShow !== undefined )? isShow : undefined,
           clinicId: clinicId ? clinicId : undefined,
         },
         include: {
