@@ -706,6 +706,9 @@ export class ClinicService {
           isShow: isShow ? isShow : undefined,
           clinicId: clinicId ? clinicId : undefined,
         },
+        include: {
+          clinics: true
+        },
         orderBy: {
           createdAt: 'desc',
         },

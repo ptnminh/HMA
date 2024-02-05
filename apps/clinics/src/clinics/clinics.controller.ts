@@ -1159,12 +1159,6 @@ export class ClinicController {
   async searchNews(data: any) {
     try {
       const { clinicId, title, isShow, page, size } = data;
-      if (!clinicId && !title && !isShow) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Không có dữ liệu tìm kiếm',
-        };
-      }
       if (title && isContainSpecialChar(title)) {
         return {
           status: HttpStatus.BAD_REQUEST,
@@ -1185,7 +1179,13 @@ export class ClinicController {
         status: HttpStatus.OK,
         message: 'Tìm kiếm thành công',
         data: {
-          data: result,
+          data: result.map((news) => {
+            const {clinics, ...rest} = news;
+            return {
+              ...rest,
+              clinicName: clinics? clinics.name : null,
+            }
+          }),
           pageSize: size,
           currentPage: page + 1,
           total,

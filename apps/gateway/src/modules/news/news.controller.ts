@@ -137,15 +137,15 @@ import { UpdateNewsDto } from './dto/update-news.dto';
       @Query('clinicId') clinicId?: string,
       @Query('title') title?: string,
       @Query('isShow') isShow?: Boolean,
-      @Query('pageSize') pageSize?: String,
-      @Query('pageIndex') pageIndex?: String,
+      @Query('pageSize') pageSize?: number,
+      @Query('pageIndex') pageIndex?: number,
     ) {
       const clinicServiceResponse = await firstValueFrom(
         this.clinicServiceClient.send(ClinicCommand.SEARCH_NEWS, {
           clinicId,
           title,
           isShow,
-          size: pageSize? +pageSize : 20,
+          size: pageSize? +pageSize : 10,
           page: pageIndex? +pageIndex : 0,
         }),
       );
