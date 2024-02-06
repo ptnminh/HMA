@@ -21,6 +21,11 @@ export class CreateMedicalSupplierDto {
   @IsString()
   note?: string;
 
+  @ApiProperty({ example: 'clinicId' })
+  @IsOptional()
+  @IsString()
+  clinicId?: string;
+
   @ApiProperty({ example: 10 })
   @IsOptional()
   @IsNumber()
@@ -88,6 +93,11 @@ export class UpdateMedicalSupplierDto {
   @IsOptional()
   @IsString()
   note?: string;
+
+  @ApiProperty({ example: 'clinicId' })
+  @IsOptional()
+  @IsString()
+  clinicId?: string;
 
   @ApiProperty({ example: 10 })
   @IsOptional()

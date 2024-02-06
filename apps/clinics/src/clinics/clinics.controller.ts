@@ -1247,10 +1247,10 @@ export class ClinicController {
   @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_LIST)
   async listMedicalSupplier(data: any) {
     try {
-      const { vendor, medicineName, isDisabled } = data;
+      const { vendor, medicineName, isDisabled, clinicId } = data;
       const medicalSuppliers = await this.clinicService.listMedicalSupplier({
         vendor,
-
+        clinicId,
         medicineName,
         isDisabled,
       });

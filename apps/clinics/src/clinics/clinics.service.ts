@@ -756,10 +756,12 @@ export class ClinicService {
     vendor,
     medicineName,
     isDisabled,
+    clinicId,
   }: {
     vendor?: string;
     medicineName?: string;
     isDisabled?: string;
+    clinicId?: string;
   }) {
     let isDisabledValue = null;
     if (isDisabled) {
@@ -770,6 +772,7 @@ export class ClinicService {
         ...(medicineName ? { medicineName: { contains: medicineName } } : {}),
         ...(vendor ? { vendor: { contains: vendor } } : {}),
         ...(isDisabledValue !== null ? { isDisabled: isDisabledValue } : {}),
+        ...(clinicId ? { clinicId } : {}),
       },
       include: {
         category: {

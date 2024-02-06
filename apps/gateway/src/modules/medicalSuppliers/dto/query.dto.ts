@@ -13,4 +13,8 @@ export class GetListQueryDto {
   @ApiProperty({ required: false })
   @IsOptional()
   isDisabled?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  clinicId?: string;
 }
