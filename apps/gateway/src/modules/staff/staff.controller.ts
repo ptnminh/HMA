@@ -31,14 +31,8 @@ export class StaffController {
   ) {}
 
   @Post()
-  @ApiQuery({ name: 'userId', required: false })
-  async createStaff(
-    @Query('userId') userId: string | undefined,
-    @Query('clinicId') clinicId: string,
-    @Query('roleId') roleId: string,
-    @Body() dto: CreateStaffDto,
-  ) {
-    const { services, userInfo, ...rest } = dto;
+  async createStaff(@Body() dto: CreateStaffDto) {
+    const { services, userId, roleId, clinicId, userInfo, ...rest } = dto;
     if (!userId && Object.keys(userInfo).length === 0) {
       throw new HttpException(
         {

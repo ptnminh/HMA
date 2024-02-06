@@ -75,6 +75,27 @@ export class CreateStaffDto {
   specialize?: string;
 
   @ApiProperty({
+    example: 'userId',
+  })
+  @IsString()
+  @IsOptional()
+  userId?: string;
+
+  @ApiProperty({
+    example: 'clinicId',
+  })
+  @IsString()
+  @IsOptional()
+  clinicId?: string;
+
+  @ApiProperty({
+    example: 1,
+  })
+  @IsNumber()
+  @IsOptional()
+  roleId?: number;
+
+  @ApiProperty({
     example: 1,
     description: 'Years of experience. Minimum required: 0',
   })
