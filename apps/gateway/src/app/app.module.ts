@@ -16,6 +16,8 @@ import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
 import { MedicalSuppliersController } from 'src/modules/medicalSuppliers/medical-suppliers.controller';
 import { NewsController } from 'src/modules/news/news.controller';
 import { NotificationController } from 'src/modules/notification/notification.controller';
+import { PatientCommand } from 'src/modules/patients/command';
+import { PatientsController } from 'src/modules/patients/patients.controller';
 import { PaymentController } from 'src/modules/payment/payment.controller';
 import { PlansController } from 'src/modules/plans/plans.controller';
 import { StaffController } from 'src/modules/staff/staff.controller';
@@ -61,6 +63,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
     AppointmentController,
     NewsController,
     MedicalSuppliersController,
+    PatientsController,
   ],
   providers: [
     ConfigService,

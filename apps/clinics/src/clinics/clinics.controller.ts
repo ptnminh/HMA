@@ -1,7 +1,7 @@
 import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { ClinicService } from './clinics.service';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
-import { ClinicCommand, MedicalSupplierCommand } from './command';
+import { ClinicCommand, MedicalSupplierCommand, PatientCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
@@ -1344,6 +1344,39 @@ export class ClinicController {
         message: 'Lỗi hệ thống',
         data: null,
       };
+    }
+  }
+
+  @MessagePattern(PatientCommand.SEARCH_PATIENT)
+  async searchPatient(query: any) {
+    try {
+      const isEmpty = Object.values(query).every(value => value === null||value ==='')
+      if(isEmpty) {
+        return {
+          message: "Không có dữ liệu tìm kiếm",
+          status: HttpStatus.BAD_REQUEST,
+        }
+      }
+
+      const patients = await this.clinicService.searchPatient(query)
+      return {
+        status: HttpStatus.OK,
+        message: "Tìm kiếm thành công",
+        data: patients.map((value) => {
+          const {patient, ...rest} = value
+          return {
+            ...rest,
+            ...patient,
+          }
+        })
+      }
+    }
+    catch(error) {
+      console.log(error)
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      }
     }
   }
 }

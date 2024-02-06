@@ -42,3 +42,8 @@ export enum MedicalSupplierCommand {
   MEDICAL_SUPPLIER_DELETE = 'MEDICAL_SUPPLIER_DELETE',
   MEDICAL_SUPPLIER_GET = 'MEDICAL_SUPPLIER_GET',
 }
+
+
+export enum PatientCommand {
+  SEARCH_PATIENT = 'SEARCH_PATIENT',
+}

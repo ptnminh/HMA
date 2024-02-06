@@ -818,4 +818,51 @@ export class ClinicService {
       data,
     });
   }
+
+
+  async searchPatient(query: any) {
+    try {
+      const {name, userId, clinicId, gender, phone, email} = query
+      const patients = await this.prismaService.patients.findMany({
+        where: {
+          userId: userId? userId : undefined,
+          clinicId: clinicId? clinicId : undefined,
+          patient: {
+            gender: gender? gender : undefined,
+            phone: phone? phone : undefined,
+            email: email? email : undefined,
+          }
+
+        },
+        include: {
+          patient: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+              gender: true,
+              phone: true,
+              address: true,
+              emailVerified: true,
+            }
+          },
+        }
+      })
+      const returnData = []
+      if (name) {
+        for (var member of patients) {
+          const strName = convertVietnameseString(member.patient.firstName) 
+          + ' '
+          + convertVietnameseString(member.patient.lastName);
+          if (strName.includes(convertVietnameseString(name))) {
+            returnData.push(member)
+          }
+        }
+      }
+      return name? returnData : patients;
+    }
+    catch(error) {
+      console.log(error)
+    }
+  }
 }
