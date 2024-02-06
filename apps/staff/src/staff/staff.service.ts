@@ -189,6 +189,7 @@ export class StaffService {
       where: {
         id,
         isDisabled: false,
+        deletedAt: null
       },
     });
   }

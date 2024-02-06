@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { map } from 'lodash';
 import { PrismaService } from 'src/prisma.service';
 import { convertVietnameseString } from './utils';
+import { now } from 'moment';
 
 @Injectable()
 export class ClinicService {
@@ -391,6 +392,7 @@ export class ClinicService {
       where: {
         isDisabled: isDisabled !== undefined ? isDisabled : undefined,
         clinicId,
+        deletedAt: null,
       },
       include: {
         category: {
@@ -406,7 +408,7 @@ export class ClinicService {
     return this.prismaService.clinicServices.findFirst({
       where: {
         id,
-        isDisabled: false,
+        deletedAt: null,
       },
       include: {
         category: {
@@ -436,7 +438,7 @@ export class ClinicService {
         id,
       },
       data: {
-        isDisabled: true,
+        deletedAt: new Date(now()),
       },
     });
   }
