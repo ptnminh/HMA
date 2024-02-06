@@ -180,6 +180,7 @@ model clinics {
   category         category[]
   staffs           staffs[]
   patients         patients[]
+  medicalSupplies  medicalSupplies[]
 }
 
 model clinicNews {
@@ -365,10 +366,6 @@ model clinicServices {
 
 model patients {
   id                  Int            @id @default(autoincrement())
-  phoneNumber         String?        @map("phone_number")
-  address             String?
-  gender              Int?
-  birthday            DateTime?
   bloodGroup          String?        @map("blood_group")
   anamnesis           String?
   idCard              String?        @map("id_card")
@@ -390,10 +387,12 @@ model medicalSupplies {
   vendor       String?
   description  String?
   unit         String?
+  clinicId     String?   @map(name: "clinic_id")
   note         String?
   categoryId   Int?      @map(name: "category_id")
   isDisabled   Boolean   @default(false) @map(name: "is_disabled")
   category     category? @relation(fields: [categoryId], references: [id])
+  clinics      clinics?  @relation(fields: [clinicId], references: [id])
 
   @@map("medical_supplies")
 }
