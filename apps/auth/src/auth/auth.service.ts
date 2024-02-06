@@ -22,7 +22,7 @@ export class AuthService {
     if (emailVerified) {
       emailVerifiedBool = emailVerified === 'true' ? true : false;
     }
-    return this.prismaService.users.findMany({
+    return this.prismaService.users.findFirst({
       where: {
         ...(emailVerified ? { emailVerified: emailVerifiedBool } : {}),
         ...(email ? { email } : {}),
