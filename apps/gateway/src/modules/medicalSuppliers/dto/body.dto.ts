@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMedicalSupplierDto {
@@ -113,4 +113,9 @@ export class UpdateMedicalSupplierDto {
   @IsOptional()
   @IsString()
   expiry?: Date;
+
+  @ApiProperty({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  isDisabled?: boolean;
 }
