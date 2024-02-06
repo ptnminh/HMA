@@ -450,8 +450,8 @@ export class AuthController {
       if (!data.isReset && !isNotEmpty(currentPassword)) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Chưa nhập mật khẩu cũ"
-        }
+          message: 'Chưa nhập mật khẩu cũ',
+        };
       }
       if (!data.isReset) {
         const isMatch = await comparePassword(currentPassword, user.password);
@@ -580,14 +580,15 @@ export class AuthController {
   async findUserByEmail(data: { email: string; emailVerified: string }) {
     try {
       const { email, emailVerified } = data;
-      const users = await this.authService.findAllUserByEmail(
+      const user = await this.authService.findAllUserByEmail(
         email,
         emailVerified,
       );
+      delete user?.password;
       return {
         status: HttpStatus.OK,
         message: 'Tìm user thành công',
-        data: users.map(({ password, ...user }) => user),
+        data: user,
       };
     } catch (error) {
       return {
