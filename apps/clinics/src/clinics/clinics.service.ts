@@ -844,6 +844,7 @@ export class ClinicService {
               phone: true,
               address: true,
               emailVerified: true,
+              avatar: true,
             }
           },
         }
