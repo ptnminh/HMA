@@ -299,6 +299,8 @@ model staffs {
   description    String?           @db.Text
   roleId         Int?              @map(name: "role_id")
   clinicId       String?           @map(name: "clinic_id")
+  isAcceptInvite Boolean           @default(true) @map(name: "is_accept_invite")
+  uniqueId       String?           @map(name: "unique_id")
   userId         String?           @map(name: "user_id")
   createdAt      DateTime          @default(now()) @map(name: "created_at")
   updatedAt      DateTime          @default(now()) @updatedAt() @map("updated_at")

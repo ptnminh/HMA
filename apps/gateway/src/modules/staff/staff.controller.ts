@@ -31,19 +31,31 @@ export class StaffController {
   ) {}
 
   @Post()
+  @ApiQuery({ name: 'userId', required: false })
   async createStaff(
-    @Query('userId') userId: string,
+    @Query('userId') userId: string | undefined,
     @Query('clinicId') clinicId: string,
     @Query('roleId') roleId: string,
     @Body() dto: CreateStaffDto,
   ) {
-    const { services, ...rest } = dto;
+    const { services, userInfo, ...rest } = dto;
+    if (!userId && Object.keys(userInfo).length === 0) {
+      throw new HttpException(
+        {
+          message: 'userId hoặc userInfo không được để trống',
+          data: null,
+          status: false,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const staffServiceResponse = await firstValueFrom(
       this.staffServiceClient.send(StaffCommand.CREATE_STAFF, {
         clinicId,
         userId,
         roleId: +roleId,
         services: dto.services ? dto.services : [],
+        userInfo,
         ...rest,
       }),
     );
@@ -271,13 +283,13 @@ export class StaffController {
     };
   }
 
-  @ApiQuery({name: "userId", required: false})
-  @ApiQuery({name: "roleId", required: false})
-  @ApiQuery({name: "clinicId", required: false})
-  @ApiQuery({name: "gender", required: false})
-  @ApiQuery({name: "phoneNumber", required: false})
-  @ApiQuery({name: "email", required: false})
-  @ApiQuery({name: "name", required: false})
+  @ApiQuery({ name: 'userId', required: false })
+  @ApiQuery({ name: 'roleId', required: false })
+  @ApiQuery({ name: 'clinicId', required: false })
+  @ApiQuery({ name: 'gender', required: false })
+  @ApiQuery({ name: 'phoneNumber', required: false })
+  @ApiQuery({ name: 'email', required: false })
+  @ApiQuery({ name: 'name', required: false })
   @Get()
   async searchStaff(
     @Query('userId') userId: string,
@@ -285,21 +297,19 @@ export class StaffController {
     @Query('clinicId') clinicId: string,
     @Query('gender') gender?: number,
     @Query('phoneNumber') phoneNumber?: string,
-    @Query('email') email?:string,
-    @Query('name') name?:string,
+    @Query('email') email?: string,
+    @Query('name') name?: string,
   ) {
     const staffServiceResponse = await firstValueFrom(
-      this.staffServiceClient.send(
-        StaffCommand.SEARCH_STAFF,{
-          userId,
-          roleId: +roleId,
-          gender: +gender,
-          clinicId,
-          phoneNumber,
-          email,
-          name,
-        }
-      ),
+      this.staffServiceClient.send(StaffCommand.SEARCH_STAFF, {
+        userId,
+        roleId: +roleId,
+        gender: +gender,
+        clinicId,
+        phoneNumber,
+        email,
+        name,
+      }),
     );
     if (staffServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(

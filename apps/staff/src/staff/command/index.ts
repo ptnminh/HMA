@@ -17,3 +17,7 @@ export enum StaffCommand {
   FIND_FREE_APPOINTMENT_BY_STAFF_ID = 'FIND_FREE_APPOINTMENT_BY_STAFF_ID',
   SEARCH_STAFF = 'SEARCH_STAFF',
 }
+
+export enum AuthCommand {
+  USER_CREATE = 'user_create',
+}

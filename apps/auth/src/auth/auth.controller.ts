@@ -28,7 +28,15 @@ export class AuthController {
   @MessagePattern(AuthCommand.USER_CREATE)
   async register(data: RegisterDto) {
     try {
-      const { email, isMobile, noActionSendEmail, ...rest } = data;
+      const {
+        email,
+        isMobile,
+        noActionSendEmail,
+        type,
+        uniqueId,
+        rawPassword,
+        ...rest
+      } = data;
 
       const exUser = await this.authService.findUserByEmail(email);
       if (exUser?.emailVerified) {
@@ -60,6 +68,8 @@ export class AuthController {
         {
           id: user.id,
           isMobile,
+          type,
+          uniqueId,
         },
         {
           secret: jwtSercret,
@@ -75,6 +85,12 @@ export class AuthController {
             this.mailService.emit(EVENTS.AUTH_REGISTER, {
               email,
               link: linkComfirm,
+              metadata:
+                type && type === 'CREATE_STAFF'
+                  ? {
+                      password: rawPassword,
+                    }
+                  : {},
             }),
           );
         }
@@ -153,8 +169,19 @@ export class AuthController {
   @MessagePattern(AuthCommand.USER_VERIFY)
   async verfiyAccount(data: { id: string }) {
     try {
-      const { id } = data;
+      const {
+        id,
+        uniqueId,
+      }: {
+        id: string;
+        uniqueId?: string;
+      } = data;
       await this.authService.verifyEmail(id);
+      if (uniqueId) {
+        await this.authService.updateStaffInfo(uniqueId, {
+          isAcceptInvite: true,
+        });
+      }
       const user = await this.authService.findUserVerifiedById(id);
 
       return {

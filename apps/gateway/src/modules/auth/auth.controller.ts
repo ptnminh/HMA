@@ -186,6 +186,7 @@ export class AuthController {
     const verifyResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.USER_VERIFY, {
         id: decoded.id,
+        uniqueId: decoded?.uniqueId,
       }),
     );
 

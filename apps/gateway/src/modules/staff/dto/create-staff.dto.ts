@@ -10,10 +10,63 @@ import {
   IsString,
   Min,
 } from 'class-validator';
+class UserInfo {
+  @ApiProperty({
+    example: 'email@gmail.com',
+  })
+  @IsString()
+  @IsOptional()
+  email?: string;
 
+  @ApiProperty({
+    example: 'https://www.google.com',
+  })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+
+  @ApiProperty({
+    example: 'John',
+  })
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiProperty({
+    example: 'Doe',
+  })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @ApiProperty({
+    example: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  gender?: number;
+
+  @ApiProperty({
+    example: '0987654321',
+  })
+  @IsOptional()
+  phone?: string;
+
+  @ApiProperty({
+    example: 'address',
+  })
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @ApiProperty({
+    example: '2021-09-01',
+  })
+  @IsOptional()
+  @IsString()
+  birthday?: string;
+}
 export class CreateStaffDto {
-
-
   @ApiProperty({
     example: 'Tim mạch',
   })
@@ -39,6 +92,22 @@ export class CreateStaffDto {
   @IsNumber({}, { each: true })
   @IsOptional()
   services?: number[];
+
+  @ApiProperty({
+    type: UserInfo,
+    example: {
+      email: 'email@gmail.com',
+      avatar: 'https://www.google.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      gender: 0,
+      phone: '0987654321',
+      address: 'address',
+      birthday: '2021-09-01',
+    },
+  })
+  @IsOptional()
+  userInfo?: UserInfo;
 }
 
 export class CreateAppoimentDto {

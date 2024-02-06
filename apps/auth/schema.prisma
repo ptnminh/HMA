@@ -78,16 +78,6 @@ model clinicGroupRoles {
   @@map("clinic_group_roles")
 }
 
-model permissions {
-  id          Int       @id @default(autoincrement())
-  permission  String
-  description String?
-  isDisabled  Boolean   @default(false) @map(name: "is_disabled")
-  disabledAt  DateTime? @map(name: "disabled_at")
-  updatedAt   DateTime  @default(now()) @updatedAt @map(name: "updated_at")
-  createdAt   DateTime  @default(now()) @map(name: "created_at")
-}
-
 model rolePermissions {
   id           Int              @id @default(autoincrement())
   roleId       Int              @map(name: "role_id")
@@ -173,6 +163,8 @@ model clinics {
   ownerId          String             @map(name: "owner_id")
   address          String?
   logo             String?
+  lat              Float?
+  long             Float?
   description      String?
   metadata         String?
   isActive         Boolean            @default(true) @map(name: "is_activated")
@@ -187,6 +179,8 @@ model clinics {
   medicalSuppliers medicalSuppliers[]
   category         category[]
   staffs           staffs[]
+  patients         patients[]
+  medicalSupplies  medicalSupplies[]
 }
 
 model clinicNews {
@@ -204,30 +198,35 @@ model clinicNews {
 }
 
 model medicalSuppliers {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String?
-  address     String?
-  phone       String?
-  email       String?
-  stock       Int?
-  clinicId    String    @map(name: "clinic_id")
-  categoryId  Int?      @map(name: "category_id")
-  expiredAt   DateTime? @map(name: "expired_at")
-  createdAt   DateTime  @default(now()) @map(name: "created_at")
-  updatedAt   DateTime  @default(now()) @updatedAt @map(name: "updated_at")
-  isDisabled  Boolean   @default(false) @map(name: "is_disabled")
-  disabledAt  DateTime? @map(name: "disabled_at")
-  clinics     clinics   @relation(fields: [clinicId], references: [id])
-  category    category? @relation(fields: [categoryId], references: [id])
+  id           Int       @id @default(autoincrement())
+  medicineName String?   @map(name: "medicine_name")
+  expiry       String?
+  stock        Int?
+  note         String?
+  vendor       String?
+  unit         Float?
+  description  String?
+  address      String?
+  phone        String?
+  email        String?
+  name         String?
+  clinicId     String?   @map(name: "clinic_id")
+  categoryId   Int?      @map(name: "category_id")
+  expiredAt    DateTime? @map(name: "expired_at")
+  createdAt    DateTime  @default(now()) @map(name: "created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+  isDisabled   Boolean   @default(false) @map(name: "is_disabled")
+  disabledAt   DateTime? @map(name: "disabled_at")
+  clinics      clinics?  @relation(fields: [clinicId], references: [id])
+  category     category? @relation(fields: [categoryId], references: [id])
 
   @@map(name: "medical_suppliers")
 }
 
 model category {
   id               Int                @id @default(autoincrement())
-  name             String
-  type             String?
+  name             String             @map(name: "category_name")
+  type             Int                @map(name: "category_type")
   note             String?
   clinicId         String             @map(name: "clinic_id")
   description      String?
@@ -238,6 +237,7 @@ model category {
   clinics          clinics            @relation(fields: [clinicId], references: [id])
   medicalSuppliers medicalSuppliers[]
   clinicServices   clinicServices[]
+  medicalSupplies  medicalSupplies[]
 }
 
 model subscriptions {
@@ -299,6 +299,8 @@ model staffs {
   description    String?           @db.Text
   roleId         Int?              @map(name: "role_id")
   clinicId       String?           @map(name: "clinic_id")
+  isAcceptInvite Boolean           @default(true) @map(name: "is_accept_invite")
+  uniqueId       String?           @map(name: "unique_id")
   userId         String?           @map(name: "user_id")
   createdAt      DateTime          @default(now()) @map(name: "created_at")
   updatedAt      DateTime          @default(now()) @updatedAt() @map("updated_at")
@@ -356,7 +358,7 @@ model clinicServices {
   createdAt     DateTime        @default(now()) @map(name: "created_at")
   updatedAt     DateTime        @default(now()) @updatedAt @map(name: "updated_at")
   isDisabled    Boolean         @default(false) @map(name: "is_disabled")
-  disabledAt    DateTime?       @map(name: "disabled_at")
+  deletedAt     DateTime?       @map(name: "deleted_at")
   staffServices staffServices[]
   clinics       clinics         @relation(fields: [clinicId], references: [id])
   category      category?       @relation(fields: [categoryId], references: [id])
@@ -366,10 +368,6 @@ model clinicServices {
 
 model patients {
   id                  Int            @id @default(autoincrement())
-  phoneNumber         String?        @map("phone_number")
-  address             String?
-  gender              Int?
-  birthday            DateTime?
   bloodGroup          String?        @map("blood_group")
   anamnesis           String?
   idCard              String?        @map("id_card")
@@ -378,20 +376,27 @@ model patients {
   userId              String?        @map("user_id")
   appointments        appointments[]
   patient             users?         @relation(fields: [userId], references: [id])
+  clinics             clinics?       @relation(fields: [clinicId], references: [id])
 }
 
-model medicine {
+model medicalSupplies {
   id           Int       @id @default(autoincrement())
   medicineName String    @map(name: "medicine_name")
   stock        Int?
   price        Float?
   expiredAt    DateTime?
+  expiry       DateTime?
   vendor       String?
   description  String?
   unit         String?
+  clinicId     String?   @map(name: "clinic_id")
   note         String?
   categoryId   Int?      @map(name: "category_id")
   isDisabled   Boolean   @default(false) @map(name: "is_disabled")
+  category     category? @relation(fields: [categoryId], references: [id])
+  clinics      clinics?  @relation(fields: [clinicId], references: [id])
+
+  @@map("medical_supplies")
 }
 
 model staffServices {

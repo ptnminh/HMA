@@ -59,6 +59,18 @@ export class AuthService {
     });
   }
 
+  async updateStaffInfo(
+    uniqueId: string,
+    payload: Prisma.staffsUncheckedUpdateInput,
+  ) {
+    return this.prismaService.staffs.updateMany({
+      where: {
+        uniqueId,
+      },
+      data: payload,
+    });
+  }
+
   async findUserByEmail(email: string): Promise<any> {
     try {
       return this.prismaService.users.findFirst({

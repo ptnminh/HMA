@@ -1,29 +1,69 @@
-import { Controller, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { StaffService } from './staff.service';
-import { MessagePattern } from '@nestjs/microservices';
-import { StaffCommand } from './command';
+import { ClientProxy, MessagePattern } from '@nestjs/microservices';
+import { AuthCommand, StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
 import { some } from 'lodash';
-import { isAlpha, isAlphanumeric } from 'class-validator';
 import { convertVietnameseString, isContainSpecialChar } from './utils';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('staff')
 export class StaffController {
-  constructor(private staffService: StaffService) {}
+  constructor(
+    private staffService: StaffService,
+    @Inject('AUTH_SERVICE') private readonly authServiceClient: ClientProxy,
+  ) {}
 
   @MessagePattern(StaffCommand.CREATE_STAFF)
   async createStaff(data: any) {
     try {
-      console.log(data)
-      const { userId, clinicId, roleId ,services, ...rest } = data;
+      const { userInfo, clinicId, roleId, services, ...rest } = data;
+      let userId = data.userId;
+      let uniqueId: string = '';
+      if (!userId) {
+        const randomPassword = Math.random().toString(36).slice(-8);
+        uniqueId = randomPassword;
+        const userPayload: Prisma.usersUncheckedCreateInput = {
+          email: userInfo.email,
+          firstName: userInfo?.firstName,
+          lastName: userInfo?.lastName,
+          phone: userInfo?.phone,
+          password: randomPassword,
+          avatar: userInfo?.avatar,
+          isInputPassword: false,
+          gender: userInfo?.gender,
+          address: userInfo?.address,
+          moduleId: 5,
+          emailVerified: false,
+          ...(userInfo.birthday && {
+            birthday: new Date(userInfo.birthday).toISOString(),
+          }),
+        };
+        const createUserResponse = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.USER_CREATE, {
+            ...userPayload,
+            type: 'CREATE_STAFF',
+            rawPassword: randomPassword,
+            uniqueId,
+          }),
+        );
+        if (createUserResponse.status !== HttpStatus.CREATED) {
+          return {
+            message: createUserResponse.message,
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        userId = createUserResponse.id;
+      }
       const payload: Prisma.staffsUncheckedCreateInput = {
         userId,
         roleId,
         clinicId,
+        isAcceptInvite: userInfo ? false : true,
+        ...(uniqueId ? { uniqueId } : {}),
         ...rest,
       };
-      console.log(payload)
       const staff = await this.staffService.createStaff(payload);
       if (!staff) {
         return {
@@ -70,7 +110,7 @@ export class StaffController {
           status: HttpStatus.BAD_REQUEST,
         };
       }
-      delete(staff.users.password)
+      delete staff.users.password;
       return {
         message: 'Tìm kiếm thành công',
         status: HttpStatus.OK,
@@ -296,8 +336,6 @@ export class StaffController {
     }
   }
 
-
-
   @MessagePattern(StaffCommand.FIND_SCHEDULE_BY_STAFF_ID)
   async findScheduleByStaffId(data: any) {
     try {
@@ -459,63 +497,68 @@ export class StaffController {
   @MessagePattern(StaffCommand.SEARCH_STAFF)
   async searchStaff(data: any) {
     try {
-      const {name, ...query} = data
-      const isEmpty = Object.values(data).every(value => value === null||value ==='')
-      if(isEmpty) {
+      const { name, ...query } = data;
+      const isEmpty = Object.values(data).every(
+        (value) => value === null || value === '',
+      );
+      if (isEmpty) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Không có dữ liệu tìm kiếm",
-        }
+          message: 'Không có dữ liệu tìm kiếm',
+        };
       }
-      var stringName = name? convertVietnameseString(name): ''
-      if(name && !name.replace(/^\s+|\s+$/g,"") || name && isContainSpecialChar(name)) {
+      var stringName = name ? convertVietnameseString(name) : '';
+      if (
+        (name && !name.replace(/^\s+|\s+$/g, '')) ||
+        (name && isContainSpecialChar(name))
+      ) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: "Tên không hợp lệ",
-        }
+          message: 'Tên không hợp lệ',
+        };
       }
-      var staffList = []
-      var staffs = await this.staffService.searchStaff(query)
+      var staffList = [];
+      var staffs = await this.staffService.searchStaff(query);
 
-      if(name && staffs.length === 0) staffList = await this.staffService.findAllStaff()
-      else staffList = staffs
+      if (name && staffs.length === 0)
+        staffList = await this.staffService.findAllStaff();
+      else staffList = staffs;
 
-      var dataList = []
-      for( var staff of staffList) {
-        const {users, role, ...rest} = staff
-        delete(users.password)
-        var permissionList = []
-        for (var value of role.rolePermissions ) {
-          permissionList.push({...value.permission})
+      var dataList = [];
+      for (var staff of staffList) {
+        const { users, role, ...rest } = staff;
+        delete users.password;
+        var permissionList = [];
+        for (var value of role.rolePermissions) {
+          permissionList.push({ ...value.permission });
         }
         const fullName =
-            convertVietnameseString(users.firstName)
-            + " "
-            + convertVietnameseString(users.lastName)
-        console.log(users)
-        if(fullName.includes(stringName)) dataList.push({
-          ...rest,
-          users,
-          role: {
-            id: role.id,
-            name: role.name,
-            permissions: permissionList
-          }
-        })
+          convertVietnameseString(users.firstName) +
+          ' ' +
+          convertVietnameseString(users.lastName);
+        console.log(users);
+        if (fullName.includes(stringName))
+          dataList.push({
+            ...rest,
+            users,
+            role: {
+              id: role.id,
+              name: role.name,
+              permissions: permissionList,
+            },
+          });
       }
       return {
         status: HttpStatus.OK,
-        message: "Lấy danh sách thông tin staff thành công",
+        message: 'Lấy danh sách thông tin staff thành công',
         data: dataList,
-      }
-    }
-    catch(error) {
+      };
+    } catch (error) {
       console.log(error);
       return {
-        message: "Lỗi hệ thống",
+        message: 'Lỗi hệ thống',
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-      }
+      };
     }
   }
-
 }
