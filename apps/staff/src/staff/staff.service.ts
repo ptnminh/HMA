@@ -246,7 +246,7 @@ export class StaffService {
         isDisabled: false,
         AND: [
           {
-            users: gender ? { gender: gender } : undefined,
+            users: (gender !== undefined) ? { gender, } : undefined,
           },
           {
             users: phoneNumber
