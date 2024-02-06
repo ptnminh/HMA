@@ -28,8 +28,8 @@ import {
 } from './dto/body.dto';
 import { GetListQueryDto } from './dto/query.dto';
 
-@Controller('medical-suppliers')
-@ApiTags('Medical-Suppliers')
+@Controller('medical-supplies')
+@ApiTags('Medical Supplies')
 export class MedicalSuppliersController {
   constructor(
     @Inject('CLINIC_SERVICE')
@@ -96,11 +96,11 @@ export class MedicalSuppliersController {
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('Bearer')
-  @Put(':medicalSupplierId')
+  @Put(':medicalSupplyId')
   @ApiOkResponse({ type: CreateMedicalSupplierResponse })
   async updateMedicalSupplier(
     @Body() createMedicalSupplierDto: UpdateMedicalSupplierDto,
-    @Param('medicalSupplierId') medicalSupplierId: number,
+    @Param('medicalSupplyId') medicalSupplierId: number,
   ): Promise<CreateMedicalSupplierResponse> {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(
@@ -128,10 +128,10 @@ export class MedicalSuppliersController {
     };
   }
 
-  @Get(':medicalSupplierId')
+  @Get(':medicalSupplyId')
   @ApiOkResponse({ type: CreateMedicalSupplierResponse })
   async getMedicalSupplierById(
-    @Param('medicalSupplierId') medicalSupplierId: number,
+    @Param('medicalSupplyId') medicalSupplierId: number,
   ): Promise<CreateMedicalSupplierResponse> {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(

@@ -197,22 +197,27 @@ model clinicNews {
 }
 
 model medicalSuppliers {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String?
-  address     String?
-  phone       String?
-  email       String?
-  stock       Int?
-  clinicId    String?   @map(name: "clinic_id")
-  categoryId  Int?      @map(name: "category_id")
-  expiredAt   DateTime? @map(name: "expired_at")
-  createdAt   DateTime  @default(now()) @map(name: "created_at")
-  updatedAt   DateTime  @default(now()) @updatedAt @map(name: "updated_at")
-  isDisabled  Boolean   @default(false) @map(name: "is_disabled")
-  disabledAt  DateTime? @map(name: "disabled_at")
-  clinics     clinics?  @relation(fields: [clinicId], references: [id])
-  category    category? @relation(fields: [categoryId], references: [id])
+  id           Int       @id @default(autoincrement())
+  medicineName String?   @map(name: "medicine_name")
+  expiry       String?
+  stock        Int?
+  note         String?
+  vendor       String?
+  unit         Float?
+  description  String?
+  address      String?
+  phone        String?
+  email        String?
+  name         String?
+  clinicId     String?   @map(name: "clinic_id")
+  categoryId   Int?      @map(name: "category_id")
+  expiredAt    DateTime? @map(name: "expired_at")
+  createdAt    DateTime  @default(now()) @map(name: "created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt @map(name: "updated_at")
+  isDisabled   Boolean   @default(false) @map(name: "is_disabled")
+  disabledAt   DateTime? @map(name: "disabled_at")
+  clinics      clinics?  @relation(fields: [clinicId], references: [id])
+  category     category? @relation(fields: [categoryId], references: [id])
 
   @@map(name: "medical_suppliers")
 }
@@ -231,6 +236,7 @@ model category {
   clinics          clinics            @relation(fields: [clinicId], references: [id])
   medicalSuppliers medicalSuppliers[]
   clinicServices   clinicServices[]
+  medicalSupplies  medicalSupplies[]
 }
 
 model subscriptions {
@@ -374,18 +380,22 @@ model patients {
   clinics             clinics?       @relation(fields: [clinicId], references: [id])
 }
 
-model medicine {
+model medicalSupplies {
   id           Int       @id @default(autoincrement())
   medicineName String    @map(name: "medicine_name")
   stock        Int?
   price        Float?
   expiredAt    DateTime?
+  expiry       DateTime?
   vendor       String?
   description  String?
   unit         String?
   note         String?
   categoryId   Int?      @map(name: "category_id")
   isDisabled   Boolean   @default(false) @map(name: "is_disabled")
+  category     category? @relation(fields: [categoryId], references: [id])
+
+  @@map("medical_supplies")
 }
 
 model staffServices {

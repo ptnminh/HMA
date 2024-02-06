@@ -763,7 +763,10 @@ export class ClinicController {
         };
       }
       const clinicServices =
-        await this.clinicService.findClinicServiceByClinicId(clinicId, isDisabled);
+        await this.clinicService.findClinicServiceByClinicId(
+          clinicId,
+          isDisabled,
+        );
       return {
         status: HttpStatus.OK,
         message: 'Lấy thông tin clinic service thành công',
@@ -1180,11 +1183,11 @@ export class ClinicController {
         message: 'Tìm kiếm thành công',
         data: {
           data: result.map((news) => {
-            const {clinics, ...rest} = news;
+            const { clinics, ...rest } = news;
             return {
               ...rest,
-              clinicName: clinics? clinics.name : null,
-            }
+              clinicName: clinics ? clinics.name : null,
+            };
           }),
           pageSize: size,
           currentPage: page + 1,
@@ -1203,29 +1206,20 @@ export class ClinicController {
   @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_CREATE)
   async createMedicalSupplier(data: any) {
     try {
-      const { clinicId, expiredAt, ...rest } = data;
-      if (clinicId) {
-        const clinic = await this.clinicService.findClinicById(clinicId);
-        if (!clinic) {
-          return {
-            status: HttpStatus.BAD_REQUEST,
-            message: 'Clinic không tồn tại',
-          };
-        }
-      }
-      const exSupplier = await this.clinicService.findMedicalSupplierByEmail(
-        rest.email,
+      const { expiredAt, expiry, ...rest } = data;
+      const exSupplier = await this.clinicService.findMedicalSupplyByName(
+        rest.medicineName,
       );
       if (exSupplier) {
         return {
           status: HttpStatus.BAD_REQUEST,
-          message: 'Email nhà cung cấp đã tồn tại',
+          message: 'Medicine đã tồn tại',
         };
       }
-      const payload: Prisma.medicalSuppliersUncheckedCreateInput = {
-        clinicId,
+      const payload: Prisma.medicalSuppliesUncheckedCreateInput = {
         ...rest,
         ...(expiredAt && { expiredAt: new Date(expiredAt).toISOString() }),
+        ...(expiry && { expiredAt: new Date(expiry).toISOString() }),
       };
       const medicalSupplier =
         await this.clinicService.createMedicalSupplier(payload);
@@ -1253,18 +1247,24 @@ export class ClinicController {
   @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_LIST)
   async listMedicalSupplier(data: any) {
     try {
-      const { clinicId, name, email, isDisabled } = data;
+      const { vendor, medicineName, isDisabled } = data;
       const medicalSuppliers = await this.clinicService.listMedicalSupplier({
-        clinicId,
-        name,
-        email,
+        vendor,
+
+        medicineName,
         isDisabled,
       });
 
       return {
         status: HttpStatus.OK,
         message: 'Tìm kiếm thành công',
-        data: medicalSuppliers,
+        data: medicalSuppliers?.map((supplier) => {
+          const { category, ...rest } = supplier;
+          return {
+            ...rest,
+            categoryName: category ? category.name : null,
+          };
+        }),
       };
     } catch (error) {
       console.log(error);
@@ -1279,7 +1279,7 @@ export class ClinicController {
   @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_UPDATE)
   async updateMedicalSupplier(data: any) {
     try {
-      const { id, expiredAt, ...rest } = data;
+      const { id, expiredAt, expiry, ...rest } = data;
       const medicalSupplier =
         await this.clinicService.findMedicalSupplierById(id);
       if (!medicalSupplier) {
@@ -1288,16 +1288,22 @@ export class ClinicController {
           message: 'Nhà cung cấp không tồn tại',
         };
       }
-      const payload: Prisma.medicalSuppliersUncheckedUpdateInput = {
+      const payload: Prisma.medicalSuppliesUncheckedUpdateInput = {
         ...rest,
         ...(expiredAt && { expiredAt: new Date(expiredAt).toISOString() }),
+        ...(expiry && { expiredAt: new Date(expiry).toISOString() }),
       };
       const updatedMedicalSupplier =
         await this.clinicService.updateMedicalSupplier(id, payload);
+      const categoryName = updatedMedicalSupplier?.category?.name;
+      delete updatedMedicalSupplier?.category;
       return {
         status: HttpStatus.OK,
         message: 'Cập nhật nhà cung cấp thành công',
-        data: updatedMedicalSupplier,
+        data: {
+          ...updatedMedicalSupplier,
+          categoryName,
+        },
       };
     } catch (error) {
       console.log(error);
@@ -1321,10 +1327,15 @@ export class ClinicController {
           message: 'Nhà cung cấp không tồn tại',
         };
       }
+      const categoryName = medicalSupplier?.category?.name;
+      delete medicalSupplier?.category;
       return {
         status: HttpStatus.OK,
         message: 'Lấy thông tin nhà cung cấp thành công',
-        data: medicalSupplier,
+        data: {
+          ...medicalSupplier,
+          categoryName,
+        },
       };
     } catch (error) {
       console.log(error);

@@ -2,49 +2,49 @@ import { IsOptional, IsString, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMedicalSupplierDto {
-  @ApiProperty({ example: 'Supplier Name' })
+  @ApiProperty({ example: 'Medicine Name' })
   @IsString()
-  name: string;
+  medicineName: string;
 
-  @ApiProperty({ example: 'Supplier Description' })
+  @ApiProperty({ example: 'Medical Supply Description' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'Supplier Address' })
+  @ApiProperty({ example: 'Vendor Name' })
   @IsOptional()
   @IsString()
-  address?: string;
+  vendor?: string;
 
-  @ApiProperty({ example: 'Supplier Phone' })
+  @ApiProperty({ example: 'Note' })
   @IsOptional()
   @IsString()
-  phone?: string;
-
-  @ApiProperty({ example: 'supplier@example.com' })
-  @IsOptional()
-  @IsString()
-  email?: string;
+  note?: string;
 
   @ApiProperty({ example: 10 })
   @IsOptional()
   @IsNumber()
   stock?: number;
 
-  @ApiProperty({ example: 'clinic_id' })
-  @IsString()
+  @ApiProperty({ example: 'Unit' })
   @IsOptional()
-  clinicId: string;
+  @IsString()
+  unit?: string;
 
   @ApiProperty({ example: 1 })
   @IsOptional()
   @IsNumber()
   categoryId?: number;
 
+  @ApiProperty({ example: 1, description: 'Không có thì ko gửi lên' })
+  @IsOptional()
+  @IsNumber()
+  price?: number;
+
   @ApiProperty({ example: '2022-01-01' })
   @IsOptional()
   @IsString()
-  expiredAt?: Date;
+  expiry?: Date;
 }
 
 export class CreateMedicalSupplierResponse {
@@ -53,13 +53,9 @@ export class CreateMedicalSupplierResponse {
   @ApiProperty({
     example: {
       id: '1',
-      name: 'Supplier Name',
-      description: 'Supplier Description',
-      address: 'Supplier Address',
-      phone: 'Supplier Phone',
-      email: 'supplier@example.com',
+      medicineName: 'Supply Name',
+      description: 'Supply Description',
       stock: 10,
-      clinicId: 'clinic_id',
       categoryId: 1,
       expiredAt: '2022-01-01',
     },
@@ -67,54 +63,54 @@ export class CreateMedicalSupplierResponse {
   })
   data: CreateMedicalSupplierDto;
   @ApiProperty({
-    example: 'Tạo nhà cung cấp thành công!',
+    example: 'Tạo Medical Supply thành công!',
     nullable: true,
   })
   message: { [key: string]: any };
 }
 export class UpdateMedicalSupplierDto {
-  @ApiProperty({ example: 'Supplier Name' })
-  @IsOptional()
+  @ApiProperty({ example: 'Medicine Name' })
   @IsString()
-  name?: string;
+  @IsOptional()
+  medicineName: string;
 
-  @ApiProperty({ example: 'Supplier Description' })
+  @ApiProperty({ example: 'Medical Supply Description' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ example: 'Supplier Address' })
+  @ApiProperty({ example: 'Vendor Name' })
   @IsOptional()
   @IsString()
-  address?: string;
+  vendor?: string;
 
-  @ApiProperty({ example: 'Supplier Phone' })
+  @ApiProperty({ example: 'Note' })
   @IsOptional()
   @IsString()
-  phone?: string;
-
-  @ApiProperty({ example: 'supplier@example.com' })
-  @IsOptional()
-  @IsString()
-  email?: string;
+  note?: string;
 
   @ApiProperty({ example: 10 })
   @IsOptional()
   @IsNumber()
   stock?: number;
 
-  @ApiProperty({ example: 'clinic_id' })
+  @ApiProperty({ example: 'Unit' })
   @IsOptional()
   @IsString()
-  clinicId?: string;
+  unit?: string;
 
   @ApiProperty({ example: 1 })
   @IsOptional()
   @IsNumber()
   categoryId?: number;
 
+  @ApiProperty({ example: 1 })
+  @IsOptional()
+  @IsNumber()
+  price?: number;
+
   @ApiProperty({ example: '2022-01-01' })
   @IsOptional()
   @IsString()
-  expiredAt?: Date;
+  expiry?: Date;
 }
