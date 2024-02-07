@@ -821,7 +821,7 @@ export class ClinicService {
 
   async searchPatient(query: any) {
     try {
-      const { name, userId, clinicId, gender, phone, email } = query;
+      const { name, userId, clinicId, gender, phone, email, isDisabled, emailVerified } = query;
       const patients = await this.prismaService.patients.findMany({
         where: {
           userId: userId ? userId : undefined,
@@ -829,8 +829,12 @@ export class ClinicService {
           patient: {
             gender: (gender !== null && gender !== undefined)?
                     gender : undefined,
+            emailVerified: (emailVerified !== null && emailVerified !== undefined)?
+                    emailVerified : undefined,
             phone: phone? phone : undefined,
             email: email? email : undefined,
+            isDisabled: (isDisabled !== null && isDisabled !== undefined)?
+                        isDisabled : undefined,
           }
 
         },
@@ -844,6 +848,7 @@ export class ClinicService {
               phone: true,
               address: true,
               emailVerified: true,
+              isDisabled: true,
               avatar: true,
             },
           },

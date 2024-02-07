@@ -1355,15 +1355,15 @@ export class ClinicController {
   @MessagePattern(PatientCommand.SEARCH_PATIENT)
   async searchPatient(query: any) {
     try {
-      const isEmpty = Object.values(query).every(
-        (value) => value === null || value === '',
-      );
-      if (isEmpty) {
-        return {
-          message: 'Không có dữ liệu tìm kiếm',
-          status: HttpStatus.BAD_REQUEST,
-        };
-      }
+      // const isEmpty = Object.values(query).every(
+      //   (value) => value === null || value === '',
+      // );
+      // if (isEmpty) {
+      //   return {
+      //     message: 'Không có dữ liệu tìm kiếm',
+      //     status: HttpStatus.BAD_REQUEST,
+      //   };
+      // }
 
       const patients = await this.clinicService.searchPatient(query);
       return {

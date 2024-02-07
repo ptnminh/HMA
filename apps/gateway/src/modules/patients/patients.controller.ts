@@ -72,6 +72,8 @@ export class PatientsController {
   @ApiQuery({ name: 'phone', required: false })
   @ApiQuery({ name: 'email', required: false })
   @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'isDisabled', required: false })
+  @ApiQuery({ name: 'emailVerified', required: false })
   @Get()
   async searchPatients(
     @Query('userId') userId: string,
@@ -80,6 +82,8 @@ export class PatientsController {
     @Query('phone') phone?: string,
     @Query('email') email?: string,
     @Query('name') name?: string,
+    @Query('isDisabled') isDisabled?: boolean,
+    @Query('emailVerified') emailVerified?: boolean
   ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(PatientCommand.SEARCH_PATIENT, {
@@ -89,6 +93,8 @@ export class PatientsController {
         email,
         name,
         gender: +gender,
+        isDisabled,
+        emailVerified,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
