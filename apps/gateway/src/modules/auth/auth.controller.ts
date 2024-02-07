@@ -187,6 +187,7 @@ export class AuthController {
       this.authServiceClient.send(AuthCommand.USER_VERIFY, {
         id: decoded.id,
         uniqueId: decoded?.uniqueId,
+        type: decoded?.type,
       }),
     );
 

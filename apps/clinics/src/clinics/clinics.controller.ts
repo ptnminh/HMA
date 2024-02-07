@@ -1,7 +1,12 @@
 import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { ClinicService } from './clinics.service';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
-import { ClinicCommand, MedicalSupplierCommand, PatientCommand } from './command';
+import {
+  AuthCommand,
+  ClinicCommand,
+  MedicalSupplierCommand,
+  PatientCommand,
+} from './command';
 import { Prisma } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
@@ -1350,33 +1355,102 @@ export class ClinicController {
   @MessagePattern(PatientCommand.SEARCH_PATIENT)
   async searchPatient(query: any) {
     try {
-      const isEmpty = Object.values(query).every(value => value === null||value ==='')
-      if(isEmpty) {
+      const isEmpty = Object.values(query).every(
+        (value) => value === null || value === '',
+      );
+      if (isEmpty) {
         return {
-          message: "Không có dữ liệu tìm kiếm",
+          message: 'Không có dữ liệu tìm kiếm',
           status: HttpStatus.BAD_REQUEST,
-        }
+        };
       }
 
-      const patients = await this.clinicService.searchPatient(query)
+      const patients = await this.clinicService.searchPatient(query);
       return {
         status: HttpStatus.OK,
-        message: "Tìm kiếm thành công",
+        message: 'Tìm kiếm thành công',
         data: patients.map((value) => {
-          const {patient, ...rest} = value
+          const { patient, ...rest } = value;
           return {
             ...rest,
             ...patient,
-          }
-        })
-      }
-    }
-    catch(error) {
-      console.log(error)
+          };
+        }),
+      };
+    } catch (error) {
+      console.log(error);
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(PatientCommand.CREATE_PATIENT)
+  async createPatient(data: any) {
+    try {
+      const { userInfo, clinicId, ...rest } = data;
+      let userId = data.userId;
+      let uniqueId: string = '';
+      if (!userId) {
+        const randomPassword = Math.random().toString(36).slice(-8);
+        uniqueId = randomPassword;
+        const userPayload: Prisma.usersUncheckedCreateInput = {
+          email: userInfo.email,
+          firstName: userInfo?.firstName,
+          lastName: userInfo?.lastName,
+          phone: userInfo?.phone,
+          password: randomPassword,
+          avatar: userInfo?.avatar,
+          isInputPassword: false,
+          gender: userInfo?.gender,
+          address: userInfo?.address,
+          moduleId: 3,
+          emailVerified: false,
+          ...(userInfo.birthday && {
+            birthday: new Date(userInfo.birthday).toISOString(),
+          }),
+        };
+        const createUserResponse = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.USER_CREATE, {
+            ...userPayload,
+            type: 'CREATE_PATIENT',
+            rawPassword: randomPassword,
+            uniqueId,
+          }),
+        );
+        if (createUserResponse.status !== HttpStatus.CREATED) {
+          return {
+            message: createUserResponse.message,
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        userId = createUserResponse?.user?.id;
       }
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const patientPayload: Prisma.patientsUncheckedCreateInput = {
+        userId,
+        clinicId,
+        ...rest,
+      };
+      const patient = await this.clinicService.createPatient(patientPayload);
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Tạo bệnh nhân thành công',
+        data: patient,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
     }
   }
 }

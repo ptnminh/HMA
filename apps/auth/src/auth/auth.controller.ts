@@ -85,12 +85,11 @@ export class AuthController {
             this.mailService.emit(EVENTS.AUTH_REGISTER, {
               email,
               link: linkComfirm,
-              metadata:
-                type && type === 'CREATE_STAFF'
-                  ? {
-                      password: rawPassword,
-                    }
-                  : {},
+              metadata: type
+                ? {
+                    password: rawPassword,
+                  }
+                : {},
             }),
           );
         }
@@ -172,12 +171,14 @@ export class AuthController {
       const {
         id,
         uniqueId,
+        type,
       }: {
         id: string;
         uniqueId?: string;
+        type?: string;
       } = data;
       await this.authService.verifyEmail(id);
-      if (uniqueId) {
+      if (uniqueId && type && type === 'CREATE_STAFF') {
         await this.authService.updateStaffInfo(uniqueId, {
           isAcceptInvite: true,
         });

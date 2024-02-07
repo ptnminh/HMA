@@ -819,14 +819,13 @@ export class ClinicService {
     });
   }
 
-
   async searchPatient(query: any) {
     try {
-      const {name, userId, clinicId, gender, phone, email} = query
+      const { name, userId, clinicId, gender, phone, email } = query;
       const patients = await this.prismaService.patients.findMany({
         where: {
-          userId: userId? userId : undefined,
-          clinicId: clinicId? clinicId : undefined,
+          userId: userId ? userId : undefined,
+          clinicId: clinicId ? clinicId : undefined,
           patient: {
             gender: (gender !== null && gender !== undefined)?
                     gender : undefined,
@@ -846,7 +845,7 @@ export class ClinicService {
               address: true,
               emailVerified: true,
               avatar: true,
-            }
+            },
           },
         }
       })
@@ -863,10 +862,15 @@ export class ClinicService {
           }
         }
       }
-      return name? returnData : patients;
+      return name ? returnData : patients;
+    } catch (error) {
+      console.log(error);
     }
-    catch(error) {
-      console.log(error)
-    }
+  }
+
+  async createPatient(data: Prisma.patientsUncheckedCreateInput) {
+    return this.prismaService.patients.create({
+      data,
+    });
   }
 }

@@ -370,6 +370,7 @@ model patients {
   id                  Int            @id @default(autoincrement())
   bloodGroup          String?        @map("blood_group")
   anamnesis           String?
+  uniqueId            String?        @map("unique_id")
   idCard              String?        @map("id_card")
   healthInsuranceCode String?        @map("health_insurance_code")
   clinicId            String?        @map("clinic_id")
