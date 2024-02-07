@@ -501,6 +501,7 @@ export class StaffController {
       const isEmpty = Object.values(data).every(
         (value) => value === null || value === '',
       );
+      console.log(query)
       if (isEmpty) {
         return {
           status: HttpStatus.BAD_REQUEST,
@@ -517,41 +518,26 @@ export class StaffController {
           message: 'Tên không hợp lệ',
         };
       }
-      var staffList = [];
       var staffs = await this.staffService.searchStaff(query);
 
-      if (name && staffs.length === 0)
-        staffList = await this.staffService.findAllStaff();
-      else staffList = staffs;
-
-      var dataList = [];
-      for (var staff of staffList) {
-        const { users, role, ...rest } = staff;
-        delete users.password;
-        var permissionList = [];
-        for (var value of role.rolePermissions) {
-          permissionList.push({ ...value.permission });
-        }
-        const fullName =
-          convertVietnameseString(users.firstName) +
-          ' ' +
-          convertVietnameseString(users.lastName);
-        console.log(users);
-        if (fullName.includes(stringName))
-          dataList.push({
-            ...rest,
-            users,
-            role: {
-              id: role.id,
-              name: role.name,
-              permissions: permissionList,
-            },
-          });
-      }
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách thông tin staff thành công',
-        data: dataList,
+        data: staffs.map((value) => {
+          const {users, role, ... rest} = value
+          if(users) delete(users.password)
+          const {rolePermissions, ...roleData} = role
+          return {
+            ...rest,
+            users,
+            role: {
+              ...roleData,
+              permissions: rolePermissions.map((item) => {
+                return item.permission
+              })
+            }
+          }
+        })
       };
     } catch (error) {
       console.log(error);

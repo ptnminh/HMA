@@ -22,6 +22,7 @@ import { CreateAppoimentDto, CreateStaffDto } from './dto/create-staff.dto';
 import { CurrentUser } from 'src/decorators';
 import { UpdateStaffDto } from './dto/update-staff.dto';
 import { FindFreeAppointmentByStaffIdQueryDto } from './dto/query.dto';
+import { isNumber } from 'class-validator';
 
 @Controller('staffs')
 @ApiTags('Staff')
@@ -297,8 +298,8 @@ export class StaffController {
     const staffServiceResponse = await firstValueFrom(
       this.staffServiceClient.send(StaffCommand.SEARCH_STAFF, {
         userId,
-        roleId: +roleId,
-        gender: +gender,
+        roleId,
+        gender,
         clinicId,
         phoneNumber,
         email,
