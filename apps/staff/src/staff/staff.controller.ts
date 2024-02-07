@@ -498,16 +498,16 @@ export class StaffController {
   async searchStaff(data: any) {
     try {
       const { name, ...query } = data;
-      const isEmpty = Object.values(data).every(
-        (value) => value === null || value === '',
-      );
-      console.log(query)
-      if (isEmpty) {
-        return {
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Không có dữ liệu tìm kiếm',
-        };
-      }
+      // const isEmpty = Object.values(data).every(
+      //   (value) => value === null || value === '',
+      // );
+      // console.log(query)
+      // if (isEmpty) {
+      //   return {
+      //     status: HttpStatus.BAD_REQUEST,
+      //     message: 'Không có dữ liệu tìm kiếm',
+      //   };
+      // }
       var stringName = name ? convertVietnameseString(name) : '';
       if (
         (name && !name.replace(/^\s+|\s+$/g, '')) ||

@@ -43,6 +43,8 @@ export class StaffService {
         specialize: true,
         experience: true,
         description: true,
+        isAcceptInvite: true,
+        isDisabled: true,
         staffServices: {
           where: {
             isDisabled: false,
@@ -240,12 +242,15 @@ export class StaffService {
   }
 
   async searchStaff(query) {
-    const { userId, clinicId, roleId, gender, phoneNumber, email, name } = query;
+    const { userId, clinicId, roleId, gender, phoneNumber, email, name, isDisabled, isAcceptInvite } = query;
     const staffs = await this.prismaService.staffs.findMany({
       where: {
         clinicId: clinicId? clinicId : undefined,
-        roleId: roleId? roleId : undefined,
-        isDisabled: false,
+        roleId: (roleId!== undefined && roleId !== null)? roleId : undefined,
+        isDisabled: (isDisabled !== null && isDisabled !== undefined)? 
+                    isDisabled : undefined,
+        isAcceptInvite: (isAcceptInvite !== null && isAcceptInvite !== undefined)? 
+                    isAcceptInvite : undefined,
         AND: [
           {
             users: (gender !== undefined  && gender !== null)? { gender, } : undefined,
@@ -269,6 +274,8 @@ export class StaffService {
         description: true,
         specialize: true,
         clinicId: true,
+        isDisabled: true,
+        isAcceptInvite: true,
         users: true,
         role: {
           select: {
@@ -310,9 +317,6 @@ export class StaffService {
 
   async findAllStaff() {
     return this.prismaService.staffs.findMany({
-      where: {
-        isDisabled: false,
-      },
       select: {
         id: true,
         clinicId: true,

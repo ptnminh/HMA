@@ -828,7 +828,8 @@ export class ClinicService {
           userId: userId? userId : undefined,
           clinicId: clinicId? clinicId : undefined,
           patient: {
-            gender: gender? gender : undefined,
+            gender: (gender !== null && gender !== undefined)?
+                    gender : undefined,
             phone: phone? phone : undefined,
             email: email? email : undefined,
           }
@@ -850,13 +851,15 @@ export class ClinicService {
         }
       })
       const returnData = []
-      if (name) {
+      if (name ) {
         for (var member of patients) {
-          const strName = convertVietnameseString(member.patient.firstName) 
-          + ' '
-          + convertVietnameseString(member.patient.lastName);
-          if (strName.includes(convertVietnameseString(name))) {
-            returnData.push(member)
+          if(member.patient) {
+            const strName = convertVietnameseString(member.patient.firstName) 
+            + ' '
+            + convertVietnameseString(member.patient.lastName);
+            if (strName.includes(convertVietnameseString(name))) {
+              returnData.push(member)
+            }
           }
         }
       }

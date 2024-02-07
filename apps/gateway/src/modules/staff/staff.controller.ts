@@ -285,25 +285,31 @@ export class StaffController {
   @ApiQuery({ name: 'phoneNumber', required: false })
   @ApiQuery({ name: 'email', required: false })
   @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'isDisabled', required: false })
+  @ApiQuery({ name: 'isAcceptInvite', required: false })
   @Get()
   async searchStaff(
     @Query('userId') userId: string,
-    @Query('roleId') roleId: string,
+    @Query('roleId') roleId: number,
     @Query('clinicId') clinicId: string,
     @Query('gender') gender?: number,
     @Query('phoneNumber') phoneNumber?: string,
     @Query('email') email?: string,
     @Query('name') name?: string,
+    @Query('isDisabled') isDisabled?: boolean,
+    @Query('isAcceptInvite') isAcceptInvite?: boolean,
   ) {
     const staffServiceResponse = await firstValueFrom(
       this.staffServiceClient.send(StaffCommand.SEARCH_STAFF, {
         userId,
-        roleId,
-        gender,
+        roleId: +roleId,
+        gender: +gender,
         clinicId,
         phoneNumber,
         email,
         name,
+        isDisabled,
+        isAcceptInvite
       }),
     );
     if (staffServiceResponse.status !== HttpStatus.OK) {
