@@ -518,7 +518,7 @@ export class StaffController {
           message: 'Tên không hợp lệ',
         };
       }
-      var staffs = await this.staffService.searchStaff(data);
+      var staffs = await this.staffService.searchStaff({name, ...query});
 
       return {
         status: HttpStatus.OK,

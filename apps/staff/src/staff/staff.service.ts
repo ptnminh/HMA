@@ -293,12 +293,16 @@ export class StaffService {
     var searchWithName = []
     if (name) {
       for (var staff of staffs) {
-        const strName = convertVietnameseString(staff.users.firstName) 
-                        + ' '
-                        + convertVietnameseString(staff.users.lastName);
-        if(strName.includes(convertVietnameseString(name))) {
-          searchWithName.push(staff)
+        if (staff.users) 
+        {
+          const strName = convertVietnameseString(staff.users.firstName) 
+          + ' '
+          + convertVietnameseString(staff.users.lastName);
+          if(strName.includes(convertVietnameseString(name))) {
+            searchWithName.push(staff)
+          }
         }
+
       }
     }
     return name? searchWithName : staffs;
