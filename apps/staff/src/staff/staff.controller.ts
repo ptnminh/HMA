@@ -5,7 +5,7 @@ import { AuthCommand, StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
 import { some } from 'lodash';
-import { convertVietnameseString, isContainSpecialChar } from './utils';
+import { isContainSpecialChar } from './utils';
 import { firstValueFrom } from 'rxjs';
 
 @Controller('staff')
@@ -54,7 +54,7 @@ export class StaffController {
             status: HttpStatus.BAD_REQUEST,
           };
         }
-        userId = createUserResponse.id;
+        userId = createUserResponse?.user?.id;
       }
       const payload: Prisma.staffsUncheckedCreateInput = {
         userId,
@@ -501,14 +501,13 @@ export class StaffController {
       const isEmpty = Object.values(data).every(
         (value) => value === null || value === '',
       );
-      console.log(query)
+      console.log(query);
       if (isEmpty) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Không có dữ liệu tìm kiếm',
         };
       }
-      var stringName = name ? convertVietnameseString(name) : '';
       if (
         (name && !name.replace(/^\s+|\s+$/g, '')) ||
         (name && isContainSpecialChar(name))
@@ -518,26 +517,26 @@ export class StaffController {
           message: 'Tên không hợp lệ',
         };
       }
-      var staffs = await this.staffService.searchStaff({name, ...query});
+      const staffs = await this.staffService.searchStaff({ name, ...query });
 
       return {
         status: HttpStatus.OK,
         message: 'Lấy danh sách thông tin staff thành công',
         data: staffs.map((value) => {
-          const {users, role, ... rest} = value
-          if(users) delete(users.password)
-          const {rolePermissions, ...roleData} = role
+          const { users, role, ...rest } = value;
+          if (users) delete users.password;
+          const { rolePermissions, ...roleData } = role;
           return {
             ...rest,
             users,
             role: {
               ...roleData,
               permissions: rolePermissions.map((item) => {
-                return item.permission
-              })
-            }
-          }
-        })
+                return item.permission;
+              }),
+            },
+          };
+        }),
       };
     } catch (error) {
       console.log(error);

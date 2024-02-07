@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { isNumber } from 'lodash';
 import { PrismaService } from 'src/prisma.service';
 import { AppointmentStatus } from 'src/shared';
 import { convertVietnameseString } from './utils';
@@ -240,26 +239,28 @@ export class StaffService {
   }
 
   async searchStaff(query) {
-    const { userId, clinicId, roleId, gender, phoneNumber, email, name } = query;
+    const { userId, clinicId, roleId, gender, phoneNumber, email, name } =
+      query;
     const staffs = await this.prismaService.staffs.findMany({
       where: {
-        clinicId: clinicId? clinicId : undefined,
-        roleId: roleId? roleId : undefined,
+        clinicId: clinicId ? clinicId : undefined,
+        roleId: roleId ? roleId : undefined,
         isDisabled: false,
         AND: [
           {
-            users: (gender !== undefined  && gender !== null)? { gender, } : undefined,
+            users:
+              gender !== undefined && gender !== null ? { gender } : undefined,
           },
           {
-            users: phoneNumber?
-               { phone: { contains: phoneNumber } }
+            users: phoneNumber
+              ? { phone: { contains: phoneNumber } }
               : undefined,
           },
           {
-            users: userId? { id: userId } : undefined,
+            users: userId ? { id: userId } : undefined,
           },
           {
-            users: email? { email: { contains: email } } : undefined,
+            users: email ? { email: { contains: email } } : undefined,
           },
         ],
       },
@@ -290,22 +291,21 @@ export class StaffService {
       },
     });
 
-    var searchWithName = []
+    const searchWithName = [];
     if (name) {
-      for (var staff of staffs) {
-        if (staff.users) 
-        {
-          const strName = convertVietnameseString(staff.users.firstName) 
-          + ' '
-          + convertVietnameseString(staff.users.lastName);
-          if(strName.includes(convertVietnameseString(name))) {
-            searchWithName.push(staff)
+      for (const staff of staffs) {
+        if (staff.users) {
+          const strName =
+            convertVietnameseString(staff.users.firstName) +
+            ' ' +
+            convertVietnameseString(staff.users.lastName);
+          if (strName.includes(convertVietnameseString(name))) {
+            searchWithName.push(staff);
           }
         }
-
       }
     }
-    return name? searchWithName : staffs;
+    return name ? searchWithName : staffs;
   }
 
   async findAllStaff() {

@@ -819,20 +819,18 @@ export class ClinicService {
     });
   }
 
-
   async searchPatient(query: any) {
     try {
-      const {name, userId, clinicId, gender, phone, email} = query
+      const { name, userId, clinicId, gender, phone, email } = query;
       const patients = await this.prismaService.patients.findMany({
         where: {
-          userId: userId? userId : undefined,
-          clinicId: clinicId? clinicId : undefined,
+          userId: userId ? userId : undefined,
+          clinicId: clinicId ? clinicId : undefined,
           patient: {
-            gender: gender? gender : undefined,
-            phone: phone? phone : undefined,
-            email: email? email : undefined,
-          }
-
+            gender: gender ? gender : undefined,
+            phone: phone ? phone : undefined,
+            email: email ? email : undefined,
+          },
         },
         include: {
           patient: {
@@ -845,25 +843,31 @@ export class ClinicService {
               address: true,
               emailVerified: true,
               avatar: true,
-            }
+            },
           },
-        }
-      })
-      const returnData = []
+        },
+      });
+      const returnData = [];
       if (name) {
-        for (var member of patients) {
-          const strName = convertVietnameseString(member.patient.firstName) 
-          + ' '
-          + convertVietnameseString(member.patient.lastName);
+        for (const member of patients) {
+          const strName =
+            convertVietnameseString(member.patient.firstName) +
+            ' ' +
+            convertVietnameseString(member.patient.lastName);
           if (strName.includes(convertVietnameseString(name))) {
-            returnData.push(member)
+            returnData.push(member);
           }
         }
       }
-      return name? returnData : patients;
+      return name ? returnData : patients;
+    } catch (error) {
+      console.log(error);
     }
-    catch(error) {
-      console.log(error)
-    }
+  }
+
+  async createPatient(data: Prisma.patientsUncheckedCreateInput) {
+    return this.prismaService.patients.create({
+      data,
+    });
   }
 }
