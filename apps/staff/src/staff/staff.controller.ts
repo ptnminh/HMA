@@ -104,30 +104,33 @@ export class StaffController {
       }
       const createdStaff = await this.staffService.findStaffById(staff.id);
 
-      const getUserResponse = await firstValueFrom(
-        this.authServiceClient.send(AuthCommand.USER_GET, {
-          userId,
-        }),
-      );
-      if (getUserResponse.status !== HttpStatus.OK) {
-        return {
-          message: getUserResponse.message,
-          status: HttpStatus.BAD_REQUEST,
-        };
+      if (Object.keys(userInfo).length === 0) {
+        const getUserResponse = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.USER_GET, {
+            userId,
+          }),
+        );
+        if (getUserResponse.status !== HttpStatus.OK) {
+          return {
+            message: getUserResponse.message,
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        const overriedContent = `${getUserResponse.data.firstName} ${
+          getUserResponse.data.lastName
+        } đã tham gia phòng khám phòng khám ${clinicServiceResponse.data
+          ?.name} lúc ${moment()
+          .tz('Asia/Ho_Chi_Minh')
+          .format('DD/MM/YYYY HH:mm:ss')}`;
+        await lastValueFrom(
+          this.notiService.emit(EVENTS.NOTIFICATION_CREATE, {
+            userId: clinicServiceResponse.data?.owner?.id,
+            content: overriedContent,
+            body: overriedContent,
+          }),
+        );
       }
-      const overriedContent = `${getUserResponse.data.firstName} ${
-        getUserResponse.data.lastName
-      } đã tham gia phòng khám phòng khám ${clinicServiceResponse.data
-        ?.name} lúc ${moment()
-        .tz('Asia/Ho_Chi_Minh')
-        .format('DD/MM/YYYY HH:mm:ss')}`;
-      await lastValueFrom(
-        this.notiService.emit(EVENTS.NOTIFICATION_CREATE, {
-          userId: clinicServiceResponse.data?.owner?.id,
-          content: overriedContent,
-          body: overriedContent,
-        }),
-      );
+
       return {
         message: 'Tạo staff thành công',
         status: HttpStatus.OK,
