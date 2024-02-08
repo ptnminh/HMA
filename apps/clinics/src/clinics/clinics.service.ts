@@ -618,7 +618,7 @@ export class ClinicService {
       const result = [];
       const categories = await this.prismaService.category.findMany({
         where: {
-          type: type ? type : undefined,
+          type: (type !== null && type !== undefined) ? type : undefined,
           isDisabled: false,
           clinicId,
         },
