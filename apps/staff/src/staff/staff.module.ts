@@ -5,7 +5,11 @@ import { config } from 'src/configs';
 import { PrismaService } from 'src/prisma.service';
 import { StaffController } from './staff.controller';
 import { StaffService } from './staff.service';
-import { ClientProxyFactory } from '@nestjs/microservices';
+import {
+  ClientProxyFactory,
+  ClientsModule,
+  Transport,
+} from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -13,6 +17,22 @@ import { ClientProxyFactory } from '@nestjs/microservices';
       isGlobal: true,
       load: [config],
     }),
+    ClientsModule.register([
+      {
+        name: 'NOTI_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [
+            'amqps://zwhbnmku:w_XDp3N5qASxWXSmz6O8_sE3flzQMrYf@octopus.rmq3.cloudamqp.com/zwhbnmku',
+          ],
+          queue: 'notification',
+          noAck: true,
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
   ],
   controllers: [StaffController],
   providers: [
@@ -28,6 +48,19 @@ import { ClientProxyFactory } from '@nestjs/microservices';
           options: {
             host: configService.get('AUTH_SERVICE_HOST'),
             port: configService.get('AUTH_SERVICE_PORT'),
+          },
+        });
+      },
+
+      inject: [ConfigService],
+    },
+    {
+      provide: 'CLINIC_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create({
+          options: {
+            host: configService.get('CLINIC_SERVICE_HOST'),
+            port: configService.get('CLINIC_SERVICE_PORT'),
           },
         });
       },

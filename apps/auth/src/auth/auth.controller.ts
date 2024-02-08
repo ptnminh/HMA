@@ -15,6 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import { lastValueFrom } from 'rxjs';
 import { Prisma } from '@prisma/client';
 import { isNotEmpty } from 'class-validator';
+import * as moment from 'moment-timezone';
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +24,7 @@ export class AuthController {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     @Inject('MAIL_SERVICE') private readonly mailService: ClientProxy,
+    @Inject('NOTI_SERVICE') private readonly notiService: ClientProxy,
   ) {}
 
   @MessagePattern(AuthCommand.USER_CREATE)
@@ -35,6 +37,7 @@ export class AuthController {
         type,
         uniqueId,
         rawPassword,
+        notificationData,
         ...rest
       } = data;
 
@@ -70,6 +73,7 @@ export class AuthController {
           isMobile,
           type,
           uniqueId,
+          notificationData,
         },
         {
           secret: jwtSercret,
@@ -172,16 +176,33 @@ export class AuthController {
         id,
         uniqueId,
         type,
+        notificationData,
       }: {
         id: string;
         uniqueId?: string;
         type?: string;
+        notificationData?: {
+          userId?: string;
+          content?: string;
+        };
       } = data;
       await this.authService.verifyEmail(id);
       if (uniqueId && type && type === 'CREATE_STAFF') {
         await this.authService.updateStaffInfo(uniqueId, {
           isAcceptInvite: true,
         });
+      }
+      if (Object.keys(notificationData).length > 0) {
+        const overriedContent =
+          notificationData.content +
+          ` ${moment().tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')}`;
+        await lastValueFrom(
+          this.notiService.emit(EVENTS.NOTIFICATION_CREATE, {
+            userId: notificationData.userId,
+            content: overriedContent,
+            body: overriedContent,
+          }),
+        );
       }
       const user = await this.authService.findUserVerifiedById(id);
 

@@ -1,18 +1,21 @@
 import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { StaffService } from './staff.service';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
-import { AuthCommand, StaffCommand } from './command';
+import { AuthCommand, ClinicCommand, EVENTS, StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
 import { some } from 'lodash';
-import { convertVietnameseString, isContainSpecialChar } from './utils';
-import { firstValueFrom } from 'rxjs';
+import { isContainSpecialChar } from './utils';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
+import * as moment from 'moment-timezone';
 
 @Controller('staff')
 export class StaffController {
   constructor(
     private staffService: StaffService,
     @Inject('AUTH_SERVICE') private readonly authServiceClient: ClientProxy,
+    @Inject('CLINIC_SERVICE') private readonly clinicServiceClient: ClientProxy,
+    @Inject('NOTI_SERVICE') private readonly notiService: ClientProxy,
   ) {}
 
   @MessagePattern(StaffCommand.CREATE_STAFF)
@@ -21,6 +24,17 @@ export class StaffController {
       const { userInfo, clinicId, roleId, services, ...rest } = data;
       let userId = data.userId;
       let uniqueId: string = '';
+      const clinicServiceResponse = await firstValueFrom(
+        this.clinicServiceClient.send(ClinicCommand.GET_CLINIC_DETAIL, {
+          clinicId,
+        }),
+      );
+      if (clinicServiceResponse.status !== HttpStatus.OK) {
+        return {
+          message: clinicServiceResponse.message,
+          status: HttpStatus.BAD_REQUEST,
+        };
+      }
       if (!userId) {
         const randomPassword = Math.random().toString(36).slice(-8);
         uniqueId = randomPassword;
@@ -46,6 +60,10 @@ export class StaffController {
             type: 'CREATE_STAFF',
             rawPassword: randomPassword,
             uniqueId,
+            notificationData: {
+              userId: clinicServiceResponse.data?.owner?.id,
+              content: `${userInfo.firstName} ${userInfo.lastName} đã tham gia phòng khám phòng khám ${clinicServiceResponse.data?.name} lúc`,
+            },
           }),
         );
         if (createUserResponse.status !== HttpStatus.CREATED) {
@@ -85,6 +103,31 @@ export class StaffController {
         }
       }
       const createdStaff = await this.staffService.findStaffById(staff.id);
+
+      const getUserResponse = await firstValueFrom(
+        this.authServiceClient.send(AuthCommand.USER_GET, {
+          userId,
+        }),
+      );
+      if (getUserResponse.status !== HttpStatus.OK) {
+        return {
+          message: getUserResponse.message,
+          status: HttpStatus.BAD_REQUEST,
+        };
+      }
+      const overriedContent = `${getUserResponse.data.firstName} ${
+        getUserResponse.data.lastName
+      } đã tham gia phòng khám phòng khám ${clinicServiceResponse.data
+        ?.name} lúc ${moment()
+        .tz('Asia/Ho_Chi_Minh')
+        .format('DD/MM/YYYY HH:mm:ss')}`;
+      await lastValueFrom(
+        this.notiService.emit(EVENTS.NOTIFICATION_CREATE, {
+          userId: clinicServiceResponse.data?.owner?.id,
+          content: overriedContent,
+          body: overriedContent,
+        }),
+      );
       return {
         message: 'Tạo staff thành công',
         status: HttpStatus.OK,
@@ -508,7 +551,6 @@ export class StaffController {
       //     message: 'Không có dữ liệu tìm kiếm',
       //   };
       // }
-      var stringName = name ? convertVietnameseString(name) : '';
       if (
         (name && !name.replace(/^\s+|\s+$/g, '')) ||
         (name && isContainSpecialChar(name))

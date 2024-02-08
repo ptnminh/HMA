@@ -20,4 +20,13 @@ export enum StaffCommand {
 
 export enum AuthCommand {
   USER_CREATE = 'user_create',
+  USER_GET = 'user_get',
+}
+
+export enum ClinicCommand {
+  GET_CLINIC_DETAIL = 'GET_CLINIC_DETAIL',
+}
+
+export enum EVENTS {
+  NOTIFICATION_CREATE = 'create_realtime_notification',
 }

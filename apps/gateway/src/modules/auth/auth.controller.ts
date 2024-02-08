@@ -188,6 +188,7 @@ export class AuthController {
         id: decoded.id,
         uniqueId: decoded?.uniqueId,
         type: decoded?.type,
+        notificationData: decoded?.notificationData,
       }),
     );
 

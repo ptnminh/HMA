@@ -22,6 +22,8 @@ export class RegisterDto {
   rawPassword?: string;
 
   uniqueId?: string;
+
+  notificationData?: any;
 }
 
 export class GoogleOauthDTO {
