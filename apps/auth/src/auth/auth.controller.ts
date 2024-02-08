@@ -193,6 +193,7 @@ export class AuthController {
         });
       }
       if (Object.keys(notificationData).length > 0) {
+        // create real time notification
         const overriedContent =
           notificationData.content +
           ` ${moment().tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')}`;
@@ -200,6 +201,20 @@ export class AuthController {
           this.notiService.emit(EVENTS.NOTIFICATION_CREATE, {
             userId: notificationData.userId,
             content: overriedContent,
+            title: 'Thông báo',
+          }),
+        );
+
+        // get tokens from user
+        const tokens = await this.authService.getUserToken(
+          notificationData.userId,
+        );
+
+        // push notification
+        await lastValueFrom(
+          this.notiService.emit(EVENTS.NOTIFICATION_PUSH, {
+            tokens,
+            title: 'Thông báo',
             body: overriedContent,
           }),
         );

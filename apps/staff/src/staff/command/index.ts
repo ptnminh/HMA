@@ -21,6 +21,7 @@ export enum StaffCommand {
 export enum AuthCommand {
   USER_CREATE = 'user_create',
   USER_GET = 'user_get',
+  GET_USER_TOKEN = 'get_user_token',
 }
 
 export enum ClinicCommand {
@@ -29,4 +30,5 @@ export enum ClinicCommand {
 
 export enum EVENTS {
   NOTIFICATION_CREATE = 'create_realtime_notification',
+  NOTIFICATION_PUSH = 'push_notification',
 }

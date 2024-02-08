@@ -41,7 +41,7 @@ export class CreateRealtimeNotificationDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  public body: string;
+  public title: string;
 
   @ApiProperty()
   @IsNotEmpty()

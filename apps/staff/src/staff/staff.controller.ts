@@ -126,7 +126,27 @@ export class StaffController {
           this.notiService.emit(EVENTS.NOTIFICATION_CREATE, {
             userId: clinicServiceResponse.data?.owner?.id,
             content: overriedContent,
+            title: 'Thông báo',
+          }),
+        );
+
+        const getTokens = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+            userId,
+          }),
+        );
+        if (getTokens.status !== HttpStatus.OK) {
+          return {
+            message: getTokens.message,
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        const tokens = getTokens.data?.map((item) => item.token);
+        await lastValueFrom(
+          this.notiService.emit(EVENTS.NOTIFICATION_PUSH, {
+            tokens,
             body: overriedContent,
+            title: 'Thông báo',
           }),
         );
       }
