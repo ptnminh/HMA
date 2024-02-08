@@ -213,7 +213,7 @@ export class AuthController {
         // push notification
         await lastValueFrom(
           this.notiService.emit(EVENTS.NOTIFICATION_PUSH, {
-            tokens,
+            tokens: tokens.map((item) => item.token),
             title: 'Thông báo',
             body: overriedContent,
           }),
