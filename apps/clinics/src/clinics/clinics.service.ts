@@ -467,7 +467,7 @@ export class ClinicService {
       where,
       include: {
         staffs: {
-          select: {
+          include: {
             users: {
               select: {
                 id: true,
@@ -493,15 +493,23 @@ export class ClinicService {
             },
           },
         },
+        clinics: true,
       },
     });
     return map(appointments, (appointment: any) => {
       const { staffs, patients, ...rest }: any = appointment;
+      const { id: staffId, userInClinics, ...restStaff }: any = staffs;
+      const { id: doctorId, ...restUserInfo } = userInClinics?.users;
       const { patient, ...restPatient }: any = patients;
       const { id: userId, ...restPatientInfo }: any = patient;
       return {
         ...rest,
-        doctor: staffs?.userInClinics?.users,
+        doctor: {
+          ...restStaff,
+          staffId,
+          doctorId,
+          ...restUserInfo,
+        },
         patient: {
           ...restPatient,
           userId,
@@ -530,13 +538,16 @@ export class ClinicService {
       },
       include: {
         staffs: {
-          select: {
+          include: {
             users: {
               select: {
                 id: true,
                 email: true,
                 firstName: true,
                 lastName: true,
+                address: true,
+                avatar: true,
+                phone: true,
               },
             },
           },
@@ -556,17 +567,25 @@ export class ClinicService {
             },
           },
         },
+        clinics: true,
       },
     });
     if (!appointment) {
       return null;
     }
     const { staffs, patients, ...rest }: any = appointment;
+    const { id: staffId, userInClinics, ...restStaff }: any = staffs;
+    const { id: doctorId, ...restUserInfo } = userInClinics?.users;
     const { patient, ...restPatient }: any = patients;
     const { id: userId, ...restPatientInfo }: any = patient;
     return {
       ...rest,
-      doctor: staffs?.userInClinics?.users,
+      doctor: {
+        ...restStaff,
+        staffId,
+        doctorId,
+        ...restUserInfo,
+      },
       patient: {
         ...restPatient,
         userId,
@@ -575,9 +594,64 @@ export class ClinicService {
     };
   }
   async createAppointment(data: Prisma.appointmentsUncheckedCreateInput) {
-    return this.prismaService.appointments.create({
+    const appointment = await this.prismaService.appointments.create({
       data,
+      include: {
+        staffs: {
+          include: {
+            users: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                avatar: true,
+                phone: true,
+              },
+            },
+          },
+        },
+        patients: {
+          include: {
+            patient: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                avatar: true,
+                phone: true,
+              },
+            },
+          },
+        },
+        clinics: true,
+      },
     });
+    if (!appointment) {
+      return null;
+    }
+    const { staffs, patients, ...rest }: any = appointment;
+    const { id: staffId, userInClinics, ...restStaff }: any = staffs;
+    const { id: doctorId, ...restUserInfo } = userInClinics?.users;
+    const { patient, ...restPatient }: any = patients;
+    const { id: userId, ...restPatientInfo }: any = patient;
+    return {
+      ...rest,
+      doctor: {
+        ...restStaff,
+        staffId,
+        doctorId,
+        ...restUserInfo,
+      },
+      patient: {
+        ...restPatient,
+        userId,
+        ...restPatientInfo,
+      },
+    };
   }
 
   async findAllStaffInClinic(clinicId: string) {
@@ -618,7 +692,7 @@ export class ClinicService {
       const result = [];
       const categories = await this.prismaService.category.findMany({
         where: {
-          type: (type !== null && type !== undefined) ? type : undefined,
+          type: type !== null && type !== undefined ? type : undefined,
           isDisabled: false,
           clinicId,
         },
@@ -821,22 +895,34 @@ export class ClinicService {
 
   async searchPatient(query: any) {
     try {
-      const { name, userId, clinicId, gender, phone, email, isDisabled, emailVerified } = query;
+      const {
+        name,
+        userId,
+        clinicId,
+        gender,
+        phone,
+        email,
+        isDisabled,
+        emailVerified,
+      } = query;
       const patients = await this.prismaService.patients.findMany({
         where: {
           userId: userId ? userId : undefined,
           clinicId: clinicId ? clinicId : undefined,
           patient: {
-            gender: (gender !== null && gender !== undefined)?
-                    gender : undefined,
-            emailVerified: (emailVerified !== null && emailVerified !== undefined)?
-                    emailVerified : undefined,
-            phone: phone? phone : undefined,
-            email: email? email : undefined,
-            isDisabled: (isDisabled !== null && isDisabled !== undefined)?
-                        isDisabled : undefined,
-          }
-
+            gender:
+              gender !== null && gender !== undefined ? gender : undefined,
+            emailVerified:
+              emailVerified !== null && emailVerified !== undefined
+                ? emailVerified
+                : undefined,
+            phone: phone ? phone : undefined,
+            email: email ? email : undefined,
+            isDisabled:
+              isDisabled !== null && isDisabled !== undefined
+                ? isDisabled
+                : undefined,
+          },
         },
         include: {
           patient: {
@@ -852,17 +938,18 @@ export class ClinicService {
               avatar: true,
             },
           },
-        }
-      })
-      const returnData = []
-      if (name ) {
+        },
+      });
+      const returnData = [];
+      if (name) {
         for (var member of patients) {
-          if(member.patient) {
-            const strName = convertVietnameseString(member.patient.firstName) 
-            + ' '
-            + convertVietnameseString(member.patient.lastName);
+          if (member.patient) {
+            const strName =
+              convertVietnameseString(member.patient.firstName) +
+              ' ' +
+              convertVietnameseString(member.patient.lastName);
             if (strName.includes(convertVietnameseString(name))) {
-              returnData.push(member)
+              returnData.push(member);
             }
           }
         }

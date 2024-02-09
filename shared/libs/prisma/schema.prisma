@@ -58,8 +58,7 @@ model accounts {
   isDisabled Boolean   @default(false) @map(name: "is_disabled")
   updatedAt  DateTime  @default(now()) @updatedAt @map(name: "updated_at")
   createdAt  DateTime  @default(now()) @map(name: "created_at")
-
-  user users @relation(fields: [userId], references: [id])
+  user       users     @relation(fields: [userId], references: [id])
 }
 
 model clinicGroupRoles {

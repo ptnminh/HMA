@@ -48,14 +48,6 @@ export class AuthService {
         id,
         emailVerified: true,
       },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        emailVerified: true,
-        isInputPassword: true,
-      },
     });
   }
 
