@@ -498,8 +498,8 @@ export class ClinicService {
     });
     return map(appointments, (appointment: any) => {
       const { staffs, patients, ...rest }: any = appointment;
-      const { id: staffId, userInClinics, ...restStaff }: any = staffs;
-      const { id: doctorId, ...restUserInfo } = userInClinics?.users;
+      const { id: staffId, users, ...restStaff }: any = staffs;
+      const { id: doctorId, ...restUserInfo } = users;
       const { patient, ...restPatient }: any = patients;
       const { id: userId, ...restPatientInfo }: any = patient;
       return {
@@ -575,8 +575,8 @@ export class ClinicService {
       return null;
     }
     const { staffs, patients, ...rest }: any = appointment;
-    const { id: staffId, userInClinics, ...restStaff }: any = staffs;
-    const { id: doctorId, ...restUserInfo } = userInClinics?.users;
+    const { id: staffId, users, ...restStaff }: any = staffs;
+    const { id: doctorId, ...restUserInfo } = users;
     const { patient, ...restPatient }: any = patients;
     const { id: userId, ...restPatientInfo }: any = patient;
     return {
@@ -637,8 +637,8 @@ export class ClinicService {
       return null;
     }
     const { staffs, patients, ...rest }: any = appointment;
-    const { id: staffId, userInClinics, ...restStaff }: any = staffs;
-    const { id: doctorId, ...restUserInfo } = userInClinics?.users;
+    const { id: staffId, users, ...restStaff }: any = staffs;
+    const { id: doctorId, ...restUserInfo } = users;
     const { patient, ...restPatient }: any = patients;
     const { id: userId, ...restPatientInfo }: any = patient;
     return {
