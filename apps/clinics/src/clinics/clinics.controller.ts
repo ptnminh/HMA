@@ -700,6 +700,7 @@ export class ClinicController {
     startTime: string;
     endTime?: string;
     date: string;
+    serviceId?: number;
   }) {
     try {
       const appointment = await this.clinicService.createAppointment({

@@ -128,4 +128,9 @@ export class UpdateMedicalSupplierDto {
   @IsOptional()
   @IsBoolean()
   isDisabled?: boolean;
+
+  @ApiProperty({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  isDeleted?: boolean;
 }

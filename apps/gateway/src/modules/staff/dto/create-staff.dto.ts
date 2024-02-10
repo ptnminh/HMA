@@ -161,6 +161,10 @@ export class CreateAppoimentDto {
   @ApiProperty({ example: '2021-09-01' })
   @IsNotEmpty()
   date: string;
+
+  @ApiProperty({ example: 1 })
+  @IsOptional()
+  serviceId?: number;
 }
 
 export class UpdateAppointmentDto {
@@ -193,4 +197,8 @@ export class UpdateAppointmentDto {
   @ApiProperty({ example: '2021-09-01' })
   @IsOptional()
   date?: string;
+
+  @ApiProperty({ example: 1 })
+  @IsOptional()
+  serviceId?: number;
 }

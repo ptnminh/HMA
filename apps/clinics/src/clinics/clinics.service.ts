@@ -494,6 +494,7 @@ export class ClinicService {
           },
         },
         clinics: true,
+        clinicServices: true,
       },
     });
     return map(appointments, (appointment: any) => {
@@ -569,6 +570,7 @@ export class ClinicService {
           },
         },
         clinics: true,
+        clinicServices: true,
       },
     });
     if (!appointment) {
@@ -631,6 +633,7 @@ export class ClinicService {
           },
         },
         clinics: true,
+        clinicServices: true,
       },
     });
     if (!appointment) {
@@ -850,6 +853,7 @@ export class ClinicService {
         ...(vendor ? { vendor: { contains: vendor } } : {}),
         ...(isDisabledValue !== null ? { isDisabled: isDisabledValue } : {}),
         ...(clinicId ? { clinicId } : {}),
+        isDeleted: false,
       },
       include: {
         category: {
@@ -865,7 +869,7 @@ export class ClinicService {
     return this.prismaService.medicalSupplies.findUnique({
       where: {
         id,
-        isDisabled: false,
+        isDeleted: false,
       },
       include: {
         category: {

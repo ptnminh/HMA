@@ -58,8 +58,7 @@ model accounts {
   isDisabled Boolean   @default(false) @map(name: "is_disabled")
   updatedAt  DateTime  @default(now()) @updatedAt @map(name: "updated_at")
   createdAt  DateTime  @default(now()) @map(name: "created_at")
-
-  user users @relation(fields: [userId], references: [id])
+  user       users     @relation(fields: [userId], references: [id])
 }
 
 model clinicGroupRoles {
@@ -315,22 +314,24 @@ model staffs {
 }
 
 model appointments {
-  id          Int       @id @default(autoincrement())
-  startTime   String?
-  endTime     String?
-  date        String?
-  status      String
-  clinicId    String    @map(name: "clinic_id")
-  patientId   Int?
-  doctorId    Int?
-  description String?
-  createAt    DateTime  @default(now()) @map(name: "created_at")
-  updateAt    DateTime  @default(now()) @updatedAt @map(name: "updated_at")
-  isDisabled  Boolean   @default(false) @map(name: "is_disabled")
-  disabledAt  DateTime? @map(name: "disabled_at")
-  patients    patients? @relation(fields: [patientId], references: [id])
-  staffs      staffs?   @relation(fields: [doctorId], references: [id])
-  clinics     clinics   @relation(fields: [clinicId], references: [id])
+  id             Int             @id @default(autoincrement())
+  startTime      String?
+  endTime        String?
+  date           String?
+  status         String
+  clinicId       String          @map(name: "clinic_id")
+  serviceId      Int?            @map(name: "service_id")
+  patientId      Int?
+  doctorId       Int?
+  description    String?
+  createAt       DateTime        @default(now()) @map(name: "created_at")
+  updateAt       DateTime        @default(now()) @updatedAt @map(name: "updated_at")
+  isDisabled     Boolean         @default(false) @map(name: "is_disabled")
+  disabledAt     DateTime?       @map(name: "disabled_at")
+  patients       patients?       @relation(fields: [patientId], references: [id])
+  staffs         staffs?         @relation(fields: [doctorId], references: [id])
+  clinics        clinics         @relation(fields: [clinicId], references: [id])
+  clinicServices clinicServices? @relation(fields: [serviceId], references: [id])
 }
 
 model staffSchedules {
@@ -362,6 +363,7 @@ model clinicServices {
   staffServices staffServices[]
   clinics       clinics         @relation(fields: [clinicId], references: [id])
   category      category?       @relation(fields: [categoryId], references: [id])
+  appointments  appointments[]
 
   @@map("clinic_services")
 }
@@ -389,6 +391,7 @@ model medicalSupplies {
   expiry       DateTime?
   vendor       String?
   description  String?
+  isDeleted    Boolean   @default(false) @map(name: "is_deleted")
   unit         String?
   clinicId     String?   @map(name: "clinic_id")
   note         String?
