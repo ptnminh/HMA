@@ -50,4 +50,5 @@ export enum PatientCommand {
 
 export enum AuthCommand {
   USER_CREATE = 'user_create',
+  GET_USER_TOKEN = 'get_user_token',
 }

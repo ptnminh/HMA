@@ -150,9 +150,9 @@ export class CreateAppoimentDto {
   @IsNotEmpty()
   doctorId: number;
 
-  @ApiProperty({ example: '01046db1-154f-41af-a2c0-61c6669a3e23' })
+  @ApiProperty({ example: 1 })
   @IsNotEmpty()
-  patientId: string;
+  patientId: number;
 
   @ApiProperty({ example: '01046db1-154f-41af-a2c0-61c6669a3e23' })
   @IsNotEmpty()
@@ -165,6 +165,11 @@ export class CreateAppoimentDto {
   @ApiProperty({ example: 1 })
   @IsOptional()
   serviceId?: number;
+
+  @ApiProperty({ example: 'PENDING' })
+  @IsOptional()
+  @IsString()
+  status?: string;
 }
 
 export class UpdateAppointmentDto {
@@ -201,4 +206,9 @@ export class UpdateAppointmentDto {
   @ApiProperty({ example: 1 })
   @IsOptional()
   serviceId?: number;
+
+  @ApiProperty({ example: 'PENDING' })
+  @IsOptional()
+  @IsString()
+  status?: string;
 }

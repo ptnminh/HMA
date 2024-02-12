@@ -240,6 +240,25 @@ export class ClinicService {
     });
   }
 
+  async findUsersInClinic(clinicId: string) {
+    return this.prismaService.staffs.findMany({
+      where: {
+        clinicId,
+      },
+      include: {
+        role: {
+          include: {
+            rolePermissions: {
+              include: {
+                permission: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async findUserInClinic(clinicId: string, userId: string) {
     return this.prismaService.staffs.findFirst({
       where: {
@@ -974,6 +993,22 @@ export class ClinicService {
   async createPatient(data: Prisma.patientsUncheckedCreateInput) {
     return this.prismaService.patients.create({
       data,
+    });
+  }
+
+  async findStaffById(id: number) {
+    return this.prismaService.staffs.findUnique({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async findPatientById(id: number) {
+    return this.prismaService.patients.findUnique({
+      where: {
+        id,
+      },
     });
   }
 }

@@ -8,10 +8,10 @@ import {
   PatientCommand,
 } from './command';
 import { Prisma } from '@prisma/client';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
-import { BookingStatus, SUBSCRIPTION_STATUS } from 'src/shared';
-import { map } from 'lodash';
+import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
+import { filter, includes, map } from 'lodash';
 import { isContainSpecialChar } from './utils';
 
 @Controller()
@@ -20,6 +20,8 @@ export class ClinicController {
     private readonly clinicService: ClinicService,
     @Inject('AUTH_SERVICE')
     private readonly authServiceClient: ClientProxy,
+    @Inject('NOTI_SERVICE')
+    private readonly notiServiceClient: ClientProxy,
   ) {}
   @MessagePattern(ClinicCommand.CLINIC_CREATE)
   async createClinic(data: any) {
@@ -650,6 +652,66 @@ export class ClinicController {
         appointmentId,
         payload,
       );
+      if (data.status && data.status === BookingStatus.CONFIRM) {
+        const patientInfo = await this.clinicService.findPatientById(
+          data.patientId,
+        );
+        const doctorInfo = await this.clinicService.findStaffById(
+          data.doctorId,
+        );
+        if (!doctorInfo) {
+          return {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'Bác sĩ không tồn tại',
+          };
+        }
+        if (!patientInfo) {
+          return {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'Bệnh nhân không tồn tại',
+          };
+        }
+        const getTokensOfPatient = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+            userId: patientInfo.userId,
+          }),
+        );
+        if (getTokensOfPatient.status !== HttpStatus.OK) {
+          return {
+            message: 'Không tím thấy tokens của bệnh nhân.',
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        const patientTokens = getTokensOfPatient.data?.map(
+          (item) => item.token,
+        );
+        const getTokensOfDoctor = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+            userId: doctorInfo.userId,
+          }),
+        );
+        if (getTokensOfDoctor.status !== HttpStatus.OK) {
+          return {
+            message: 'Không tím thấy tokens của bác sĩ.',
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        const doctorTokens = getTokensOfDoctor.data?.map((item) => item.token);
+        await lastValueFrom(
+          this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
+            tokens: patientTokens,
+            body: `Lịch hẹn khám ngày ${moment(data.date).format('DD-MM-YYYY')} lúc ${data.startTime} đã được xác nhận`,
+            title: 'Thông báo',
+          }),
+        );
+        await lastValueFrom(
+          this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
+            tokens: doctorTokens,
+            body: `Bạn có một lịch hẹn khám lúc ${data.startTime} ngày ${moment(data.date).format('DD-MM-YYYY')}`,
+            title: 'Thông báo',
+          }),
+        );
+      }
       return {
         status: HttpStatus.OK,
         message: 'Cập nhật appointment thành công',
@@ -701,17 +763,118 @@ export class ClinicController {
     endTime?: string;
     date: string;
     serviceId?: number;
+    status?: string;
   }) {
     try {
+      const patientInfo = await this.clinicService.findPatientById(
+        data.patientId,
+      );
+      const doctorInfo = await this.clinicService.findStaffById(data.doctorId);
+      if (!doctorInfo) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Bác sĩ không tồn tại',
+        };
+      }
+      if (!patientInfo) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Bệnh nhân không tồn tại',
+        };
+      }
       const appointment = await this.clinicService.createAppointment({
         ...data,
-        status: BookingStatus.PENDING,
+        status: data?.status || BookingStatus.PENDING,
       });
       if (!appointment) {
         return {
           status: HttpStatus.BAD_REQUEST,
           message: 'Appointment không tồn tại',
         };
+      }
+      if (!data?.status) {
+        const members = await this.clinicService.findUsersInClinic(
+          data.clinicId,
+        );
+        await Promise.all(
+          map(members, async (member) => {
+            try {
+              if (
+                filter(
+                  member.role.rolePermissions,
+                  (rolePermission) =>
+                    rolePermission.permission.optionName ===
+                    'Quản lý thăm khám bệnh nhân',
+                ).length > 0
+              ) {
+                const getTokens = await firstValueFrom(
+                  this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+                    userId: member.userId,
+                  }),
+                );
+                if (getTokens.status !== HttpStatus.OK) {
+                  return {
+                    message: getTokens.message,
+                    status: HttpStatus.BAD_REQUEST,
+                  };
+                }
+                const tokens = getTokens.data?.map((item) => item.token);
+                await lastValueFrom(
+                  this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
+                    tokens,
+                    body: 'Lịch hẹn mới đang chờ xác nhận',
+                    title: 'Thông báo',
+                  }),
+                );
+              }
+              return member;
+            } catch (error) {
+              console.log(error);
+            }
+          }),
+        );
+      }
+      if (data.status === BookingStatus.CONFIRM) {
+        const getTokensOfPatient = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+            userId: patientInfo.userId,
+          }),
+        );
+        if (getTokensOfPatient.status !== HttpStatus.OK) {
+          return {
+            message: 'Không tím thấy tokens của bệnh nhân.',
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        const patientTokens = getTokensOfPatient.data?.map(
+          (item) => item.token,
+        );
+        const getTokensOfDoctor = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+            userId: doctorInfo.userId,
+          }),
+        );
+        if (getTokensOfDoctor.status !== HttpStatus.OK) {
+          return {
+            message: 'Không tím thấy tokens của bác sĩ.',
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        const doctorTokens = getTokensOfDoctor.data?.map((item) => item.token);
+        await lastValueFrom(
+          this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
+            tokens: patientTokens,
+            body: `Lịch hẹn khám ngày ${moment(data.date).format('DD-MM-YYYY')} lúc ${data.startTime} đã được xác nhận`,
+            title: 'Thông báo',
+          }),
+        );
+        await lastValueFrom(
+          this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
+            tokens: doctorTokens,
+            body: `Bạn có một lịch hẹn khám lúc ${data.startTime} ngày ${moment(data.date).format('DD-MM-YYYY')}`,
+            title: 'Thông báo',
+          }),
+        );
       }
       return {
         status: HttpStatus.OK,
