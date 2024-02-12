@@ -652,7 +652,7 @@ export class ClinicController {
         appointmentId,
         payload,
       );
-      if (data.status && data.status === BookingStatus.CONFIRM) {
+      if (data.status) {
         const patientInfo = await this.clinicService.findPatientById(
           data.patientId,
         );
@@ -700,14 +700,29 @@ export class ClinicController {
         await lastValueFrom(
           this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
             tokens: patientTokens,
-            body: `Lịch hẹn khám ngày ${moment(data.date).format('DD-MM-YYYY')} lúc ${data.startTime} đã được xác nhận`,
+            body: `Lịch hẹn khám ngày ${moment(data.date).format('DD-MM-YYYY')} lúc ${data.startTime} đã được ${data.status === BookingStatus.CONFIRM ? 'xác nhận' : 'hủy'}`,
             title: 'Thông báo',
           }),
         );
         await lastValueFrom(
           this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
             tokens: doctorTokens,
-            body: `Bạn có một lịch hẹn khám lúc ${data.startTime} ngày ${moment(data.date).format('DD-MM-YYYY')}`,
+            body: `Bạn có một lịch hẹn khám lúc ${data.startTime} ngày ${moment(data.date).format('DD-MM-YYYY')} đã được ${data.status === BookingStatus.CONFIRM ? 'xác nhận' : 'hủy'}`,
+            title: 'Thông báo',
+          }),
+        );
+
+        await lastValueFrom(
+          this.notiServiceClient.emit(EVENTS.NOTIFICATION_CREATE, {
+            userId: patientInfo.userId,
+            content: `Lịch hẹn khám ngày ${moment(data.date).format('DD-MM-YYYY')} lúc ${data.startTime} đã được ${data.status === BookingStatus.CONFIRM ? 'xác nhận' : 'hủy'}`,
+            title: 'Thông báo',
+          }),
+        );
+        await lastValueFrom(
+          this.notiServiceClient.emit(EVENTS.NOTIFICATION_CREATE, {
+            userId: doctorInfo.userId,
+            content: `Bạn có một lịch hẹn khám lúc ${data.startTime} ngày ${moment(data.date).format('DD-MM-YYYY')} đã được ${data.status === BookingStatus.CONFIRM ? 'xác nhận' : 'hủy'}`,
             title: 'Thông báo',
           }),
         );
@@ -823,6 +838,13 @@ export class ClinicController {
                   this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
                     tokens,
                     body: 'Lịch hẹn mới đang chờ xác nhận',
+                    title: 'Thông báo',
+                  }),
+                );
+                await lastValueFrom(
+                  this.notiServiceClient.emit(EVENTS.NOTIFICATION_CREATE, {
+                    userId: member.userId,
+                    content: `Lịch hẹn mới đang chờ xác nhận`,
                     title: 'Thông báo',
                   }),
                 );
