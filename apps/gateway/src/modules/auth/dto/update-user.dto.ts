@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsDate, IsDateString, IsIn, IsOptional, IsPhoneNumber, IsString } from "class-validator";
+import { IsDate, IsDateString, IsEmail, IsIn, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
 export class UpdateUserDto {
     @IsString()
@@ -38,4 +38,9 @@ export class UpdateUserDto {
     @IsString()
     @IsOptional()
     avatar?: String;
+
+    @ApiProperty({example: "example@email.com"})
+    @IsEmail()
+    @IsOptional()
+    email?: String;
 }

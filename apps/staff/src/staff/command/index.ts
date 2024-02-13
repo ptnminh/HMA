@@ -22,6 +22,7 @@ export enum AuthCommand {
   USER_CREATE = 'user_create',
   USER_GET = 'user_get',
   GET_USER_TOKEN = 'get_user_token',
+  UPDATE_USER = 'update_user',
 }
 
 export enum ClinicCommand {

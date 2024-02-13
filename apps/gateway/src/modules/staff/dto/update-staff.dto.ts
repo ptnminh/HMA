@@ -1,30 +1,56 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ArrayUnique, IsArray, IsIn, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, Min } from "class-validator";
+import { Type } from "class-transformer";
+import { ArrayUnique, IsArray, IsIn, IsDate, IsNumber, IsOptional, IsPhoneNumber, IsString, Min, IsEmail } from "class-validator";
 
-export class UpdateStaffDto {
-    @ApiProperty({
-        example: 1,
-        description: "Male: 1, Female: 0"
-    })
+class UserInfo {
+    @IsString()
     @IsOptional()
-    @IsIn([0, 1])
+    @ApiProperty({example: "Clinic"})
+    firstName?: String;
+
+    @ApiProperty({example: "Test User"})
+    @IsString()
+    @IsOptional()
+    lastName?: String;
+
+    @ApiProperty({example: 0})
+    @IsIn([0,1])
+    @IsOptional()
     gender?: number;
- 
-    @ApiProperty({
-        example: "84702928134",
-        description: "Vietnamese phone number of staff"
-    })
+
+    @ApiProperty({example: "01/01/2001"})
+    @IsDate()
+    @IsOptional()
+    @Type(() => Date)
+    birthday?: Date;
+
+    @ApiProperty({example: "Nguyễn Văn Cứ, P5, TP.Hồ Chí Minh"})
+    @IsString()
+    @IsOptional()
+    address?: String;
+
+    @ApiProperty({example: "84926251488"})
     @IsPhoneNumber('VN')
     @IsOptional()
-    phoneNumber?: string;
-
-    @ApiProperty({
-        example: "Đ. Nguyễn Văn Cứ, TP.Hồ Chí Minh",
-        description: "The address of staff",
-    })
+    phone?: String;
+    
+    @ApiProperty({example: "avatar"})
     @IsString()
-    @IsNotEmpty()
-    address: string;
+    @IsOptional()
+    avatar?: String;
+
+    @ApiProperty({example: "example@email.com"})
+    @IsEmail()
+    @IsOptional()
+    email?: String;
+  }
+
+export class UpdateStaffDto {
+
+    @IsOptional()
+    @IsString()
+    @ApiProperty({example: "Description"})
+    description?: string
 
     @ApiProperty({
         example: "Tim mạch",
@@ -42,6 +68,8 @@ export class UpdateStaffDto {
     @Min(0)
     experience: number;
 
+
+
     @ApiProperty({
         example: [1,2,4],
         description: "The list contains clinic service id"
@@ -51,4 +79,21 @@ export class UpdateStaffDto {
     @IsNumber({}, {each: true})
     @IsOptional()    
     services?: number[]
+
+    @ApiProperty({
+        type: UserInfo,
+        example: {
+          email: 'email@gmail.com',
+          avatar: 'https://www.google.com',
+          firstName: 'John',
+          lastName: 'Doe',
+          gender: 0,
+          phone: '0987654321',
+          address: 'address',
+          birthday: '2021-09-01',
+        },
+      })
+      @IsOptional()
+      userInfo?: UserInfo;
+
 }

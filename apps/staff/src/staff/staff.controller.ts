@@ -226,7 +226,7 @@ export class StaffController {
   @MessagePattern(StaffCommand.UPDATE_STAFF)
   async updateStaff(data: any) {
     try {
-      const { id, services, ...payload } = data;
+      const { id, services, userInfo, ...payload } = data;
       const staff = await this.staffService.findStaffById(id);
       if (!staff) {
         return {
@@ -248,14 +248,37 @@ export class StaffController {
           }
         }
       }
-
-      await this.staffService.updateStaff(id, payload);
-      const updatedStaff = await this.staffService.findStaffById(id);
+      if (userInfo) {
+        const {birthday, ...rest} = userInfo
+        const updateUserResponse  = await firstValueFrom(this.authServiceClient.send(AuthCommand.UPDATE_USER, {
+          id: staff.users.id,
+          ...rest,
+          birthday: new Date(birthday),
+        }))
+        if (updateUserResponse.status !== HttpStatus.OK) {
+          return {
+            message: updateUserResponse.message,
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+      }
+      const updatedStaff = await this.staffService.findStaffById(id)
+      delete(updatedStaff.clinics)
+      const {role, users , staffServices ,...staffData} = updatedStaff
+      delete(users.password)
       return {
-        message: 'Cập nhật staff thành công',
         status: HttpStatus.OK,
-        data: updatedStaff,
-      };
+        message: "Cập nhân nhân viên thành công",
+        data: {
+          ...staffData,
+          users,
+          role,
+          services: staffServices.map((staffService) => {
+            const {clinicServices, ...rest} = staffService
+            return clinicServices
+          })
+        }
+      }
     } catch (error) {
       console.log(error);
       return {
