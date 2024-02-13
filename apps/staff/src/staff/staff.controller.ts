@@ -262,6 +262,10 @@ export class StaffController {
           };
         }
       }
+      const updatedData : Prisma.staffsUncheckedUpdateInput = {
+        ...payload,
+      }
+      await this.staffService.updateStaff(id, updatedData)
       const updatedStaff = await this.staffService.findStaffById(id)
       delete(updatedStaff.clinics)
       const {role, users , staffServices ,...staffData} = updatedStaff
@@ -272,7 +276,6 @@ export class StaffController {
         data: {
           ...staffData,
           users,
-          role,
           services: staffServices.map((staffService) => {
             const {clinicServices, ...rest} = staffService
             return clinicServices
