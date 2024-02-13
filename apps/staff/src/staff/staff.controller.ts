@@ -270,6 +270,7 @@ export class StaffController {
       delete(updatedStaff.clinics)
       const {role, users , staffServices ,...staffData} = updatedStaff
       delete(users.password)
+      delete(staffData.staffSchedules)
       return {
         status: HttpStatus.OK,
         message: "Cập nhân nhân viên thành công",
