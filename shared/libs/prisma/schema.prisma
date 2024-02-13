@@ -295,6 +295,7 @@ model staffs {
   id             Int               @id() @default(autoincrement())
   specialize     String?
   experience     Int?
+  gender         Int?
   description    String?           @db.Text
   roleId         Int?              @map(name: "role_id")
   clinicId       String?           @map(name: "clinic_id")
