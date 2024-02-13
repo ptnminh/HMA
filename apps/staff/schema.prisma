@@ -297,6 +297,8 @@ model staffs {
   specialize     String?
   experience     Int?
   gender         Int?
+  phoneNumber    String?
+  address        String?
   description    String?           @db.Text
   roleId         Int?              @map(name: "role_id")
   clinicId       String?           @map(name: "clinic_id")
