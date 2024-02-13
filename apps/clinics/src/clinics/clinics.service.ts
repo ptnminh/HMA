@@ -962,6 +962,7 @@ export class ClinicService {
               email: true,
               gender: true,
               phone: true,
+              birthday: true,
               address: true,
               emailVerified: true,
               isDisabled: true,
