@@ -917,6 +917,20 @@ export class ClinicController {
             title: 'Thông báo',
           }),
         );
+        await lastValueFrom(
+          this.notiServiceClient.emit(EVENTS.NOTIFICATION_CREATE, {
+            userId: patientInfo.userId,
+            content: `Lịch hẹn khám ngày ${moment(data.date).format('DD-MM-YYYY')} lúc ${data.startTime} đã được ${data.status === BookingStatus.CONFIRM ? 'xác nhận' : 'hủy'}`,
+            title: 'Thông báo',
+          }),
+        );
+        await lastValueFrom(
+          this.notiServiceClient.emit(EVENTS.NOTIFICATION_CREATE, {
+            userId: doctorInfo.userId,
+            content: `Bạn có một lịch hẹn khám lúc ${data.startTime} ngày ${moment(data.date).format('DD-MM-YYYY')} đã được ${data.status === BookingStatus.CONFIRM ? 'xác nhận' : 'hủy'}`,
+            title: 'Thông báo',
+          }),
+        );
       }
       await this.clinicService
         .updateClinicStatistical({
