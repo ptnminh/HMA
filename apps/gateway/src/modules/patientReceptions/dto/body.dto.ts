@@ -95,7 +95,7 @@ export class UpdateMedicalRecordDto {
   clinicId?: string;
 
   @ApiProperty({
-    example: 'doctorId',
+    example: 1,
     required: false,
   })
   @IsOptional()
