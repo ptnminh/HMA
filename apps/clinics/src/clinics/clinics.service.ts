@@ -1355,13 +1355,13 @@ export class ClinicService {
               date,
             }
           : {
-              date: '2024-02-14',
+              date: moment(date).format('YYYY-MM-DD'),
             }),
         ...(startDate && endDate
           ? {
               date: {
-                gte: new Date(startDate).toISOString(),
-                lte: new Date(endDate).toISOString(),
+                gte: moment(startDate).format('YYYY-MM-DD'),
+                lte: moment(endDate).format('YYYY-MM-DD'),
               },
             }
           : {}),
