@@ -13,7 +13,12 @@ import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
 import { filter, map } from 'lodash';
-import { isContainSpecialChar } from './utils';
+import {
+  calculateTimeBefore,
+  combineDateAndTime,
+  isContainSpecialChar,
+  scheduleJob,
+} from './utils';
 import { customAlphabet } from 'nanoid';
 import { ICreatePatientReception } from './interface';
 
@@ -655,51 +660,47 @@ export class ClinicController {
         appointmentId,
         payload,
       );
+      const patientInfo = await this.clinicService.findPatientById(
+        data.patientId,
+      );
+      const doctorInfo = await this.clinicService.findStaffById(data.doctorId);
+      if (!doctorInfo) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Bác sĩ không tồn tại',
+        };
+      }
+      if (!patientInfo) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Bệnh nhân không tồn tại',
+        };
+      }
+      const getTokensOfPatient = await firstValueFrom(
+        this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+          userId: patientInfo.userId,
+        }),
+      );
+      if (getTokensOfPatient.status !== HttpStatus.OK) {
+        return {
+          message: 'Không tím thấy tokens của bệnh nhân.',
+          status: HttpStatus.BAD_REQUEST,
+        };
+      }
+      const patientTokens = getTokensOfPatient.data?.map((item) => item.token);
+      const getTokensOfDoctor = await firstValueFrom(
+        this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+          userId: doctorInfo.userId,
+        }),
+      );
+      if (getTokensOfDoctor.status !== HttpStatus.OK) {
+        return {
+          message: 'Không tím thấy tokens của bác sĩ.',
+          status: HttpStatus.BAD_REQUEST,
+        };
+      }
+      const doctorTokens = getTokensOfDoctor.data?.map((item) => item.token);
       if (data.status) {
-        const patientInfo = await this.clinicService.findPatientById(
-          data.patientId,
-        );
-        const doctorInfo = await this.clinicService.findStaffById(
-          data.doctorId,
-        );
-        if (!doctorInfo) {
-          return {
-            status: HttpStatus.BAD_REQUEST,
-            message: 'Bác sĩ không tồn tại',
-          };
-        }
-        if (!patientInfo) {
-          return {
-            status: HttpStatus.BAD_REQUEST,
-            message: 'Bệnh nhân không tồn tại',
-          };
-        }
-        const getTokensOfPatient = await firstValueFrom(
-          this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
-            userId: patientInfo.userId,
-          }),
-        );
-        if (getTokensOfPatient.status !== HttpStatus.OK) {
-          return {
-            message: 'Không tím thấy tokens của bệnh nhân.',
-            status: HttpStatus.BAD_REQUEST,
-          };
-        }
-        const patientTokens = getTokensOfPatient.data?.map(
-          (item) => item.token,
-        );
-        const getTokensOfDoctor = await firstValueFrom(
-          this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
-            userId: doctorInfo.userId,
-          }),
-        );
-        if (getTokensOfDoctor.status !== HttpStatus.OK) {
-          return {
-            message: 'Không tím thấy tokens của bác sĩ.',
-            status: HttpStatus.BAD_REQUEST,
-          };
-        }
-        const doctorTokens = getTokensOfDoctor.data?.map((item) => item.token);
         await lastValueFrom(
           this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
             tokens: patientTokens,
@@ -729,6 +730,21 @@ export class ClinicController {
             title: 'Thông báo',
           }),
         );
+      }
+      if (data.status === BookingStatus.CONFIRM) {
+        const startTime = appointment.startTime;
+        const dateAppointment = appointment.date;
+        const thirtyMinutesBefore = calculateTimeBefore(startTime, 30);
+        const time = combineDateAndTime(dateAppointment, thirtyMinutesBefore);
+        scheduleJob(time, async () => {
+          await lastValueFrom(
+            this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
+              tokens: patientTokens,
+              body: `Lịch hẹn khám ngày ${moment(data.date).format('DD-MM-YYYY')} lúc ${data.startTime} còn 30 phút nữa trước khi bắt đầu`,
+              title: 'Thông báo',
+            }),
+          );
+        });
       }
       return {
         status: HttpStatus.OK,
