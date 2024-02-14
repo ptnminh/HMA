@@ -3,7 +3,8 @@ import { Prisma } from '@prisma/client';
 import { map } from 'lodash';
 import { PrismaService } from 'src/prisma.service';
 import { convertVietnameseString } from './utils';
-import moment, { now } from 'moment';
+import { now } from 'moment';
+import * as moment from 'moment-timezone';
 
 @Injectable()
 export class ClinicService {
@@ -1299,12 +1300,21 @@ export class ClinicService {
       where: {
         clinicId_date: {
           clinicId,
-          date,
+          date: moment(date).format('YYYY-MM-DD'),
         },
       },
       create: {
         clinicId,
-        date: new Date(date).toISOString(),
+        date: moment().format('YYYY-MM-DD'),
+        ...(payload.newPatient && {
+          numberOfPatients: 1,
+        }),
+        ...(payload.newAppointment && {
+          numberOfAppointments: 1,
+        }),
+        ...(payload.revenue && {
+          revenue: payload.revenue,
+        }),
       },
       update: {
         ...(payload.revenue && {
@@ -1345,13 +1355,13 @@ export class ClinicService {
               date,
             }
           : {
-              date: moment().format('YYYY-MM-DD'),
+              date: '2024-02-14',
             }),
         ...(startDate && endDate
           ? {
               date: {
-                gte: startDate,
-                lte: endDate,
+                gte: new Date(startDate).toISOString(),
+                lte: new Date(endDate).toISOString(),
               },
             }
           : {}),

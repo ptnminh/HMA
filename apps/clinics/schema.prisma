@@ -489,7 +489,7 @@ model clinicRequestServices {
 model clinicStatistic {
   id                   Int      @id @default(autoincrement())
   clinicId             String   @map(name: "clinic_id")
-  date                 DateTime @map(name: "date")
+  date                 String?  @map(name: "date")
   numberOfPatients     Int      @default(0) @map(name: "number_of_patients")
   revenue              Float    @default(0)
   numberOfAppointments Int      @default(0) @map(name: "number_of_appointments")
