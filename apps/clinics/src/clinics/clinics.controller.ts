@@ -6,13 +6,15 @@ import {
   ClinicCommand,
   MedicalSupplierCommand,
   PatientCommand,
+  PatientReceptionCommand,
 } from './command';
 import { Prisma } from '@prisma/client';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
-import { filter, includes, map, now } from 'lodash';
+import { filter, map } from 'lodash';
 import { isContainSpecialChar } from './utils';
+import { customAlphabet } from 'nanoid';
 
 @Controller()
 export class ClinicController {
@@ -1640,18 +1642,17 @@ export class ClinicController {
     }
   }
 
-
   @MessagePattern(PatientCommand.GET_PATIENT_BY_ID)
   async findPatientById(data: any) {
-    const {id} = data
-    const patientInfo = await this.clinicService.getPatientDetail(id)
+    const { id } = data;
+    const patientInfo = await this.clinicService.getPatientDetail(id);
     if (!patientInfo) {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: "Bệnh nhân không tồn tại",
-      }
+        message: 'Bệnh nhân không tồn tại',
+      };
     }
-    const {patient ,...rest} = patientInfo
+    const { patient, ...rest } = patientInfo;
     return {
       status: HttpStatus.OK,
       data: {
@@ -1659,49 +1660,317 @@ export class ClinicController {
         ...patient,
       },
       message: 'Tìm kiếm thành công',
-    }
+    };
   }
 
   @MessagePattern(PatientCommand.UPDATE_PATIENT)
   async updatePatient(data: any) {
-    const {id, payload} = data
-    const patientInfo = await this.clinicService.findPatientById(id)
+    const { id, payload } = data;
+    const patientInfo = await this.clinicService.findPatientById(id);
     if (!patientInfo) {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: "Bệnh nhân không tồn tại",
-      }
+        message: 'Bệnh nhân không tồn tại',
+      };
     }
-    const updatedData : Prisma.patientsUncheckedUpdateInput = {
-      ...payload
-    }
-    const updatedPatient =  await this.clinicService.updatePatient(id, updatedData)
+    const updatedData: Prisma.patientsUncheckedUpdateInput = {
+      ...payload,
+    };
+    const updatedPatient = await this.clinicService.updatePatient(
+      id,
+      updatedData,
+    );
     return {
       status: HttpStatus.OK,
       data: updatedPatient,
       message: 'Cập nhật thành công',
-    }
+    };
   }
-
 
   @MessagePattern(PatientCommand.DELETE_PATIENT)
   async deletePatient(data: any) {
-    const {id} = data
-    const patientInfo = await this.clinicService.findPatientById(id)
+    const { id } = data;
+    const patientInfo = await this.clinicService.findPatientById(id);
     if (!patientInfo) {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: "Bệnh nhân không tồn tại",
-      }
+        message: 'Bệnh nhân không tồn tại',
+      };
     }
-    const updatedData : Prisma.patientsUncheckedUpdateInput = {
-      deletedAt: new Date(Date.now())
-    }
-    await this.clinicService.updatePatient(id, updatedData)
+    const updatedData: Prisma.patientsUncheckedUpdateInput = {
+      deletedAt: new Date(Date.now()),
+    };
+    await this.clinicService.updatePatient(id, updatedData);
     return {
       status: HttpStatus.OK,
       data: null,
       message: 'Xóa bệnh nhân thành công',
+    };
+  }
+  @MessagePattern(PatientReceptionCommand.CREATE_PATIENT_RECEPTION)
+  async createPatientReception(data: { appointmentId: number }) {
+    try {
+      const { appointmentId } = data;
+
+      const appointment =
+        await this.clinicService.findAppointmentById(appointmentId);
+      if (!appointment) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Appointment không tồn tại',
+        };
+      }
+      const {
+        date: dateCreated,
+        serviceId,
+        clinicId,
+        patientId,
+        doctorId,
+      } = appointment;
+
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const patient = await this.clinicService.findPatientById(patientId);
+      if (!patient) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Bệnh nhân không tồn tại',
+        };
+      }
+
+      const serviceDetail =
+        await this.clinicService.findClinicServiceById(serviceId);
+
+      const payload: Prisma.medicalRecordsUncheckedCreateInput = {
+        patientId,
+        doctorId,
+        clinicId,
+        dateCreated,
+      };
+      const patientReception =
+        await this.clinicService.createPatientReception(payload);
+      if (!patientReception) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tạo phiếu tiếp nhận bệnh nhân thất bại',
+        };
+      }
+      const medicalRecordServicePayload: Prisma.medicalRecordServicesUncheckedCreateInput =
+        {
+          medicalRecordId: patientReception.id,
+          amount: serviceDetail.price,
+          clinicId,
+          clinicServiceId: serviceId,
+          serviceName: serviceDetail.serviceName,
+        };
+      await this.clinicService.createMedicalRecordService(
+        medicalRecordServicePayload,
+      );
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Tạo phiếu tiếp nhận bệnh nhân thành công',
+        data: patientReception,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.UPDATE_PATIENT_RECEPTION)
+  async updatePatientReception(data: any) {
+    try {
+      const { id, ...rest } = data;
+      const patientReception =
+        await this.clinicService.findMedicalRecordById(id);
+      if (!patientReception) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Phiếu tiếp nhận không tồn tại',
+        };
+      }
+      const updatedPatientReception =
+        await this.clinicService.updateMedicalRecord(id, rest);
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Cập nhật phiếu tiếp nhận thành công',
+        data: updatedPatientReception,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.GET_MEDICAL_RECORD)
+  async getMedicalRecord(data: any) {
+    try {
+      const { id } = data;
+      const medicalRecord = await this.clinicService.findMedicalRecordById(id);
+      if (!medicalRecord) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Phiếu tiếp nhận không tồn tại',
+        };
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy thông tin phiếu tiếp nhận thành công',
+        data: medicalRecord,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.GET_LIST_MEDICAL_RECORD)
+  async getListMedicalRecord(data: {
+    clinicId?: string;
+    patientId?: number;
+    doctorId?: number;
+    paymentStatus?: number;
+  }) {
+    try {
+      const { clinicId, patientId, doctorId, paymentStatus } = data;
+      const medicalRecords = await this.clinicService.findMedicalRecords({
+        clinicId,
+        patientId,
+        doctorId,
+        paymentStatus,
+      });
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách phiếu tiếp nhận thành công',
+        data: medicalRecords,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.UPDATE_MEDICAL_RECORD_SERVICE)
+  async updateMedicalRecordService(data: {
+    medicalRecordId?: number;
+    clinicServiceId?: number;
+    code?: string;
+    serviceResult?: string;
+  }) {
+    try {
+      const { medicalRecordId, clinicServiceId, ...rest } = data;
+      const medicalRecordService =
+        await this.clinicService.findMedicalRecordService({
+          medicalRecordId,
+          clinicServiceId,
+        });
+      if (!medicalRecordService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Dịch vụ không tồn tại',
+        };
+      }
+      const updatedMedicalRecordService =
+        await this.clinicService.updateMedicalRecordService(
+          medicalRecordService.id,
+          rest,
+        );
+      return {
+        status: HttpStatus.OK,
+        message: 'Cập nhật dịch vụ thành công',
+        data: updatedMedicalRecordService,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.REQUEST_SERVICE)
+  async requestService(data: any) {
+    try {
+      const { clinicServiceId, medicalRecordId, serviceName } = data;
+      const code = customAlphabet(
+        '1234567890abcdefghiklmnouwpqz',
+        10,
+      )(10).toUpperCase();
+      const medicalRequestServicePayload: Prisma.clinicRequestServicesUncheckedCreateInput =
+        {
+          code,
+          clinicServiceId,
+          medicalRecordId,
+          serviceName,
+        };
+      const clinicRequestService =
+        await this.clinicService.createClinicRequestService(
+          medicalRequestServicePayload,
+        );
+      if (!clinicRequestService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tạo yêu cầu dịch vụ thất bại',
+        };
+      }
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Tạo yêu cầu dịch vụ thành công',
+        data: clinicRequestService,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.GET_REQUEST_SERVICE_BY_CODE)
+  async getRequestServiceByCode(data: any) {
+    try {
+      const { code } = data;
+      const clinicRequestService =
+        await this.clinicService.findClinicRequestServiceByCode(code);
+      if (!clinicRequestService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Yêu cầu dịch vụ không tồn tại',
+        };
+      }
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy thông tin yêu cầu dịch vụ thành công',
+        data: clinicRequestService,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
     }
   }
 }

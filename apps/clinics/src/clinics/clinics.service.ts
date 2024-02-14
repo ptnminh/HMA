@@ -974,7 +974,7 @@ export class ClinicService {
       });
       const returnData = [];
       if (name) {
-        for (var member of patients) {
+        for (const member of patients) {
           if (member.patient) {
             const strName =
               convertVietnameseString(member.patient.firstName) +
@@ -1037,7 +1037,7 @@ export class ClinicService {
           },
         },
       },
-    })
+    });
   }
 
   async updatePatient(id: number, data: Prisma.patientsUncheckedUpdateInput) {
@@ -1046,8 +1046,146 @@ export class ClinicService {
         id,
       },
       data,
-    })
+    });
+  }
+  async createPatientReception(
+    data: Prisma.medicalRecordsUncheckedCreateInput,
+  ) {
+    return this.prismaService.medicalRecords.create({
+      data,
+      include: {
+        patient: true,
+        clinic: true,
+        doctor: true,
+      },
+    });
   }
 
+  async createMedicalRecordService(
+    data: Prisma.medicalRecordServicesUncheckedCreateInput,
+  ) {
+    return this.prismaService.medicalRecordServices.create({
+      data,
+    });
+  }
 
+  async findMedicalRecordById(id: number) {
+    return this.prismaService.medicalRecords.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        patient: true,
+        clinic: true,
+        doctor: true,
+        clinicRequestServices: true,
+        medicalRecordServices: true,
+      },
+    });
+  }
+
+  async updateMedicalRecord(
+    id: number,
+    data: Prisma.medicalRecordsUncheckedUpdateInput,
+  ) {
+    return this.prismaService.medicalRecords.update({
+      where: {
+        id,
+      },
+      data,
+      include: {
+        patient: true,
+        clinic: true,
+        doctor: true,
+        clinicRequestServices: true,
+        medicalRecordServices: true,
+      },
+    });
+  }
+
+  async updateMedicalRecordService(
+    id: number,
+    data: Prisma.medicalRecordServicesUncheckedUpdateInput,
+  ) {
+    return this.prismaService.medicalRecordServices.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  async findMedicalRecords({
+    clinicId,
+    patientId,
+    doctorId,
+    paymentStatus,
+  }: {
+    clinicId?: string;
+    patientId?: number;
+    doctorId?: number;
+    paymentStatus?: number;
+  }) {
+    const where: any = {
+      ...(clinicId ? { clinicId } : {}),
+      ...(patientId ? { patientId } : {}),
+      ...(doctorId ? { doctorId } : {}),
+      ...(paymentStatus ? { paymentStatus } : {}),
+    };
+    return this.prismaService.medicalRecords.findMany({
+      where,
+      include: {
+        patient: true,
+        clinic: true,
+        doctor: true,
+        clinicRequestServices: true,
+        medicalRecordServices: true,
+      },
+    });
+  }
+
+  async updateMedicalRecordServiceBySearch({
+    medicalRecordId,
+    clinicServiceId,
+    data,
+  }) {
+    return this.prismaService.medicalRecordServices.updateMany({
+      where: {
+        medicalRecordId,
+        clinicServiceId,
+      },
+      data,
+    });
+  }
+
+  async findMedicalRecordService({
+    medicalRecordId,
+    clinicServiceId,
+  }: {
+    medicalRecordId: number;
+    clinicServiceId: number;
+  }) {
+    return this.prismaService.medicalRecordServices.findFirst({
+      where: {
+        medicalRecordId,
+        clinicServiceId,
+      },
+    });
+  }
+
+  async createClinicRequestService(
+    data: Prisma.clinicRequestServicesUncheckedCreateInput,
+  ) {
+    return this.prismaService.clinicRequestServices.create({
+      data,
+    });
+  }
+
+  async findClinicRequestServiceByCode(code: string) {
+    return this.prismaService.clinicRequestServices.findUnique({
+      where: {
+        code,
+      },
+    });
+  }
 }
