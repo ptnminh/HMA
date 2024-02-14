@@ -1773,10 +1773,13 @@ export class ClinicController {
       await this.clinicService.createMedicalRecordService(
         medicalRecordServicePayload,
       );
+      const medicalRecord = await this.clinicService.findMedicalRecordById(
+        patientReception.id,
+      );
       return {
         status: HttpStatus.CREATED,
         message: 'Tạo phiếu tiếp nhận bệnh nhân thành công',
-        data: patientReception,
+        data: medicalRecord,
       };
     } catch (error) {
       console.log(error);
@@ -1801,11 +1804,11 @@ export class ClinicController {
       }
       const updatedPatientReception =
         await this.clinicService.updateMedicalRecord(id, rest);
-
+      const medicalRecord = await this.clinicService.findMedicalRecordById(id);
       return {
         status: HttpStatus.OK,
         message: 'Cập nhật phiếu tiếp nhận thành công',
-        data: updatedPatientReception,
+        data: medicalRecord,
       };
     } catch (error) {
       console.log(error);

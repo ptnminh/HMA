@@ -1070,18 +1070,65 @@ export class ClinicService {
   }
 
   async findMedicalRecordById(id: number) {
-    return this.prismaService.medicalRecords.findUnique({
+    const medicalRecords = await this.prismaService.medicalRecords.findUnique({
       where: {
         id,
       },
       include: {
-        patient: true,
+        patient: {
+          include: {
+            patient: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                avatar: true,
+                phone: true,
+                gender: true,
+                birthday: true,
+              },
+            },
+          },
+        },
         clinic: true,
-        doctor: true,
+        doctor: {
+          include: {
+            users: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                avatar: true,
+                phone: true,
+                gender: true,
+                birthday: true,
+              },
+            },
+          },
+        },
         clinicRequestServices: true,
         medicalRecordServices: true,
       },
     });
+    if (!medicalRecords) {
+      return null;
+    }
+    const { patient, doctor, ...rest }: any = medicalRecords;
+    const { patient: patientInfo, ...restPatient }: any = patient;
+    const { users: doctorInfo, ...restDoctor }: any = doctor;
+    return {
+      ...rest,
+      patient: {
+        ...restPatient,
+        ...patientInfo,
+      },
+      doctor: {
+        ...restDoctor,
+        ...doctorInfo,
+      },
+    };
   }
 
   async updateMedicalRecord(
@@ -1132,15 +1179,61 @@ export class ClinicService {
       ...(doctorId ? { doctorId } : {}),
       ...(paymentStatus ? { paymentStatus } : {}),
     };
-    return this.prismaService.medicalRecords.findMany({
+    const medicalRecords = await this.prismaService.medicalRecords.findMany({
       where,
       include: {
-        patient: true,
+        patient: {
+          include: {
+            patient: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                avatar: true,
+                phone: true,
+                gender: true,
+                birthday: true,
+              },
+            },
+          },
+        },
         clinic: true,
-        doctor: true,
+        doctor: {
+          include: {
+            users: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                avatar: true,
+                phone: true,
+                gender: true,
+                birthday: true,
+              },
+            },
+          },
+        },
         clinicRequestServices: true,
         medicalRecordServices: true,
       },
+    });
+    return map(medicalRecords, (medicalRecord) => {
+      const { patient, doctor, ...rest }: any = medicalRecord;
+      const { patient: patientInfo, ...restPatient }: any = patient;
+      const { users: doctorInfo, ...restDoctor }: any = doctor;
+      return {
+        ...rest,
+        patient: {
+          ...restPatient,
+          ...patientInfo,
+        },
+        doctor: {
+          ...restDoctor,
+          ...doctorInfo,
+        },
+      };
     });
   }
 
