@@ -14,7 +14,7 @@ import { PatientReceptionCommand } from './command';
 
 @Controller('medical-records-2')
 @ApiTags('Medical Records 2')
-export class PatientReceptionsController {
+export class PatientReceptions2Controller {
   constructor(
     @Inject('CLINIC_SERVICE')
     private readonly clinicServiceClient: ClientProxy,
