@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { map } from 'lodash';
 import { PrismaService } from 'src/prisma.service';
 import { convertVietnameseString } from './utils';
-import { now } from 'moment';
+import moment, { now } from 'moment';
 
 @Injectable()
 export class ClinicService {
@@ -1322,6 +1322,39 @@ export class ClinicService {
             increment: 1,
           },
         }),
+      },
+    });
+  }
+
+  async findClinicStatistical({
+    clinicId,
+    date,
+    startDate,
+    endDate,
+  }: {
+    clinicId: string;
+    date?: string;
+    startDate?: string;
+    endDate?: string;
+  }) {
+    return this.prismaService.clinicStatistic.findMany({
+      where: {
+        clinicId,
+        ...(date
+          ? {
+              date,
+            }
+          : {
+              date: moment().format('YYYY-MM-DD'),
+            }),
+        ...(startDate && endDate
+          ? {
+              date: {
+                gte: startDate,
+                lte: endDate,
+              },
+            }
+          : {}),
       },
     });
   }

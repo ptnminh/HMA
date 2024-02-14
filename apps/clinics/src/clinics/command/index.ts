@@ -66,3 +66,7 @@ export enum PatientReceptionCommand {
   GET_REQUEST_SERVICE_BY_CODE = 'GET_REQUEST_SERVICE_BY_CODE',
   CREATE_PATIENT_RECEPTION_2 = 'CREATE_PATIENT_RECEPTION_2',
 }
+
+export enum ClinicStatiticsCommand {
+  GET_CLINIC_STATITICS = 'get-clinic-statitics',
+}

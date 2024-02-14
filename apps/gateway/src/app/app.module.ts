@@ -11,6 +11,7 @@ import { AppointmentController } from 'src/modules/appointment/appointment.contr
 import { AuthController } from 'src/modules/auth/auth.controller';
 import { JwtStrategy } from 'src/modules/auth/jwt.strategy';
 import { ChatsController } from 'src/modules/chats/chats.controller';
+import { ClinicStatiticsController } from 'src/modules/clinicStatitics/clinic-statitics.controller';
 import { ClinicsController } from 'src/modules/clinics/clinics.controller';
 import { CloudinaryModule } from 'src/modules/files/cloudinary.module';
 import { MedicalSuppliersController } from 'src/modules/medicalSuppliers/medical-suppliers.controller';
@@ -67,6 +68,7 @@ import { GoogleStrategy } from 'src/stategies/google.strategy';
     PatientsController,
     PatientReceptionsController,
     PatientReceptions2Controller,
+    ClinicStatiticsController,
   ],
   providers: [
     ConfigService,

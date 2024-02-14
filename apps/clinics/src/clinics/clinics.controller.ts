@@ -4,6 +4,7 @@ import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import {
   AuthCommand,
   ClinicCommand,
+  ClinicStatiticsCommand,
   MedicalSupplierCommand,
   PatientCommand,
   PatientReceptionCommand,
@@ -12,7 +13,7 @@ import { Prisma } from '@prisma/client';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
-import { filter, map } from 'lodash';
+import { filter, map, sumBy } from 'lodash';
 import {
   calculateTimeBefore,
   combineDateAndTime,
@@ -2085,6 +2086,51 @@ export class ClinicController {
         status: HttpStatus.CREATED,
         message: 'Tạo phiếu tiếp nhận bệnh nhân thành công',
         data: medicalRecord,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(ClinicStatiticsCommand.GET_CLINIC_STATITICS)
+  async getStatistical(data: {
+    clinicId: string;
+    date?: string;
+    days?: number;
+  }) {
+    try {
+      const { clinicId, date, days } = data;
+      let endDate = '';
+      let startDate = '';
+      if (days) {
+        startDate = moment().subtract(days, 'days').format('YYYY-MM-DD');
+        endDate = moment().format('YYYY-MM-DD');
+      }
+      const clinicStatistical = await this.clinicService.findClinicStatistical({
+        clinicId,
+        date,
+        startDate,
+        endDate,
+      });
+      if (!clinicStatistical) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Thống kê không tồn tại',
+        };
+      }
+      const result = {
+        totalPatients: sumBy(clinicStatistical, 'numberOfPatients'),
+        totalAppointments: sumBy(clinicStatistical, 'numberOfAppointments'),
+        totalRevenue: sumBy(clinicStatistical, 'revenue'),
+      };
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy thông tin thống kê thành công',
+        data: result,
       };
     } catch (error) {
       console.log(error);
