@@ -1750,7 +1750,9 @@ export class ClinicController {
         patientId,
         doctorId,
         clinicId,
-        dateCreated,
+        ...(dateCreated && {
+          dateCreated: new Date(dateCreated).toISOString(),
+        }),
       };
       const patientReception =
         await this.clinicService.createPatientReception(payload);
