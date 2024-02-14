@@ -13,7 +13,7 @@ export class GetClinicsQueryDto {
   date: string;
 
   @ApiProperty({ required: false, example: 7 })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  days: number;
+  days: string;
 }
