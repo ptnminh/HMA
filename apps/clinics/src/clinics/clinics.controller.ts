@@ -11,7 +11,7 @@ import { Prisma } from '@prisma/client';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
-import { filter, includes, map } from 'lodash';
+import { filter, includes, map, now } from 'lodash';
 import { isContainSpecialChar } from './utils';
 
 @Controller()
@@ -1637,6 +1637,71 @@ export class ClinicController {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
       };
+    }
+  }
+
+
+  @MessagePattern(PatientCommand.GET_PATIENT_BY_ID)
+  async findPatientById(data: any) {
+    const {id} = data
+    const patientInfo = await this.clinicService.getPatientDetail(id)
+    if (!patientInfo) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: "Bệnh nhân không tồn tại",
+      }
+    }
+    const {patient ,...rest} = patientInfo
+    return {
+      status: HttpStatus.OK,
+      data: {
+        ...rest,
+        ...patient,
+      },
+      message: 'Tìm kiếm thành công',
+    }
+  }
+
+  @MessagePattern(PatientCommand.UPDATE_PATIENT)
+  async updatePatient(data: any) {
+    const {id, payload} = data
+    const patientInfo = await this.clinicService.findPatientById(id)
+    if (!patientInfo) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: "Bệnh nhân không tồn tại",
+      }
+    }
+    const updatedData : Prisma.patientsUncheckedUpdateInput = {
+      ...payload
+    }
+    const updatedPatient =  await this.clinicService.updatePatient(id, updatedData)
+    return {
+      status: HttpStatus.OK,
+      data: updatedPatient,
+      message: 'Cập nhật thành công',
+    }
+  }
+
+
+  @MessagePattern(PatientCommand.DELETE_PATIENT)
+  async deletePatient(data: any) {
+    const {id} = data
+    const patientInfo = await this.clinicService.findPatientById(id)
+    if (!patientInfo) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: "Bệnh nhân không tồn tại",
+      }
+    }
+    const updatedData : Prisma.patientsUncheckedUpdateInput = {
+      deletedAt: new Date(Date.now())
+    }
+    await this.clinicService.updatePatient(id, updatedData)
+    return {
+      status: HttpStatus.OK,
+      data: null,
+      message: 'Xóa bệnh nhân thành công',
     }
   }
 }

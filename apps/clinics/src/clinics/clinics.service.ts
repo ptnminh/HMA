@@ -939,6 +939,7 @@ export class ClinicService {
         where: {
           userId: userId ? userId : undefined,
           clinicId: clinicId ? clinicId : undefined,
+          deletedAt: null,
           patient: {
             gender:
               gender !== null && gender !== undefined ? gender : undefined,
@@ -1009,7 +1010,44 @@ export class ClinicService {
     return this.prismaService.patients.findUnique({
       where: {
         id,
+        deletedAt: null,
       },
     });
   }
+
+  async getPatientDetail(id: number) {
+    return this.prismaService.patients.findUnique({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      include: {
+        patient: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            gender: true,
+            phone: true,
+            birthday: true,
+            address: true,
+            emailVerified: true,
+            isDisabled: true,
+            avatar: true,
+          },
+        },
+      },
+    })
+  }
+
+  async updatePatient(id: number, data: Prisma.patientsUncheckedUpdateInput) {
+    return this.prismaService.patients.update({
+      where: {
+        id,
+      },
+      data,
+    })
+  }
+
+
 }

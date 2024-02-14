@@ -46,6 +46,9 @@ export enum MedicalSupplierCommand {
 export enum PatientCommand {
   SEARCH_PATIENT = 'SEARCH_PATIENT',
   CREATE_PATIENT = 'CREATE_PATIENT',
+  UPDATE_PATIENT = 'UPDATE_PATIENT',
+  GET_PATIENT_BY_ID = 'GET_PATIENT_BY_ID',
+  DELETE_PATIENT = 'DELETE_PATIENT',
 }
 
 export enum AuthCommand {
