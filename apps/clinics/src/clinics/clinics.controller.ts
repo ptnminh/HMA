@@ -1751,6 +1751,8 @@ export class ClinicController {
         patientId,
         doctorId,
         clinicId,
+        examinationStatus: 0,
+        paymentStatus: 0,
         ...(dateCreated && {
           dateCreated: new Date(dateCreated).toISOString(),
         }),
@@ -1774,6 +1776,9 @@ export class ClinicController {
       await this.clinicService.createMedicalRecordService(
         medicalRecordServicePayload,
       );
+      await this.clinicService.updateAppointment(appointmentId, {
+        status: BookingStatus.CHECK_IN,
+      });
       const medicalRecord = await this.clinicService.findMedicalRecordById(
         patientReception.id,
       );
@@ -2002,6 +2007,8 @@ export class ClinicController {
         patientId,
         doctorId,
         clinicId,
+        examinationStatus: 0,
+        paymentStatus: 0,
         dateCreated: new Date().toISOString(),
         ...rest,
       };
