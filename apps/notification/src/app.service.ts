@@ -45,6 +45,7 @@ export class AppService {
           ...payload,
           id,
           sendingTime: new Date().toISOString(),
+          isRead: false,
         },
       });
       return saveNewNotiToUser;
