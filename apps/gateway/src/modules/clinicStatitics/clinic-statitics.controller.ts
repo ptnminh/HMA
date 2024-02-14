@@ -12,6 +12,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
 import { ClinicStatiticsCommand } from './command';
+import { GetClinicsQueryDto } from './dto';
 
 @Controller('statitics')
 @ApiTags('Clinic Statitics')
@@ -22,7 +23,7 @@ export class ClinicStatiticsController {
   ) {}
 
   @Get()
-  async getStatitics(@Query() query: any): Promise<any> {
+  async getStatitics(@Query() query: GetClinicsQueryDto): Promise<any> {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(
         ClinicStatiticsCommand.GET_CLINIC_STATITICS,
