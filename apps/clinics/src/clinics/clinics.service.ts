@@ -1281,4 +1281,48 @@ export class ClinicService {
       },
     });
   }
+
+  async updateClinicStatistical({
+    date,
+    clinicId,
+    payload,
+  }: {
+    date: Date | string;
+    clinicId: string;
+    payload: {
+      revenue?: number;
+      newPatient?: boolean;
+      newAppointment?: boolean;
+    };
+  }) {
+    return this.prismaService.clinicStatistic.upsert({
+      where: {
+        clinicId_date: {
+          clinicId,
+          date,
+        },
+      },
+      create: {
+        clinicId,
+        date: new Date(date).toISOString(),
+      },
+      update: {
+        ...(payload.revenue && {
+          revenue: {
+            increment: payload.revenue,
+          },
+        }),
+        ...(payload.newPatient && {
+          numberOfPatients: {
+            increment: 1,
+          },
+        }),
+        ...(payload.newAppointment && {
+          numberOfAppointments: {
+            increment: 1,
+          },
+        }),
+      },
+    });
+  }
 }

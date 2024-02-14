@@ -182,6 +182,7 @@ model clinics {
   medicalSupplies       medicalSupplies[]
   medicalRecords        medicalRecords[]
   medicalRecordServices medicalRecordServices[]
+  clinicStatistic       clinicStatistic[]
 }
 
 model clinicNews {
@@ -483,4 +484,19 @@ model clinicRequestServices {
   clinicServices        clinicServices         @relation(fields: [clinicServiceId], references: [id])
 
   @@map("clinic_request_services")
+}
+
+model clinicStatistic {
+  id                   Int      @id @default(autoincrement())
+  clinicId             String   @map(name: "clinic_id")
+  date                 DateTime @map(name: "date")
+  numberOfPatients     Int      @default(0) @map(name: "number_of_patients")
+  revenue              Float    @default(0)
+  numberOfAppointments Int      @default(0) @map(name: "number_of_appointments")
+  createdAt            DateTime @default(now()) @map(name: "created_at")
+  updatedAt            DateTime @default(now()) @updatedAt @map(name: "updated_at")
+  clinics              clinics  @relation(fields: [clinicId], references: [id])
+
+  @@unique([clinicId, date])
+  @@map("clinic_statistic")
 }

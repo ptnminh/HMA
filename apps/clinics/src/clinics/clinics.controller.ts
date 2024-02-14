@@ -917,6 +917,17 @@ export class ClinicController {
           }),
         );
       }
+      await this.clinicService
+        .updateClinicStatistical({
+          date: moment().format('YYYY-MM-DD'),
+          clinicId: data.clinicId,
+          payload: {
+            newAppointment: true,
+          },
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       return {
         status: HttpStatus.OK,
         message: 'Lấy thông tin appointment thành công',
@@ -1644,6 +1655,17 @@ export class ClinicController {
         clinicId,
         ...rest,
       };
+      await this.clinicService
+        .updateClinicStatistical({
+          date: moment().format('YYYY-MM-DD'),
+          clinicId,
+          payload: {
+            newPatient: true,
+          },
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       const patient = await this.clinicService.createPatient(patientPayload);
       return {
         status: HttpStatus.CREATED,
