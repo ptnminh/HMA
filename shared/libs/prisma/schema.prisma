@@ -380,6 +380,7 @@ model patients {
   healthInsuranceCode String?        @map("health_insurance_code")
   clinicId            String?        @map("clinic_id")
   userId              String?        @map("user_id")
+  deletedAt           DateTime?      @map(name: "deleted_at")
   appointments        appointments[]
   patient             users?         @relation(fields: [userId], references: [id])
   clinics             clinics?       @relation(fields: [clinicId], references: [id])
