@@ -15,6 +15,7 @@ import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
 import { filter, map } from 'lodash';
 import { isContainSpecialChar } from './utils';
 import { customAlphabet } from 'nanoid';
+import { ICreatePatientReception } from './interface';
 
 @Controller()
 export class ClinicController {
@@ -1802,8 +1803,8 @@ export class ClinicController {
           message: 'Phiếu tiếp nhận không tồn tại',
         };
       }
-      const updatedPatientReception =
-        await this.clinicService.updateMedicalRecord(id, rest);
+
+      await this.clinicService.updateMedicalRecord(id, rest);
       const medicalRecord = await this.clinicService.findMedicalRecordById(id);
       return {
         status: HttpStatus.OK,
@@ -1975,6 +1976,76 @@ export class ClinicController {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Lỗi hệ thống',
         data: null,
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.CREATE_PATIENT_RECEPTION_2)
+  async createPatientReception2(data: ICreatePatientReception) {
+    try {
+      const { clinicId, patientId, doctorId, services, ...rest } = data;
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const patient = await this.clinicService.findPatientById(patientId);
+      if (!patient) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Bệnh nhân không tồn tại',
+        };
+      }
+      const payload: Prisma.medicalRecordsUncheckedCreateInput = {
+        patientId,
+        doctorId,
+        clinicId,
+        dateCreated: new Date().toISOString(),
+        ...rest,
+      };
+      const patientReception =
+        await this.clinicService.createPatientReception(payload);
+      if (!patientReception) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tạo phiếu tiếp nhận bệnh nhân thất bại',
+        };
+      }
+      await Promise.all(
+        map(services, async (service) => {
+          try {
+            const medicalRecordServicePayload: Prisma.medicalRecordServicesUncheckedCreateInput =
+              {
+                medicalRecordId: patientReception.id,
+                amount: service.amount,
+                clinicId,
+                clinicServiceId: service.clinicServiceId,
+                serviceName: service.serviceName,
+              };
+            return await this.clinicService.createMedicalRecordService(
+              medicalRecordServicePayload,
+            );
+          } catch (error) {
+            console.log(error);
+          }
+        }),
+      );
+
+      const medicalRecord = await this.clinicService.findMedicalRecordById(
+        patientReception.id,
+      );
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Tạo phiếu tiếp nhận bệnh nhân thành công',
+        data: medicalRecord,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
       };
     }
   }

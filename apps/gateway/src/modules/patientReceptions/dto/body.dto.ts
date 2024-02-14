@@ -10,6 +10,69 @@ export class CreatePatientReceptionDto {
   appointmentId: number;
 }
 
+class Service {
+  @ApiProperty({
+    example: 38,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  clinicServiceId: number;
+
+  @ApiProperty({
+    example: 'Tư vấn tâm lý',
+  })
+  @IsNotEmpty()
+  @IsString()
+  serviceName: string;
+
+  @ApiProperty({
+    example: 235000,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  amount: number;
+}
+
+export class CreatePatientReception2Dto {
+  @ApiProperty({
+    example: 'ed8b694b-28e3-47e3-beaa-25cdf8830ef1',
+    required: true,
+  })
+  @IsNotEmpty()
+  clinicId: string;
+
+  @ApiProperty({
+    example: 2,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  patientId: number;
+
+  @ApiProperty({
+    example: 81,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  doctorId: number;
+
+  @ApiProperty({
+    example: 'đau đầu',
+    required: true,
+  })
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @ApiProperty({
+    type: [Service],
+    required: true,
+  })
+  @IsNotEmpty()
+  services: Service[];
+}
+
 export class UpdateMedicalRecordDto {
   @ApiProperty({
     example: 170,
