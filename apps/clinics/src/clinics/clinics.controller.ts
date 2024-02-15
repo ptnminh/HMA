@@ -13,7 +13,7 @@ import { Prisma } from '@prisma/client';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
-import { filter, map, sumBy } from 'lodash';
+import { filter, map, sumBy, uniq } from 'lodash';
 import {
   calculateTimeBefore,
   combineDateAndTime,
@@ -975,7 +975,7 @@ export class ClinicController {
         message: 'Lấy thông tin clinic service thành công',
         data: {
           ...rest,
-          staffIds: map(staffServices, 'staffId'),
+          staffIds: uniq(map(staffServices, 'staffId')),
           categoryName: category ? category.name : null,
         },
       };
@@ -1008,9 +1008,10 @@ export class ClinicController {
         status: HttpStatus.OK,
         message: 'Lấy thông tin clinic service thành công',
         data: clinicServices.map((service) => {
-          const { category, ...rest } = service;
+          const { category, staffServices, ...rest } = service;
           return {
             ...rest,
+            staffIds: uniq(map(staffServices, 'staffId')),
             categoryName: category ? category.name : null,
           };
         }),

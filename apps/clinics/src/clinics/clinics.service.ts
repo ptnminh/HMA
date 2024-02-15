@@ -420,6 +420,11 @@ export class ClinicService {
             name: true,
           },
         },
+        staffServices: {
+          select: {
+            staffId: true,
+          },
+        },
       },
     });
   }
