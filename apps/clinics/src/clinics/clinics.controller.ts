@@ -793,7 +793,8 @@ export class ClinicController {
   async createAppointment(data: {
     clinicId: string;
     doctorId: number;
-    patientId: number;
+    patientId?: number;
+    userId?: string;
     startTime: string;
     endTime?: string;
     date: string;
@@ -801,6 +802,19 @@ export class ClinicController {
     status?: string;
   }) {
     try {
+      if (!data.patientId) {
+        const patient = await this.clinicService.createPatient({
+          clinicId: data.clinicId,
+          userId: data.userId,
+        });
+        if (!patient) {
+          return {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'Tạo patient thất bại',
+          };
+        }
+        data.patientId = patient.id;
+      }
       const patientInfo = await this.clinicService.findPatientById(
         data.patientId,
       );

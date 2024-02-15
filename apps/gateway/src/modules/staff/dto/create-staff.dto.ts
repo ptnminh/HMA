@@ -151,8 +151,12 @@ export class CreateAppoimentDto {
   doctorId: number;
 
   @ApiProperty({ example: 1 })
-  @IsNotEmpty()
-  patientId: number;
+  @IsOptional()
+  patientId?: number;
+
+  @ApiProperty({ example: 'userId' })
+  @IsOptional()
+  userId?: string;
 
   @ApiProperty({ example: '01046db1-154f-41af-a2c0-61c6669a3e23' })
   @IsNotEmpty()
