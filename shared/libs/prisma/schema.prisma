@@ -296,29 +296,30 @@ model invoices {
 }
 
 model staffs {
-  id             Int               @id() @default(autoincrement())
-  specialize     String?
-  experience     Int?
-  gender         Int?
-  phoneNumber    String?
-  address        String?
-  description    String?           @db.Text
-  roleId         Int?              @map(name: "role_id")
-  clinicId       String?           @map(name: "clinic_id")
-  isAcceptInvite Boolean           @default(true) @map(name: "is_accept_invite")
-  uniqueId       String?           @map(name: "unique_id")
-  userId         String?           @map(name: "user_id")
-  createdAt      DateTime          @default(now()) @map(name: "created_at")
-  updatedAt      DateTime          @default(now()) @updatedAt() @map("updated_at")
-  isDisabled     Boolean           @default(false) @map(name: "is_disabled")
-  disabledAt     DateTime?         @map("disabled_at")
-  staffSchedules staffSchedules[]
-  appointments   appointments[]
-  staffServices  staffServices[]
-  clinics        clinics?          @relation(fields: [clinicId], references: [id])
-  role           clinicGroupRoles? @relation(fields: [roleId], references: [id])
-  users          users?            @relation(fields: [userId], references: [id])
-  medicalRecords medicalRecords[]
+  id                    Int                     @id() @default(autoincrement())
+  specialize            String?
+  experience            Int?
+  gender                Int?
+  phoneNumber           String?
+  address               String?
+  description           String?                 @db.Text
+  roleId                Int?                    @map(name: "role_id")
+  clinicId              String?                 @map(name: "clinic_id")
+  isAcceptInvite        Boolean                 @default(true) @map(name: "is_accept_invite")
+  uniqueId              String?                 @map(name: "unique_id")
+  userId                String?                 @map(name: "user_id")
+  createdAt             DateTime                @default(now()) @map(name: "created_at")
+  updatedAt             DateTime                @default(now()) @updatedAt() @map("updated_at")
+  isDisabled            Boolean                 @default(false) @map(name: "is_disabled")
+  disabledAt            DateTime?               @map("disabled_at")
+  staffSchedules        staffSchedules[]
+  appointments          appointments[]
+  staffServices         staffServices[]
+  clinics               clinics?                @relation(fields: [clinicId], references: [id])
+  role                  clinicGroupRoles?       @relation(fields: [roleId], references: [id])
+  users                 users?                  @relation(fields: [userId], references: [id])
+  medicalRecords        medicalRecords[]
+  medicalRecordServices medicalRecordServices[]
 }
 
 model appointments {
@@ -373,6 +374,7 @@ model clinicServices {
   category              category?               @relation(fields: [categoryId], references: [id])
   appointments          appointments[]
   clinicRequestServices clinicRequestServices[]
+  medicalRecordServices medicalRecordServices[]
 
   @@map("clinic_services")
 }
@@ -462,6 +464,7 @@ model medicalRecordServices {
   medicalRecordId Int                    @map(name: "medical_record_id")
   clinicId        String                 @map(name: "clinic_id")
   clinicServiceId Int                    @map(name: "clinic_service_id")
+  doctorId        Int?                   @map(name: "doctor_id")
   serviceResult   String?                @map(name: "service_result") @db.Text
   serviceName     String?                @map(name: "service_name")
   amount          Float?
@@ -472,6 +475,8 @@ model medicalRecordServices {
   clinic          clinics                @relation(fields: [clinicId], references: [id])
   medicalRecord   medicalRecords         @relation(fields: [medicalRecordId], references: [id])
   code            clinicRequestServices? @relation(fields: [returnCode], references: [code])
+  clinicServices  clinicServices         @relation(fields: [clinicServiceId], references: [id])
+  doctor          staffs?                @relation(fields: [doctorId], references: [id])
 
   @@map("medical_record_services")
 }
