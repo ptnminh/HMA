@@ -85,6 +85,31 @@ export class PatientReceptionsController {
       status: true,
     };
   }
+
+  @Post(':medicalRecordId/export-invoice')
+  async exportInvoice(@Param('medicalRecordId') medicalRecordId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(PatientReceptionCommand.EXPORT_INVOICE, {
+        medicalRecordId: +medicalRecordId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
   @Post()
   async createPatientReception(
     @Body() createPatientReceptionDto: CreatePatientReceptionDto,

@@ -183,6 +183,7 @@ model clinics {
   medicalRecords        medicalRecords[]
   medicalRecordServices medicalRecordServices[]
   clinicStatistic       clinicStatistic[]
+  investmentInvoice     investmentInvoice[]
 }
 
 model clinicNews {
@@ -377,19 +378,20 @@ model clinicServices {
 }
 
 model patients {
-  id                  Int              @id @default(autoincrement())
-  bloodGroup          String?          @map("blood_group")
+  id                  Int                 @id @default(autoincrement())
+  bloodGroup          String?             @map("blood_group")
   anamnesis           String?
-  uniqueId            String?          @map("unique_id")
-  idCard              String?          @map("id_card")
-  healthInsuranceCode String?          @map("health_insurance_code")
-  clinicId            String?          @map("clinic_id")
-  userId              String?          @map("user_id")
-  deletedAt           DateTime?        @map(name: "deleted_at")
+  uniqueId            String?             @map("unique_id")
+  idCard              String?             @map("id_card")
+  healthInsuranceCode String?             @map("health_insurance_code")
+  clinicId            String?             @map("clinic_id")
+  userId              String?             @map("user_id")
+  deletedAt           DateTime?           @map(name: "deleted_at")
   appointments        appointments[]
-  patient             users?           @relation(fields: [userId], references: [id])
-  clinics             clinics?         @relation(fields: [clinicId], references: [id])
+  patient             users?              @relation(fields: [userId], references: [id])
+  clinics             clinics?            @relation(fields: [clinicId], references: [id])
   medicalRecords      medicalRecords[]
+  investmentInvoice   investmentInvoice[]
 }
 
 model medicalSupplies {
@@ -450,6 +452,7 @@ model medicalRecords {
   clinicRequestServices clinicRequestServices[]
   medicalRecordServices medicalRecordServices[]
   prescriptionDetail    prescriptionDetail[]
+  investmentInvoice     investmentInvoice?
 
   @@map("medical_records")
 }
@@ -517,4 +520,35 @@ model prescriptionDetail {
   medicalRecord   medicalRecords @relation(fields: [medicalRecordId], references: [id])
 
   @@map("prescription_detail")
+}
+
+model investmentInvoice {
+  id              Int             @id @default(autoincrement())
+  clinicId        String          @map(name: "clinic_id")
+  patientId       Int             @map(name: "patient_id")
+  medicalRecordId Int             @unique @map(name: "medical_record_id")
+  invoiceDate     String?         @map(name: "invoice_date")
+  description     String?         @db.Text
+  status          Int             @default(0)
+  totalPayment    Float?          @map(name: "total_payment")
+  createdAt       DateTime        @default(now()) @map(name: "created_at")
+  updatedAt       DateTime        @default(now()) @updatedAt @map(name: "updated_at")
+  clinic          clinics         @relation(fields: [clinicId], references: [id])
+  patient         patients        @relation(fields: [patientId], references: [id])
+  medicalRecord   medicalRecords  @relation(fields: [medicalRecordId], references: [id])
+  invoiceDetail   invoiceDetail[]
+
+  @@map("investment_invoice")
+}
+
+model invoiceDetail {
+  id                Int               @id @default(autoincrement())
+  invoiceId         Int               @map(name: "invoice_id")
+  content           String            @db.Text
+  amount            Float
+  createdAt         DateTime          @default(now()) @map(name: "created_at")
+  updatedAt         DateTime          @default(now()) @updatedAt @map(name: "updated_at")
+  investmentInvoice investmentInvoice @relation(fields: [invoiceId], references: [id])
+
+  @@map("invoice_detail")
 }

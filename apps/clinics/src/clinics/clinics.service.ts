@@ -1396,4 +1396,53 @@ export class ClinicService {
       },
     });
   }
+
+  async createInvestmentInvoice(
+    data: Prisma.investmentInvoiceUncheckedCreateInput,
+  ) {
+    return this.prismaService.investmentInvoice.create({
+      data,
+    });
+  }
+
+  async findInvestmentInvoiceByMedicalRecordId(medicalRecordId: number) {
+    return this.prismaService.investmentInvoice.findUnique({
+      where: {
+        medicalRecordId,
+      },
+      include: {
+        invoiceDetail: true,
+        clinic: true,
+        patient: true,
+        medicalRecord: true,
+      },
+    });
+  }
+  async createInvoiceDetail(data: Prisma.invoiceDetailUncheckedCreateInput) {
+    return this.prismaService.invoiceDetail.create({
+      data,
+    });
+  }
+
+  async findInvoiceDetailByInvoiceId(invoiceId: number) {
+    return this.prismaService.invoiceDetail.findMany({
+      where: {
+        invoiceId,
+      },
+    });
+  }
+
+  async findInvestmentInvoiceById(id: number) {
+    return this.prismaService.investmentInvoice.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        invoiceDetail: true,
+        clinic: true,
+        patient: true,
+        medicalRecord: true,
+      },
+    });
+  }
 }

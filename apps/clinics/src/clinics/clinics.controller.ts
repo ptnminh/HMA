@@ -2228,4 +2228,93 @@ export class ClinicController {
       };
     }
   }
+
+  @MessagePattern(PatientReceptionCommand.EXPORT_INVOICE)
+  async exportInvoice(data: any) {
+    try {
+      const { medicalRecordId } = data;
+      const medicalRecord =
+        await this.clinicService.findMedicalRecordById(medicalRecordId);
+      if (!medicalRecord) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Phiếu tiếp nhận không tồn tại',
+        };
+      }
+      const exInvoice =
+        await this.clinicService.findInvestmentInvoiceByMedicalRecordId(
+          medicalRecordId,
+        );
+      if (exInvoice) {
+        return {
+          status: HttpStatus.OK,
+          message: 'Xuất hóa đơn thành công',
+          data: exInvoice,
+        };
+      }
+      const { medicalRecordServices } = medicalRecord;
+      const totalPayment = sumBy(medicalRecordServices, 'amount') || 0;
+      const payload: Prisma.investmentInvoiceUncheckedCreateInput = {
+        patientId: medicalRecord.patientId,
+        clinicId: medicalRecord.clinicId,
+        medicalRecordId: medicalRecordId,
+        invoiceDate: moment().format('YYYY-MM-DD'),
+        description: `Thanh toán hóa đơn khám bệnh tại ${medicalRecord.clinic?.name}#${medicalRecordId}`,
+        totalPayment,
+      };
+      const invoice = await this.clinicService.createInvestmentInvoice(payload);
+      if (!invoice) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Xuất hóa đơn thất bại',
+        };
+      }
+      await Promise.all(
+        map(medicalRecordServices, async (service) => {
+          try {
+            const invoiceDetailPayload: Prisma.invoiceDetailUncheckedCreateInput =
+              {
+                invoiceId: invoice.id,
+                amount: service.amount,
+                content: `Phí thanh toán cho dịch vụ ${service.serviceName} là ${service.amount} VNĐ`,
+              };
+            return await this.clinicService.createInvoiceDetail(
+              invoiceDetailPayload,
+            );
+          } catch (error) {
+            console.log(error);
+          }
+        }),
+      );
+      await this.clinicService
+        .updateClinicStatistical({
+          date: moment().format('YYYY-MM-DD'),
+          clinicId: medicalRecord.clinicId,
+          payload: {
+            revenue: totalPayment,
+          },
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      // update payment status of medical record
+      await this.clinicService.updateMedicalRecord(medicalRecordId, {
+        paymentStatus: 1,
+      });
+      const finalInvoice = await this.clinicService.findInvestmentInvoiceById(
+        invoice.id,
+      );
+      return {
+        status: HttpStatus.OK,
+        message: 'Xuất hóa đơn thành công',
+        data: finalInvoice,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Xuất hóa đơn thất bại',
+      };
+    }
+  }
 }
