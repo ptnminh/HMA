@@ -1121,6 +1121,7 @@ export class ClinicService {
         },
         clinicRequestServices: true,
         medicalRecordServices: true,
+        prescriptionDetail: true,
       },
     });
     if (!medicalRecords) {
@@ -1158,6 +1159,22 @@ export class ClinicService {
         clinicRequestServices: true,
         medicalRecordServices: true,
       },
+    });
+  }
+
+  async deletePrecriptionByMedicalRecordId(medicalRecordId: number) {
+    return this.prismaService.prescriptionDetail.deleteMany({
+      where: {
+        medicalRecordId,
+      },
+    });
+  }
+
+  async createPrescriptionDetail(
+    data: Prisma.prescriptionDetailUncheckedCreateInput,
+  ) {
+    return this.prismaService.prescriptionDetail.create({
+      data,
     });
   }
 
@@ -1228,6 +1245,7 @@ export class ClinicService {
         },
         clinicRequestServices: true,
         medicalRecordServices: true,
+        prescriptionDetail: true,
       },
     });
     return map(medicalRecords, (medicalRecord) => {

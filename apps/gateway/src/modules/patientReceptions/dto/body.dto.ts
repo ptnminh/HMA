@@ -197,3 +197,61 @@ export class CreateMedicalRequestServiceDto {
   @IsString()
   serviceName: string;
 }
+
+export class UpdatePrescriptionToMedicalRecordDto {
+  @ApiProperty({
+    example: 'Paracetamol',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsString()
+  medicineName: string;
+
+  @ApiProperty({
+    example: 2,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  dosage?: number;
+
+  @ApiProperty({
+    example: 'mg',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  unit?: string;
+
+  @ApiProperty({
+    example: '7 days',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  duration?: string;
+
+  @ApiProperty({
+    example: 'Morning and evening',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  usingTime?: string;
+
+  @ApiProperty({
+    example: '4 hours',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  doseInterval?: string;
+
+  @ApiProperty({
+    example: 'Take with food',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  note?: string;
+}

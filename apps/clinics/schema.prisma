@@ -449,6 +449,7 @@ model medicalRecords {
   clinic                clinics                 @relation(fields: [clinicId], references: [id])
   clinicRequestServices clinicRequestServices[]
   medicalRecordServices medicalRecordServices[]
+  prescriptionDetail    prescriptionDetail[]
 
   @@map("medical_records")
 }
@@ -499,4 +500,21 @@ model clinicStatistic {
 
   @@unique([clinicId, date])
   @@map("clinic_statistic")
+}
+
+model prescriptionDetail {
+  id              Int            @id @default(autoincrement())
+  medicineName    String         @map(name: "medicine_name")
+  dosage          Int?
+  unit            String?
+  duration        String?
+  usingTime       String?        @map(name: "using_time")
+  doseInterval    String?        @map(name: "dose_interval")
+  note            String?
+  medicalRecordId Int            @map(name: "medical_record_id")
+  createdAt       DateTime       @default(now()) @map(name: "created_at")
+  updatedAt       DateTime       @default(now()) @updatedAt @map(name: "updated_at")
+  medicalRecord   medicalRecords @relation(fields: [medicalRecordId], references: [id])
+
+  @@map("prescription_detail")
 }

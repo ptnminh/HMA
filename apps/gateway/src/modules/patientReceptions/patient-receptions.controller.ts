@@ -16,6 +16,7 @@ import {
   CreatePatientReceptionDto,
   UpdateMedicalRecordDto,
   UpdateMedicalRecordServiceDto,
+  UpdatePrescriptionToMedicalRecordDto,
 } from './dto/body.dto';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -178,6 +179,37 @@ export class PatientReceptionsController {
         PatientReceptionCommand.GET_LIST_MEDICAL_RECORD,
         {
           ...query,
+        },
+      ),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Put(':medicalRecordId/prescription')
+  async updatePrescriptionToMedicalRecord(
+    @Param('medicalRecordId') medicalRecordId: string,
+    @Body() body: UpdatePrescriptionToMedicalRecordDto[],
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(
+        PatientReceptionCommand.UPDATE_MEDICAL_RECORD_PRESCRIPTION,
+        {
+          medicalRecordId: +medicalRecordId,
+          precriptions: body,
         },
       ),
     );

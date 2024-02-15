@@ -2170,4 +2170,62 @@ export class ClinicController {
       };
     }
   }
+
+  @MessagePattern(PatientReceptionCommand.UPDATE_MEDICAL_RECORD_PRESCRIPTION)
+  async updateMedicalRecordPrescription(data: {
+    medicalRecordId: number;
+    precriptions: {
+      medicineName: string;
+      dosage?: number;
+      unit?: string;
+      duration?: string;
+      usingTime?: string;
+      doseInterval?: string;
+      note?: string;
+    }[];
+  }) {
+    try {
+      const { medicalRecordId, precriptions } = data;
+      const medicalRecord =
+        await this.clinicService.findMedicalRecordById(medicalRecordId);
+      if (!medicalRecord) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Phiếu tiếp nhận không tồn tại',
+        };
+      }
+      await this.clinicService.deletePrecriptionByMedicalRecordId(
+        medicalRecordId,
+      );
+      await Promise.all(
+        map(precriptions, async (precription) => {
+          try {
+            const medicalRecordPrecriptionPayload: Prisma.prescriptionDetailUncheckedCreateInput =
+              {
+                medicalRecordId,
+                ...precription,
+              };
+            return await this.clinicService.createPrescriptionDetail(
+              medicalRecordPrecriptionPayload,
+            );
+          } catch (error) {
+            console.log(error);
+          }
+        }),
+      );
+      const medicalRecordResult =
+        await this.clinicService.findMedicalRecordById(medicalRecordId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Cập nhật phiếu tiếp nhận thành công',
+        data: medicalRecordResult,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }
