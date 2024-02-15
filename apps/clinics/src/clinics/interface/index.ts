@@ -4,6 +4,8 @@ interface IService {
   serviceName: string;
 
   amount: number;
+
+  doctorId: number;
 }
 
 export interface ICreatePatientReception {

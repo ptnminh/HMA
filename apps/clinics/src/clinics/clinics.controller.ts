@@ -2100,7 +2100,7 @@ export class ClinicController {
                 clinicId,
                 clinicServiceId: service.clinicServiceId,
                 serviceName: service.serviceName,
-                doctorId: doctorId,
+                doctorId: service.doctorId,
               };
             return await this.clinicService.createMedicalRecordService(
               medicalRecordServicePayload,

@@ -31,6 +31,13 @@ class Service {
   @IsNotEmpty()
   @IsNumber()
   amount: number;
+
+  @ApiProperty({
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  doctorId: number;
 }
 
 export class CreatePatientReception2Dto {
