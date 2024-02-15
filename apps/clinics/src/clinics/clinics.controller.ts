@@ -969,12 +969,13 @@ export class ClinicController {
           message: 'Clinic service không tồn tại',
         };
       }
-      const { category, ...rest } = clinicService;
+      const { category, staffServices, ...rest } = clinicService;
       return {
         status: HttpStatus.OK,
         message: 'Lấy thông tin clinic service thành công',
         data: {
           ...rest,
+          staffIds: map(staffServices, 'staffId'),
           categoryName: category ? category.name : null,
         },
       };
