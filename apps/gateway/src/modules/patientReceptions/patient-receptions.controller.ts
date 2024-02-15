@@ -202,14 +202,14 @@ export class PatientReceptionsController {
   @Put(':medicalRecordId/prescription')
   async updatePrescriptionToMedicalRecord(
     @Param('medicalRecordId') medicalRecordId: string,
-    @Body() body: UpdatePrescriptionToMedicalRecordDto[],
+    @Body() body: UpdatePrescriptionToMedicalRecordDto,
   ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(
         PatientReceptionCommand.UPDATE_MEDICAL_RECORD_PRESCRIPTION,
         {
           medicalRecordId: +medicalRecordId,
-          precriptions: body,
+          precriptions: body.prescriptions,
         },
       ),
     );

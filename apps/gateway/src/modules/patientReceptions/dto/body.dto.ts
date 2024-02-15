@@ -198,7 +198,7 @@ export class CreateMedicalRequestServiceDto {
   serviceName: string;
 }
 
-export class UpdatePrescriptionToMedicalRecordDto {
+class Prescription {
   @ApiProperty({
     example: 'Paracetamol',
     required: true,
@@ -254,4 +254,13 @@ export class UpdatePrescriptionToMedicalRecordDto {
   @IsOptional()
   @IsString()
   note?: string;
+}
+
+export class UpdatePrescriptionToMedicalRecordDto {
+  @ApiProperty({
+    type: [Prescription],
+    required: true,
+  })
+  @IsNotEmpty()
+  prescriptions: Prescription[];
 }
