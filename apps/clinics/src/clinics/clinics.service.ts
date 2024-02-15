@@ -1176,9 +1176,9 @@ export class ClinicService {
   }) {
     const where: any = {
       ...(clinicId ? { clinicId } : {}),
-      ...(patientId ? { patientId } : {}),
-      ...(doctorId ? { doctorId } : {}),
-      ...(paymentStatus ? { paymentStatus } : {}),
+      ...(patientId ? { patientId: +patientId } : {}),
+      ...(doctorId ? { doctorId: +doctorId } : {}),
+      ...(paymentStatus ? { paymentStatus: +paymentStatus } : {}),
     };
     const medicalRecords = await this.prismaService.medicalRecords.findMany({
       where,
