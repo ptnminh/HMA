@@ -2368,10 +2368,18 @@ export class ClinicController {
           medicalRecordId,
         );
       if (exInvoice) {
+        const { patient: patientInfo, ...restExInvoice } = exInvoice;
+        const { patient: patientUserInfo, ...restPatient } = patientInfo;
         return {
           status: HttpStatus.OK,
           message: 'Xuất hóa đơn thành công',
-          data: exInvoice,
+          data: {
+            ...restExInvoice,
+            patient: {
+              ...restPatient,
+              ...patientUserInfo,
+            },
+          },
         };
       }
       const { medicalRecordServices } = medicalRecord;
@@ -2426,10 +2434,24 @@ export class ClinicController {
       const finalInvoice = await this.clinicService.findInvestmentInvoiceById(
         invoice.id,
       );
+      if (!finalInvoice) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Xuất hóa đơn thất bại',
+        };
+      }
+      const { patient: patientInfo, ...restInvoice } = finalInvoice;
+      const { patient: patientUserInfo, ...restPatient } = patientInfo;
       return {
         status: HttpStatus.OK,
         message: 'Xuất hóa đơn thành công',
-        data: finalInvoice,
+        data: {
+          ...restInvoice,
+          patient: {
+            ...restPatient,
+            ...patientUserInfo,
+          },
+        },
       };
     } catch (error) {
       console.log(error);

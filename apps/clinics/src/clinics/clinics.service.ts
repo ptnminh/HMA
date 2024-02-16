@@ -1440,7 +1440,20 @@ export class ClinicService {
       include: {
         invoiceDetail: true,
         clinic: true,
-        patient: true,
+        patient: {
+          include: {
+            patient: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                birthday: true,
+                address: true,
+                gender: true,
+              },
+            },
+          },
+        },
         medicalRecord: true,
       },
     });
@@ -1467,7 +1480,20 @@ export class ClinicService {
       include: {
         invoiceDetail: true,
         clinic: true,
-        patient: true,
+        patient: {
+          include: {
+            patient: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                birthday: true,
+                address: true,
+                gender: true,
+              },
+            },
+          },
+        },
         medicalRecord: true,
       },
     });
