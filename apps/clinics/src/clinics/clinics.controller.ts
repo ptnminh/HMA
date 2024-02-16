@@ -2442,7 +2442,7 @@ export class ClinicController {
               {
                 invoiceId: invoice.id,
                 amount: service.amount,
-                content: `Phí thanh toán cho dịch vụ ${service.serviceName} là ${service.amount} VNĐ`,
+                content: `Phí thanh toán dịch vụ ${service.serviceName}`,
               };
             return await this.clinicService.createInvoiceDetail(
               invoiceDetailPayload,
