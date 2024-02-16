@@ -385,3 +385,21 @@ export class UpdatePrescriptionToMedicalRecordDto {
   @IsNotEmpty()
   prescriptions: Prescription[];
 }
+
+export class UpdateInvoiceDto {
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  status?: number;
+
+  @ApiProperty({
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  cashierId?: number;
+}

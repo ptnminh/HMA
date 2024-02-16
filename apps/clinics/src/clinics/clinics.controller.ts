@@ -2368,16 +2368,21 @@ export class ClinicController {
           medicalRecordId,
         );
       if (exInvoice) {
-        const { patient: patientInfo, ...restExInvoice } = exInvoice;
+        const { patient: patientInfo, cashier, ...restInvoice } = exInvoice;
         const { patient: patientUserInfo, ...restPatient } = patientInfo;
+        const { users, ...restCashierInfo } = cashier;
         return {
           status: HttpStatus.OK,
           message: 'Xuất hóa đơn thành công',
           data: {
-            ...restExInvoice,
+            ...restInvoice,
             patient: {
               ...restPatient,
               ...patientUserInfo,
+            },
+            cashier: {
+              ...restCashierInfo,
+              ...users,
             },
           },
         };
@@ -2416,21 +2421,7 @@ export class ClinicController {
           }
         }),
       );
-      await this.clinicService
-        .updateClinicStatistical({
-          date: moment().format('YYYY-MM-DD'),
-          clinicId: medicalRecord.clinicId,
-          payload: {
-            revenue: totalPayment,
-          },
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      // update payment status of medical record
-      await this.clinicService.updateMedicalRecord(medicalRecordId, {
-        paymentStatus: 1,
-      });
+
       const finalInvoice = await this.clinicService.findInvestmentInvoiceById(
         invoice.id,
       );
@@ -2440,8 +2431,9 @@ export class ClinicController {
           message: 'Xuất hóa đơn thất bại',
         };
       }
-      const { patient: patientInfo, ...restInvoice } = finalInvoice;
+      const { patient: patientInfo, cashier, ...restInvoice } = finalInvoice;
       const { patient: patientUserInfo, ...restPatient } = patientInfo;
+      const { users, ...restCashierInfo } = cashier;
       return {
         status: HttpStatus.OK,
         message: 'Xuất hóa đơn thành công',
@@ -2451,6 +2443,10 @@ export class ClinicController {
             ...restPatient,
             ...patientUserInfo,
           },
+          cashier: {
+            ...restCashierInfo,
+            ...users,
+          },
         },
       };
     } catch (error) {
@@ -2458,6 +2454,75 @@ export class ClinicController {
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Xuất hóa đơn thất bại',
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.UPDATE_INVOICE)
+  async updateInvoice(data: {
+    status?: number;
+    cashierId?: number;
+    invoiceId: number;
+  }) {
+    try {
+      const { invoiceId, ...rest } = data;
+      const invoice =
+        await this.clinicService.findInvestmentInvoiceById(invoiceId);
+      if (!invoice) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Hóa đơn không tồn tại',
+        };
+      }
+      await this.clinicService.updateInvestmentInvoice(invoiceId, rest);
+      if (data.status && data.status === 1) {
+        await this.clinicService
+          .updateClinicStatistical({
+            date: moment().format('YYYY-MM-DD'),
+            clinicId: invoice.clinicId,
+            payload: {
+              revenue: invoice.totalPayment,
+            },
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+        // update payment status of medical record
+        await this.clinicService.updateMedicalRecord(invoice.medicalRecordId, {
+          paymentStatus: 1,
+        });
+      }
+      const finalInvoice =
+        await this.clinicService.findInvestmentInvoiceById(invoiceId);
+      if (!finalInvoice) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Xuất hóa đơn thất bại',
+        };
+      }
+      const { patient: patientInfo, cashier, ...restInvoice } = finalInvoice;
+      const { patient: patientUserInfo, ...restPatient } = patientInfo;
+      const { users, ...restCashierInfo } = cashier;
+      return {
+        status: HttpStatus.OK,
+        message: 'Xuất hóa đơn thành công',
+        data: {
+          ...restInvoice,
+          patient: {
+            ...restPatient,
+            ...patientUserInfo,
+          },
+          cashier: {
+            ...restCashierInfo,
+            ...users,
+          },
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Cập nhật hóa đơn thất bại',
       };
     }
   }

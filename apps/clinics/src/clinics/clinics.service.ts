@@ -1455,6 +1455,19 @@ export class ClinicService {
           },
         },
         medicalRecord: true,
+        cashier: {
+          include: {
+            users: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                birthday: true,
+                address: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -1495,7 +1508,32 @@ export class ClinicService {
           },
         },
         medicalRecord: true,
+        cashier: {
+          include: {
+            users: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                birthday: true,
+                address: true,
+              },
+            },
+          },
+        },
       },
+    });
+  }
+
+  async updateInvestmentInvoice(
+    id: number,
+    data: Prisma.investmentInvoiceUncheckedUpdateInput,
+  ) {
+    return this.prismaService.investmentInvoice.update({
+      where: {
+        id,
+      },
+      data,
     });
   }
 }

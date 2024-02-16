@@ -320,6 +320,7 @@ model staffs {
   users                 users?                  @relation(fields: [userId], references: [id])
   medicalRecords        medicalRecords[]
   medicalRecordServices medicalRecordServices[]
+  investmentInvoice     investmentInvoice[]
 }
 
 model appointments {
@@ -536,6 +537,7 @@ model investmentInvoice {
   invoiceDate     String?         @map(name: "invoice_date")
   description     String?         @db.Text
   status          Int             @default(0)
+  cashierId       Int?            @map(name: "cashier_id")
   totalPayment    Float?          @map(name: "total_payment")
   createdAt       DateTime        @default(now()) @map(name: "created_at")
   updatedAt       DateTime        @default(now()) @updatedAt @map(name: "updated_at")
@@ -543,6 +545,7 @@ model investmentInvoice {
   patient         patients        @relation(fields: [patientId], references: [id])
   medicalRecord   medicalRecords  @relation(fields: [medicalRecordId], references: [id])
   invoiceDetail   invoiceDetail[]
+  cashier         staffs?         @relation(fields: [cashierId], references: [id])
 
   @@map("investment_invoice")
 }

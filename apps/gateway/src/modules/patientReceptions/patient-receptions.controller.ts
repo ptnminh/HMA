@@ -16,6 +16,7 @@ import {
   CreateMedicalRecordServiceDto,
   CreateMedicalRequestServiceDto,
   CreatePatientReceptionDto,
+  UpdateInvoiceDto,
   UpdateMedicalRecordDto,
   UpdateMedicalRecordServiceDto,
   UpdateMedicalRequestServiceDto,
@@ -123,6 +124,34 @@ export class PatientReceptionsController {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(PatientReceptionCommand.EXPORT_INVOICE, {
         medicalRecordId: +medicalRecordId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Put('export-invoice/:invoiceId')
+  async updateInvoice(
+    @Param('invoiceId') invoiceId: string,
+    @Body() body: UpdateInvoiceDto,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(PatientReceptionCommand.UPDATE_INVOICE, {
+        invoiceId: +invoiceId,
+        ...body,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
