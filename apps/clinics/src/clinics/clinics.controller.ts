@@ -2033,6 +2033,44 @@ export class ClinicController {
     }
   }
 
+  @MessagePattern(PatientReceptionCommand.DELETE_MEDICAL_RECORD_SERVICE)
+  async deleteMedicalRecordService(data: {
+    medicalRecordId: number;
+    clinicServiceId: number;
+  }) {
+    try {
+      const { medicalRecordId, clinicServiceId } = data;
+      const medicalRecordService =
+        await this.clinicService.findMedicalRecordService({
+          medicalRecordId,
+          clinicServiceId,
+        });
+      if (!medicalRecordService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Dịch vụ không tồn tại',
+        };
+      }
+      await this.clinicService.deleteMedicalRecordService({
+        medicalRecordId,
+        clinicServiceId,
+      });
+      const medicalRecord =
+        await this.clinicService.findMedicalRecordById(medicalRecordId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Xóa dịch vụ thành công',
+        data: medicalRecord,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
   @MessagePattern(PatientReceptionCommand.REQUEST_SERVICE)
   async requestService(data: any) {
     try {

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -333,6 +334,37 @@ export class PatientReceptionsController {
       ),
     );
     if (clinicServiceResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Delete(':medicalRecordId/services/:serviceId')
+  async deleteServiceToMedicalRecord(
+    @Param('medicalRecordId') medicalRecordId: string,
+    @Param('serviceId') serviceId: string,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(
+        PatientReceptionCommand.DELETE_MEDICAL_RECORD_SERVICE,
+        {
+          medicalRecordId: +medicalRecordId,
+          clinicServiceId: +serviceId,
+        },
+      ),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: clinicServiceResponse.message,

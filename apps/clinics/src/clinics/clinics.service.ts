@@ -1295,6 +1295,21 @@ export class ClinicService {
     });
   }
 
+  async deleteMedicalRecordService({
+    medicalRecordId,
+    clinicServiceId,
+  }: {
+    medicalRecordId: number;
+    clinicServiceId: number;
+  }) {
+    return this.prismaService.medicalRecordServices.deleteMany({
+      where: {
+        medicalRecordId,
+        clinicServiceId,
+      },
+    });
+  }
+
   async createClinicRequestService(
     data: Prisma.clinicRequestServicesUncheckedCreateInput,
   ) {
