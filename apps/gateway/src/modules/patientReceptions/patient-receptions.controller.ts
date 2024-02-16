@@ -12,10 +12,12 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
+  CreateMedicalRecordServiceDto,
   CreateMedicalRequestServiceDto,
   CreatePatientReceptionDto,
   UpdateMedicalRecordDto,
   UpdateMedicalRecordServiceDto,
+  UpdateMedicalRequestServiceDto,
   UpdatePrescriptionToMedicalRecordDto,
 } from './dto/body.dto';
 import { firstValueFrom } from 'rxjs';
@@ -85,7 +87,36 @@ export class PatientReceptionsController {
       status: true,
     };
   }
-
+  @Put('request-service/:code')
+  async updateRequestService(
+    @Param('code') code: string,
+    @Body() body: UpdateMedicalRequestServiceDto,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(
+        PatientReceptionCommand.UPDATE_REQUEST_SERVICE,
+        {
+          code,
+          ...body,
+        },
+      ),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
   @Post(':medicalRecordId/export-invoice')
   async exportInvoice(@Param('medicalRecordId') medicalRecordId: string) {
     const clinicServiceResponse = await firstValueFrom(
@@ -272,6 +303,36 @@ export class PatientReceptionsController {
       ),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+  @Post(':medicalRecordId/services')
+  async createServiceToMedicalRecord(
+    @Param('medicalRecordId') medicalRecordId: string,
+    @Body() body: CreateMedicalRecordServiceDto,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(
+        PatientReceptionCommand.CREATE_MEDICAL_RECORD_SERVICE,
+        {
+          medicalRecordId: +medicalRecordId,
+          ...body,
+        },
+      ),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.CREATED) {
       throw new HttpException(
         {
           message: clinicServiceResponse.message,

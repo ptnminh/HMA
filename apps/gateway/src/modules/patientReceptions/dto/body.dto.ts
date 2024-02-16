@@ -174,19 +174,97 @@ export class UpdateMedicalRecordDto {
 
 export class UpdateMedicalRecordServiceDto {
   @ApiProperty({
-    example: 'Service result',
+    example: 1,
   })
   @IsOptional()
   @IsNumber()
-  serviceResult?: string;
+  clinicServiceId?: number;
 
   @ApiProperty({
-    example: 'Code',
-    required: false,
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  doctorId?: number;
+
+  @ApiProperty({
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  medicalRecordId?: number;
+
+  @ApiProperty({
+    example: 5555,
+  })
+  @IsOptional()
+  @IsNumber()
+  amount?: number;
+
+  @ApiProperty({
+    example: 'Service name',
   })
   @IsOptional()
   @IsString()
-  code?: string;
+  serviceName?: string;
+
+  @ApiProperty({
+    example: 'Service result',
+  })
+  @IsOptional()
+  @IsString()
+  serviceResult?: string;
+
+  @ApiProperty({
+    example: 'clinicId',
+  })
+  @IsOptional()
+  @IsString()
+  clinicId?: string;
+}
+
+export class CreateMedicalRecordServiceDto {
+  @ApiProperty({
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  clinicServiceId?: number;
+
+  @ApiProperty({
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  doctorId?: number;
+
+  @ApiProperty({
+    example: 5555,
+  })
+  @IsOptional()
+  @IsNumber()
+  amount?: number;
+
+  @ApiProperty({
+    example: 'Service name',
+  })
+  @IsOptional()
+  @IsString()
+  serviceName?: string;
+
+  @ApiProperty({
+    example: 'Service result',
+  })
+  @IsOptional()
+  @IsString()
+  serviceResult?: string;
+
+  @ApiProperty({
+    example: 'clinicId',
+  })
+  @IsOptional()
+  @IsString()
+  clinicId?: string;
 }
 
 export class CreateMedicalRequestServiceDto {
@@ -203,6 +281,42 @@ export class CreateMedicalRequestServiceDto {
   @IsNotEmpty()
   @IsString()
   serviceName: string;
+
+  @ApiProperty({
+    example: 'Service result',
+  })
+  @IsOptional()
+  @IsString()
+  serviceResult?: string;
+}
+export class UpdateMedicalRequestServiceDto {
+  @ApiProperty({
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  clinicServiceId?: number;
+
+  @ApiProperty({
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  medicalRecordId?: number;
+
+  @ApiProperty({
+    example: 'Service name',
+  })
+  @IsOptional()
+  @IsString()
+  serviceName?: string;
+
+  @ApiProperty({
+    example: 'Service result',
+  })
+  @IsOptional()
+  @IsString()
+  serviceResult?: string;
 }
 
 class Prescription {

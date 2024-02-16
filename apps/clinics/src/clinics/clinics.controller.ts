@@ -1988,10 +1988,56 @@ export class ClinicController {
     }
   }
 
+  @MessagePattern(PatientReceptionCommand.CREATE_MEDICAL_RECORD_SERVICE)
+  async createMedicalRecordService(data: {
+    medicalRecordId: number;
+    clinicId: string;
+    clinicServiceId: number;
+    doctorId?: number | null;
+    serviceResult?: string | null;
+    serviceName?: string | null;
+    amount?: number | null;
+  }) {
+    try {
+      const { medicalRecordId, clinicServiceId, ...rest } = data;
+      const medicalRecordServicePayload: Prisma.medicalRecordServicesUncheckedCreateInput =
+        {
+          medicalRecordId,
+          clinicServiceId,
+          paymentStatus: 0,
+          ...rest,
+        };
+      const medicalRecordService =
+        await this.clinicService.createMedicalRecordService(
+          medicalRecordServicePayload,
+        );
+      if (!medicalRecordService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tạo dịch vụ thất bại',
+        };
+      }
+      const medicalRecord =
+        await this.clinicService.findMedicalRecordById(medicalRecordId);
+      return {
+        status: HttpStatus.CREATED,
+        message: 'Tạo dịch vụ thành công',
+        data: medicalRecord,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
   @MessagePattern(PatientReceptionCommand.REQUEST_SERVICE)
   async requestService(data: any) {
     try {
-      const { clinicServiceId, medicalRecordId, serviceName } = data;
+      const { clinicServiceId, medicalRecordId, serviceName, serviceResult } =
+        data;
       const code = customAlphabet(
         '1234567890abcdefghiklmnouwpqz',
         10,
@@ -2002,6 +2048,7 @@ export class ClinicController {
           clinicServiceId,
           medicalRecordId,
           serviceName,
+          serviceResult,
         };
       const clinicRequestService =
         await this.clinicService.createClinicRequestService(
@@ -2017,6 +2064,41 @@ export class ClinicController {
         status: HttpStatus.CREATED,
         message: 'Tạo yêu cầu dịch vụ thành công',
         data: clinicRequestService,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+        data: null,
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.UPDATE_REQUEST_SERVICE)
+  async updateRequestService(data: {
+    code: string;
+    serviceName?: string;
+    serviceResult?: string;
+    medicalRecordId?: number;
+    clinicServiceId?: number;
+  }) {
+    try {
+      const { code, ...rest } = data;
+      const clinicRequestService =
+        await this.clinicService.findClinicRequestServiceByCode(code);
+      if (!clinicRequestService) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Yêu cầu dịch vụ không tồn tại',
+        };
+      }
+      const updatedClinicRequestService =
+        await this.clinicService.updateClinicRequestService(code, rest);
+      return {
+        status: HttpStatus.OK,
+        message: 'Cập nhật yêu cầu dịch vụ thành công',
+        data: updatedClinicRequestService,
       };
     } catch (error) {
       console.log(error);

@@ -1311,6 +1311,18 @@ export class ClinicService {
     });
   }
 
+  async updateClinicRequestService(
+    code: string,
+    data: Prisma.clinicRequestServicesUncheckedUpdateInput,
+  ) {
+    return this.prismaService.clinicRequestServices.update({
+      where: {
+        code,
+      },
+      data,
+    });
+  }
+
   async updateClinicStatistical({
     date,
     clinicId,
