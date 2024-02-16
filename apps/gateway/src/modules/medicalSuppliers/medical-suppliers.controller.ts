@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -137,7 +138,36 @@ export class MedicalSuppliersController {
       this.clinicServiceClient.send(
         MedicalSupplierCommand.MEDICAL_SUPPLIER_GET,
         {
-          id: medicalSupplierId,
+          id: +medicalSupplierId,
+        },
+      ),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Delete(':medicalSupplyId')
+  async deleteMedicalSupplier(
+    @Param('medicalSupplyId') medicalSupplierId: number,
+  ): Promise<any> {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(
+        MedicalSupplierCommand.MEDICAL_SUPPLIER_DELETE,
+        {
+          id: +medicalSupplierId,
         },
       ),
     );

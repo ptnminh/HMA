@@ -1528,6 +1528,35 @@ export class ClinicController {
     }
   }
 
+  @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_DELETE)
+  async deleteMedicalSupplier(data: any) {
+    try {
+      const { id } = data;
+      const medicalSupplier =
+        await this.clinicService.findMedicalSupplierById(id);
+      if (!medicalSupplier) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Nhà cung cấp không tồn tại',
+        };
+      }
+      await this.clinicService.updateMedicalSupplier(id, {
+        isDeleted: true,
+      });
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Xóa nhà cung cấp thành công',
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
   @MessagePattern(MedicalSupplierCommand.MEDICAL_SUPPLIER_UPDATE)
   async updateMedicalSupplier(data: any) {
     try {
@@ -1822,9 +1851,7 @@ export class ClinicController {
         clinicId,
         examinationStatus: 0,
         paymentStatus: 0,
-        ...(dateCreated && {
-          dateCreated: new Date(dateCreated).toISOString(),
-        }),
+        dateCreated: new Date(dateCreated).toISOString(),
       };
       const patientReception =
         await this.clinicService.createPatientReception(payload);
