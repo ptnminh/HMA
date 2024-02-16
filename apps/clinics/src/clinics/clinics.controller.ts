@@ -2370,7 +2370,14 @@ export class ClinicController {
       if (exInvoice) {
         const { patient: patientInfo, cashier, ...restInvoice } = exInvoice;
         const { patient: patientUserInfo, ...restPatient } = patientInfo;
-        const { users, ...restCashierInfo } = cashier;
+        let clonedCashier: any = { ...cashier };
+        if (cashier) {
+          const { users, ...restCashierInfo } = cashier;
+          clonedCashier = {
+            ...restCashierInfo,
+            ...users,
+          };
+        }
         return {
           status: HttpStatus.OK,
           message: 'Xuất hóa đơn thành công',
@@ -2380,10 +2387,7 @@ export class ClinicController {
               ...restPatient,
               ...patientUserInfo,
             },
-            cashier: {
-              ...restCashierInfo,
-              ...users,
-            },
+            cashier: clonedCashier,
           },
         };
       }
@@ -2433,7 +2437,14 @@ export class ClinicController {
       }
       const { patient: patientInfo, cashier, ...restInvoice } = finalInvoice;
       const { patient: patientUserInfo, ...restPatient } = patientInfo;
-      const { users, ...restCashierInfo } = cashier;
+      let clonedCashier: any = { ...cashier };
+      if (cashier) {
+        const { users, ...restCashierInfo } = cashier;
+        clonedCashier = {
+          ...restCashierInfo,
+          ...users,
+        };
+      }
       return {
         status: HttpStatus.OK,
         message: 'Xuất hóa đơn thành công',
@@ -2443,10 +2454,7 @@ export class ClinicController {
             ...restPatient,
             ...patientUserInfo,
           },
-          cashier: {
-            ...restCashierInfo,
-            ...users,
-          },
+          cashier: clonedCashier,
         },
       };
     } catch (error) {
