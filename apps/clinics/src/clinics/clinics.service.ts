@@ -1566,4 +1566,19 @@ export class ClinicService {
       },
     });
   }
+
+  async deleteMedicalRecordSupply({
+    medicalRecordId,
+    medicalSupplyId,
+  }: {
+    medicalRecordId: number;
+    medicalSupplyId: number;
+  }) {
+    return this.prismaService.usingMedicalSupplies.deleteMany({
+      where: {
+        medicalRecordId,
+        medicalSupplyId,
+      },
+    });
+  }
 }

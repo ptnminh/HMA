@@ -426,12 +426,13 @@ export class PatientReceptionsController {
         },
       ),
     );
-    if (clinicServiceResponse.status !== HttpStatus.CREATED) {
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: clinicServiceResponse.message,
           data: null,
           status: false,
+          error: clinicServiceResponse.error,
         },
         clinicServiceResponse.status,
       );
@@ -440,6 +441,7 @@ export class PatientReceptionsController {
       message: clinicServiceResponse.message,
       data: clinicServiceResponse.data,
       status: true,
+      error: clinicServiceResponse.error,
     };
   }
 
@@ -459,7 +461,7 @@ export class PatientReceptionsController {
         },
       ),
     );
-    if (clinicServiceResponse.status !== HttpStatus.CREATED) {
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: clinicServiceResponse.message,

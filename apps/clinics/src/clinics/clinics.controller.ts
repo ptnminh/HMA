@@ -2584,6 +2584,18 @@ export class ClinicController {
           message: 'Phiếu tiếp nhận không tồn tại',
         };
       }
+      await Promise.all(
+        map(supplies, async (supply) => {
+          try {
+            return await this.clinicService.deleteMedicalRecordSupply({
+              medicalRecordId,
+              medicalSupplyId: supply.medicalSupplyId,
+            });
+          } catch (error) {
+            console.log(error);
+          }
+        }),
+      );
       const clinicId = medicalRecord.clinicId;
       const clinic = await this.clinicService.findClinicById(clinicId);
       if (!clinic) {
