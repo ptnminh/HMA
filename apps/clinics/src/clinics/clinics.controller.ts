@@ -2612,8 +2612,7 @@ export class ClinicController {
           filter(
             member.role.rolePermissions,
             (rolePermission) =>
-              rolePermission.permission.optionName ===
-              'Quản lý thăm khám bệnh nhân',
+              rolePermission.permission.optionName === 'Quản lý vật tư',
           ).length > 0
         );
       });
@@ -2758,8 +2757,7 @@ export class ClinicController {
           filter(
             member.role.rolePermissions,
             (rolePermission) =>
-              rolePermission.permission.optionName ===
-              'Quản lý thăm khám bệnh nhân',
+              rolePermission.permission.optionName === 'Quản lý vật tư',
           ).length > 0
         );
       });
