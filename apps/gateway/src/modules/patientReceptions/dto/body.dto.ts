@@ -403,3 +403,39 @@ export class UpdateInvoiceDto {
   @IsNumber()
   cashierId?: number;
 }
+
+export class MedicalRecordUsingSupplies {
+  @ApiProperty({
+    example: 1,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  medicalSupplyId: number;
+
+  @ApiProperty({
+    example: 1,
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  quantity: number;
+}
+
+export class CreateMedicalRecordUsingSuppliesDto {
+  @ApiProperty({
+    type: [MedicalRecordUsingSupplies],
+    required: true,
+  })
+  @IsNotEmpty()
+  supplies: MedicalRecordUsingSupplies[];
+}
+
+export class UpdateMedicalUsingSuppliesDto {
+  @ApiProperty({
+    required: true,
+    example: 1,
+  })
+  @IsNotEmpty()
+  quantity: number;
+}

@@ -2565,4 +2565,273 @@ export class ClinicController {
       };
     }
   }
+
+  @MessagePattern(PatientReceptionCommand.CREATE_MEDICAL_RECORD_USING_SUPPLIES)
+  async createMedicalRecordUsingSupplies(data: {
+    medicalRecordId: number;
+    supplies: {
+      medicalSupplyId: number;
+      quantity: number;
+    }[];
+  }) {
+    try {
+      const { medicalRecordId, supplies } = data;
+      const medicalRecord =
+        await this.clinicService.findMedicalRecordById(medicalRecordId);
+      if (!medicalRecord) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Phiếu tiếp nhận không tồn tại',
+        };
+      }
+      const clinicId = medicalRecord.clinicId;
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const { ownerId } = clinic;
+      const updatedResult = [];
+      const members = await this.clinicService.findUsersInClinic(clinicId);
+      const validUserManageSupplies = filter(members, (member) => {
+        return (
+          filter(
+            member.role.rolePermissions,
+            (rolePermission) =>
+              rolePermission.permission.optionName ===
+              'Quản lý thăm khám bệnh nhân',
+          ).length > 0
+        );
+      });
+
+      const validUserIdsManageSupplies = map(validUserManageSupplies, 'userId');
+      validUserIdsManageSupplies.push(ownerId);
+      await Promise.all(
+        map(supplies, async (supply) => {
+          try {
+            const medicalRecordSupplyPayload: Prisma.usingMedicalSuppliesUncheckedCreateInput =
+              {
+                medicalRecordId,
+                medicalSupplyId: supply.medicalSupplyId,
+                quantity: supply.quantity,
+              };
+            const medicalSupply =
+              await this.clinicService.findMedicalSupplierById(
+                supply.medicalSupplyId,
+              );
+            if (!medicalSupply) {
+              return updatedResult.push({
+                medicalSupplyId: supply.medicalSupplyId,
+                message: 'Dịch vụ không tồn tại',
+              });
+            }
+            if (medicalSupply?.stock < supply.quantity) {
+              return updatedResult.push({
+                medicalSupplyId: supply.medicalSupplyId,
+                message: `Số lượng tồn kho không đủ còn ${medicalSupply.stock} sản phẩm`,
+              });
+            }
+            const remainStock = medicalSupply?.stock - supply.quantity;
+            await this.clinicService.updateMedicalSupplier(
+              supply.medicalSupplyId,
+              {
+                stock: remainStock,
+              },
+            );
+            if (remainStock === 0) {
+              await Promise.all(
+                map(validUserIdsManageSupplies, async (userId: string) => {
+                  try {
+                    const getTokens = await firstValueFrom(
+                      this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+                        userId,
+                      }),
+                    );
+                    if (getTokens.status !== HttpStatus.OK) {
+                      return {
+                        message: getTokens.message,
+                        status: HttpStatus.BAD_REQUEST,
+                      };
+                    }
+                    const tokens = getTokens.data?.map((item) => item.token);
+                    await lastValueFrom(
+                      this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
+                        tokens,
+                        body: `${medicalSupply.medicineName} hết hàng trong kho`,
+                        title: 'Thông báo',
+                      }),
+                    );
+                    await lastValueFrom(
+                      this.notiServiceClient.emit(EVENTS.NOTIFICATION_CREATE, {
+                        userId,
+                        content: `${medicalSupply.medicineName} hết hàng trong kho`,
+                        title: 'Thông báo',
+                      }),
+                    );
+                  } catch (error) {
+                    console.log(error);
+                  }
+                }),
+              );
+            }
+            return await this.clinicService.createMedicalRecordSupply(
+              medicalRecordSupplyPayload,
+            );
+          } catch (error) {
+            console.log(error);
+          }
+        }),
+      );
+
+      const medicalRecordResult =
+        await this.clinicService.findMedicalRecordById(medicalRecordId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Cập nhật phiếu tiếp nhận thành công',
+        data: medicalRecordResult,
+        error: updatedResult,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Cập nhật phiếu tiếp nhận thất bại',
+      };
+    }
+  }
+
+  @MessagePattern(PatientReceptionCommand.UPDATE_MEDICAL_RECORD_USING_SUPPLIES)
+  async updateMedicalRecordUsingSupplies(data: {
+    medicalRecordId: number;
+    usingMedicalSupplyId: number;
+    quantity: number;
+  }) {
+    try {
+      const { medicalRecordId, usingMedicalSupplyId, quantity } = data;
+      const medicalRecord =
+        await this.clinicService.findMedicalRecordById(medicalRecordId);
+      if (!medicalRecord) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Phiếu tiếp nhận không tồn tại',
+        };
+      }
+      const usingMedicalSupply =
+        await this.clinicService.findMedicalRecordSupplyById(
+          usingMedicalSupplyId,
+        );
+      if (!usingMedicalSupply) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Dịch vụ không tồn tại',
+        };
+      }
+      const medicalSupplyId = usingMedicalSupply.medicalSupplyId;
+      const usingMedicalSupplyQuantity = usingMedicalSupply.quantity;
+      const clinicId = medicalRecord.clinicId;
+      const clinic = await this.clinicService.findClinicById(clinicId);
+      if (!clinic) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Clinic không tồn tại',
+        };
+      }
+      const { ownerId } = clinic;
+      const updatedResult = [];
+      const members = await this.clinicService.findUsersInClinic(clinicId);
+      const validUserManageSupplies = filter(members, (member) => {
+        return (
+          filter(
+            member.role.rolePermissions,
+            (rolePermission) =>
+              rolePermission.permission.optionName ===
+              'Quản lý thăm khám bệnh nhân',
+          ).length > 0
+        );
+      });
+
+      const validUserIdsManageSupplies = map(validUserManageSupplies, 'userId');
+      validUserIdsManageSupplies.push(ownerId);
+      const medicalRecordSupplyPayload: Prisma.usingMedicalSuppliesUncheckedUpdateInput =
+        {
+          quantity,
+        };
+      const medicalSupply =
+        await this.clinicService.findMedicalSupplierById(medicalSupplyId);
+      if (!medicalSupply) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Dịch vụ không tồn tại',
+        };
+      }
+
+      const updateStock = quantity - usingMedicalSupplyQuantity;
+      const remainStock = medicalSupply?.stock - updateStock;
+      if (remainStock < 0) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: `Số lượng tồn kho không đủ còn ${medicalSupply.stock} sản phẩm`,
+        };
+      }
+      await this.clinicService.updateMedicalSupplier(medicalSupplyId, {
+        stock: remainStock,
+      });
+      if (remainStock === 0) {
+        await Promise.all(
+          map(validUserIdsManageSupplies, async (userId: string) => {
+            try {
+              const getTokens = await firstValueFrom(
+                this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+                  userId,
+                }),
+              );
+              if (getTokens.status !== HttpStatus.OK) {
+                return {
+                  message: getTokens.message,
+                  status: HttpStatus.BAD_REQUEST,
+                };
+              }
+              const tokens = getTokens.data?.map((item) => item.token);
+              await lastValueFrom(
+                this.notiServiceClient.emit(EVENTS.NOTIFICATION_PUSH, {
+                  tokens,
+                  body: `${medicalSupply.medicineName} hết hàng trong kho`,
+                  title: 'Thông báo',
+                }),
+              );
+              await lastValueFrom(
+                this.notiServiceClient.emit(EVENTS.NOTIFICATION_CREATE, {
+                  userId,
+                  content: `${medicalSupply.medicineName} hết hàng trong kho`,
+                  title: 'Thông báo',
+                }),
+              );
+            } catch (error) {
+              console.log(error);
+            }
+          }),
+        );
+      }
+      await this.clinicService.updateMedicalRecordSupply(
+        usingMedicalSupplyId,
+        medicalRecordSupplyPayload,
+      );
+      const medicalRecordResult =
+        await this.clinicService.findMedicalRecordById(medicalRecordId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Cập nhật phiếu tiếp nhận thành công',
+        data: medicalRecordResult,
+        error: updatedResult,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Cập nhật phiếu tiếp nhận thất bại',
+      };
+    }
+  }
 }

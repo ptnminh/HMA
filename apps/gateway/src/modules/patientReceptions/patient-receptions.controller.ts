@@ -14,12 +14,14 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import {
   CreateMedicalRecordServiceDto,
+  CreateMedicalRecordUsingSuppliesDto,
   CreateMedicalRequestServiceDto,
   CreatePatientReceptionDto,
   UpdateInvoiceDto,
   UpdateMedicalRecordDto,
   UpdateMedicalRecordServiceDto,
   UpdateMedicalRequestServiceDto,
+  UpdateMedicalUsingSuppliesDto,
   UpdatePrescriptionToMedicalRecordDto,
 } from './dto/body.dto';
 import { firstValueFrom } from 'rxjs';
@@ -407,6 +409,72 @@ export class PatientReceptionsController {
       message: clinicServiceResponse.message,
       data: clinicServiceResponse.data,
       status: true,
+    };
+  }
+
+  @Post(':medicalRecordId/using-supplies')
+  async createUsingSuppliesToMedicalRecord(
+    @Param('medicalRecordId') medicalRecordId: string,
+    @Body() body: CreateMedicalRecordUsingSuppliesDto,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(
+        PatientReceptionCommand.CREATE_MEDICAL_RECORD_USING_SUPPLIES,
+        {
+          medicalRecordId: +medicalRecordId,
+          supplies: body.supplies,
+        },
+      ),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Put(':medicalRecordId/using-supplies/:usingMedicalSupplyId')
+  async updateUsingSuppliesToMedicalRecord(
+    @Param('medicalRecordId') medicalRecordId: string,
+    @Param('usingMedicalSupplyId') usingMedicalSupplyId: string,
+    @Body() body: UpdateMedicalUsingSuppliesDto,
+  ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(
+        PatientReceptionCommand.UPDATE_MEDICAL_RECORD_USING_SUPPLIES,
+        {
+          medicalRecordId: +medicalRecordId,
+          usingMedicalSupplyId: +usingMedicalSupplyId,
+          ...body,
+        },
+      ),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+          error: clinicServiceResponse.error,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+      error: clinicServiceResponse.error,
     };
   }
 }

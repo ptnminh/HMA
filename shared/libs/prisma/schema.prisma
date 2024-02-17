@@ -398,22 +398,23 @@ model patients {
 }
 
 model medicalSupplies {
-  id           Int       @id @default(autoincrement())
-  medicineName String    @map(name: "medicine_name")
-  stock        Int?
-  price        Float?
-  expiredAt    DateTime?
-  expiry       DateTime?
-  vendor       String?
-  description  String?
-  isDeleted    Boolean   @default(false) @map(name: "is_deleted")
-  unit         String?
-  clinicId     String?   @map(name: "clinic_id")
-  note         String?
-  categoryId   Int?      @map(name: "category_id")
-  isDisabled   Boolean   @default(false) @map(name: "is_disabled")
-  category     category? @relation(fields: [categoryId], references: [id])
-  clinics      clinics?  @relation(fields: [clinicId], references: [id])
+  id                   Int                    @id @default(autoincrement())
+  medicineName         String                 @map(name: "medicine_name")
+  stock                Int?
+  price                Float?
+  expiredAt            DateTime?
+  expiry               DateTime?
+  vendor               String?
+  description          String?
+  isDeleted            Boolean                @default(false) @map(name: "is_deleted")
+  unit                 String?
+  clinicId             String?                @map(name: "clinic_id")
+  note                 String?
+  categoryId           Int?                   @map(name: "category_id")
+  isDisabled           Boolean                @default(false) @map(name: "is_disabled")
+  category             category?              @relation(fields: [categoryId], references: [id])
+  clinics              clinics?               @relation(fields: [clinicId], references: [id])
+  usingMedicalSupplies usingMedicalSupplies[]
 
   @@map("medical_supplies")
 }
@@ -456,6 +457,7 @@ model medicalRecords {
   medicalRecordServices medicalRecordServices[]
   prescriptionDetail    prescriptionDetail[]
   investmentInvoice     investmentInvoice?
+  usingMedicalSupplies  usingMedicalSupplies[]
 
   @@map("medical_records")
 }
@@ -560,4 +562,17 @@ model invoiceDetail {
   investmentInvoice investmentInvoice @relation(fields: [invoiceId], references: [id])
 
   @@map("invoice_detail")
+}
+
+model usingMedicalSupplies {
+  id              Int             @id @default(autoincrement())
+  medicalSupplyId Int             @map(name: "medical_supply_id")
+  medicalRecordId Int             @map(name: "clinic_id")
+  quantity        Int
+  createdAt       DateTime        @default(now()) @map(name: "created_at")
+  updatedAt       DateTime        @default(now()) @updatedAt @map(name: "updated_at")
+  medicalSupply   medicalSupplies @relation(fields: [medicalSupplyId], references: [id])
+  medicalRecord   medicalRecords  @relation(fields: [medicalRecordId], references: [id])
+
+  @@map("using_medical_supplies")
 }

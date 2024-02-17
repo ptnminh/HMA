@@ -1122,6 +1122,7 @@ export class ClinicService {
         clinicRequestServices: true,
         medicalRecordServices: true,
         prescriptionDetail: true,
+        usingMedicalSupplies: true,
       },
     });
     if (!medicalRecords) {
@@ -1246,6 +1247,7 @@ export class ClinicService {
         clinicRequestServices: true,
         medicalRecordServices: true,
         prescriptionDetail: true,
+        usingMedicalSupplies: true,
       },
     });
     return map(medicalRecords, (medicalRecord) => {
@@ -1534,6 +1536,34 @@ export class ClinicService {
         id,
       },
       data,
+    });
+  }
+
+  async createMedicalRecordSupply(
+    data: Prisma.usingMedicalSuppliesUncheckedCreateInput,
+  ) {
+    return this.prismaService.usingMedicalSupplies.create({
+      data,
+    });
+  }
+
+  async updateMedicalRecordSupply(
+    id: number,
+    data: Prisma.usingMedicalSuppliesUncheckedUpdateInput,
+  ) {
+    return this.prismaService.usingMedicalSupplies.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  async findMedicalRecordSupplyById(id: number) {
+    return this.prismaService.usingMedicalSupplies.findUnique({
+      where: {
+        id,
+      },
     });
   }
 }
