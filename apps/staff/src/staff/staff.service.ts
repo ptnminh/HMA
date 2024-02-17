@@ -169,6 +169,7 @@ export class StaffService {
         day: true,
         startTime: true,
         endTime: true,
+        isDisabled: true,
       },
       orderBy: {
         day: 'asc',

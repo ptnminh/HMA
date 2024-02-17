@@ -375,10 +375,10 @@ export class StaffController {
       }
       const currentSChedules =
         await this.staffService.findScheduleByStaffId(staffId);
-      for (const element of currentSChedules) {
+      for (var element of currentSChedules) {
         await this.staffService.deleteSchedule(element.id);
       }
-      for (const schedule of scheduleList) {
+      for (var schedule of scheduleList) {
         const payload: Prisma.staffSchedulesUncheckedCreateInput = {
           staffId: staffId,
           startTime: schedule['startTime'],
