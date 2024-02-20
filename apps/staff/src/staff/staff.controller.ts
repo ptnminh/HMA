@@ -186,7 +186,7 @@ export class StaffController {
           role: {
             id: role.id,
             name: role.name,
-            rolePermissions: role.rolePermissions.map((value) => {
+            permissions: role.rolePermissions.map((value) => {
               return value.permission;
             })
           }
