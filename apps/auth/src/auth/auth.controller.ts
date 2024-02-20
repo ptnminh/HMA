@@ -192,7 +192,7 @@ export class AuthController {
           isAcceptInvite: true,
         });
       }
-      if (Object.keys(notificationData).length > 0) {
+      if (notificationData && Object.keys(notificationData)?.length > 0) {
         // create real time notification
         const overriedContent =
           notificationData.content +
