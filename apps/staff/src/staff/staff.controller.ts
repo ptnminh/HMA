@@ -177,10 +177,20 @@ export class StaffController {
         };
       }
       delete staff.users.password;
+      const {role, ...rest} = staff;
       return {
         message: 'Tìm kiếm thành công',
         status: HttpStatus.OK,
-        data: staff,
+        data: {
+          ...rest,
+          role: {
+            id: role.id,
+            name: role.name,
+            rolePermissions: role.rolePermissions.map((value) => {
+              return value.permission;
+            })
+          }
+        }
       };
     } catch (error) {
       console.log(error);
