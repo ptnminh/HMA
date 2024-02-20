@@ -13,7 +13,7 @@ import { Prisma } from '@prisma/client';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
-import { filter, map, sumBy, uniq } from 'lodash';
+import { filter, map, orderBy, sumBy, uniq } from 'lodash';
 import {
   calculateTimeBefore,
   combineDateAndTime,
@@ -2310,6 +2310,50 @@ export class ClinicController {
         status: HttpStatus.OK,
         message: 'Lấy thông tin thống kê thành công',
         data: result,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(ClinicStatiticsCommand.GET_CLINIC_STATITICS_BY_DATE)
+  async getStatisticalByDate(data: {
+    clinicId: string;
+    startDate?: string;
+    endDate?: string;
+  }) {
+    try {
+      const { clinicId, startDate, endDate } = data;
+      const clinicStatistical = await this.clinicService.findClinicStatistical({
+        clinicId,
+        startDate,
+        endDate,
+      });
+      if (!clinicStatistical) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Thống kê không tồn tại',
+        };
+      }
+      const refactoredData = map(
+        orderBy(clinicStatistical, 'date', 'desc'),
+        (item) => {
+          return {
+            date: moment(item.date).format('MMM DD'),
+            numberOfPatients: item.numberOfPatients,
+            numberOfAppointments: item.numberOfAppointments,
+            revenue: item.revenue,
+          };
+        },
+      );
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy thông tin thống kê thành công',
+        data: refactoredData,
       };
     } catch (error) {
       console.log(error);
