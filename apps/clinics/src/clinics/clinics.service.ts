@@ -630,10 +630,9 @@ export class ClinicService {
     };
   }
   async createAppointment(data: Prisma.appointmentsUncheckedCreateInput) {
-    const clonedData = { ...data };
-    const { userId: pid, ...restInfo } = clonedData;
+    
     const appointment = await this.prismaService.appointments.create({
-      data: restInfo,
+      data,
       include: {
         staffs: {
           include: {
