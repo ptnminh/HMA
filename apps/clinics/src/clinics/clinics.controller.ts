@@ -2340,7 +2340,7 @@ export class ClinicController {
         };
       }
       const refactoredData = map(
-        orderBy(clinicStatistical, 'date', 'desc'),
+        orderBy(clinicStatistical, 'date', 'asc'),
         (item) => {
           return {
             date: moment(item.date).format('MMM DD'),
