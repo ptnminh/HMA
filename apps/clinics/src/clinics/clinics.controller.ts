@@ -16,6 +16,7 @@ import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
 import { filter, map, orderBy, sumBy, uniq } from 'lodash';
 import {
   calculateTimeBefore,
+  checkAndInsertMissingDates,
   combineDateAndTime,
   isContainSpecialChar,
   scheduleJob,
@@ -2343,17 +2344,22 @@ export class ClinicController {
         orderBy(clinicStatistical, 'date', 'asc'),
         (item) => {
           return {
-            date: moment(item.date).format('MMM DD'),
+            date: item.date,
             numberOfPatients: item.numberOfPatients,
             numberOfAppointments: item.numberOfAppointments,
             revenue: item.revenue,
           };
         },
       );
+      const newDataWithMissingDates = checkAndInsertMissingDates(
+        startDate,
+        endDate,
+        refactoredData,
+      );
       return {
         status: HttpStatus.OK,
         message: 'Lấy thông tin thống kê thành công',
-        data: refactoredData,
+        data: newDataWithMissingDates,
       };
     } catch (error) {
       console.log(error);
