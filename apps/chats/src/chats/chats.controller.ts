@@ -25,7 +25,7 @@ export class ChatController {
           return {
             data: group,
             message: "Group Chat giữa 2 user này đã tồn tại",
-            status: HttpStatus.BAD_REQUEST,
+            status: HttpStatus.OK,
           }
         }
       }
