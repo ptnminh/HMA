@@ -99,6 +99,7 @@ export class ChatService {
             email: true,
             firstName: true,
             lastName: true,
+            avatar: true,
           }
         }
       },
@@ -205,6 +206,34 @@ export class ChatService {
         type: true,
         isActive: true,
         groupChatMember: true,
+      }
+    })
+  }
+
+  async findActiveOneOnOneGroupChatByUserList(userId1: string, userId2: string) {
+    return this.prismaService.groupChats.findFirst({
+      where: {
+        isActive: true,
+        type: 'one-on-one',
+        AND: [
+          {
+            groupChatMember: {
+              some: {
+                userId: userId1,
+              }
+            }
+          },
+          {
+            groupChatMember: {
+              some: {
+                userId: userId2,
+              }
+            }
+          },
+        ]
+      },
+      include: {
+        groupChatMember: true
       }
     })
   }

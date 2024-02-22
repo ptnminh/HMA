@@ -75,10 +75,10 @@ import { userListDto } from './dto/user-list.dto';
             throw new HttpException(
                 {
                   message: chatServiceResponse.message,
-                  data: null,
                   status: false,
+                  data: chatServiceResponse.data,
                 },
-                chatServiceResponse.status
+                chatServiceResponse.status,
             )
         }
         return {

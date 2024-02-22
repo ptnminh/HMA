@@ -17,6 +17,18 @@ export class ChatController {
       if (rest.type == null) {
         rest.type = 'group'
       }
+      if (rest.type === 'one-on-one') {
+        const userId1 = userList[0]
+        const userId2 = data.adminId
+        const group = await this.chatService.findActiveOneOnOneGroupChatByUserList(userId1, userId2)
+        if (group) {
+          return {
+            data: group,
+            message: "Group Chat giữa 2 user này đã tồn tại",
+            status: HttpStatus.BAD_REQUEST,
+          }
+        }
+      }
       const adminId = data.adminId
       if (!userList.includes(adminId)) {
         userList.push(adminId)
@@ -90,7 +102,8 @@ export class ChatController {
           joinedAt: member.joinedAt,
           email: member.users.email,
           firstName: member.users.firstName,
-          lastName: member.users.lastName
+          lastName: member.users.lastName,
+          avatar: member.users.avatar,
         }
         returnList.push(result)
       }
@@ -310,7 +323,8 @@ export class ChatController {
             joinedAt: member.joinedAt,
             email: member.users.email,
             firstName: member.users.firstName,
-            lastName: member.users.lastName
+            lastName: member.users.lastName,
+            avatar: member.users.avatar
           }
           groupMemberList.push(obj)
         }
