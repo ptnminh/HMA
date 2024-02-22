@@ -4,7 +4,7 @@ import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { AuthCommand, ClinicCommand, EVENTS, StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
-import { map, some } from 'lodash';
+import { map, some, uniqBy } from 'lodash';
 import { isContainSpecialChar } from './utils';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
@@ -640,9 +640,12 @@ export class StaffController {
                 return item.permission;
               }),
             },
-            services: map(
-              staffServices,
-              (staffService) => staffService?.clinicServices,
+            services: uniqBy(
+              map(
+                staffServices,
+                (staffService) => staffService?.clinicServices,
+              ),
+              'id',
             ),
           };
         }),
