@@ -4,7 +4,7 @@ import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { AuthCommand, ClinicCommand, EVENTS, StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
-import { some } from 'lodash';
+import { map, some } from 'lodash';
 import { isContainSpecialChar } from './utils';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
@@ -177,7 +177,7 @@ export class StaffController {
         };
       }
       delete staff.users.password;
-      const {role, ...rest} = staff;
+      const { role, ...rest } = staff;
       return {
         message: 'Tìm kiếm thành công',
         status: HttpStatus.OK,
@@ -188,9 +188,9 @@ export class StaffController {
             name: role.name,
             permissions: role.rolePermissions.map((value) => {
               return value.permission;
-            })
-          }
-        }
+            }),
+          },
+        },
       };
     } catch (error) {
       console.log(error);
@@ -259,12 +259,14 @@ export class StaffController {
         }
       }
       if (userInfo) {
-        const {birthday, ...rest} = userInfo
-        const updateUserResponse  = await firstValueFrom(this.authServiceClient.send(AuthCommand.UPDATE_USER, {
-          id: staff.users.id,
-          ...rest,
-          birthday: new Date(birthday),
-        }))
+        const { birthday, ...rest } = userInfo;
+        const updateUserResponse = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.UPDATE_USER, {
+            id: staff.users.id,
+            ...rest,
+            birthday: new Date(birthday),
+          }),
+        );
         if (updateUserResponse.status !== HttpStatus.OK) {
           return {
             message: updateUserResponse.message,
@@ -272,27 +274,27 @@ export class StaffController {
           };
         }
       }
-      const updatedData : Prisma.staffsUncheckedUpdateInput = {
+      const updatedData: Prisma.staffsUncheckedUpdateInput = {
         ...payload,
-      }
-      await this.staffService.updateStaff(id, updatedData)
-      const updatedStaff = await this.staffService.findStaffById(id)
-      delete(updatedStaff.clinics)
-      const {role, users , staffServices ,...staffData} = updatedStaff
-      delete(users.password)
-      delete(staffData.staffSchedules)
+      };
+      await this.staffService.updateStaff(id, updatedData);
+      const updatedStaff = await this.staffService.findStaffById(id);
+      delete updatedStaff.clinics;
+      const { role, users, staffServices, ...staffData } = updatedStaff;
+      delete users.password;
+      delete staffData.staffSchedules;
       return {
         status: HttpStatus.OK,
-        message: "Cập nhân nhân viên thành công",
+        message: 'Cập nhân nhân viên thành công',
         data: {
           ...staffData,
           users,
           services: staffServices.map((staffService) => {
-            const {clinicServices, ...rest} = staffService
-            return clinicServices
-          })
-        }
-      }
+            const { clinicServices, ...rest } = staffService;
+            return clinicServices;
+          }),
+        },
+      };
     } catch (error) {
       console.log(error);
       return {
@@ -626,7 +628,7 @@ export class StaffController {
         status: HttpStatus.OK,
         message: 'Lấy danh sách thông tin staff thành công',
         data: staffs.map((value) => {
-          const { users, role, ...rest } = value;
+          const { users, role, staffServices, ...rest } = value;
           if (users) delete users.password;
           const { rolePermissions, ...roleData } = role;
           return {
@@ -638,6 +640,10 @@ export class StaffController {
                 return item.permission;
               }),
             },
+            services: map(
+              staffServices,
+              (staffService) => staffService?.clinicServices,
+            ),
           };
         }),
       };

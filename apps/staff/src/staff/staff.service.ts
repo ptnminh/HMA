@@ -242,15 +242,29 @@ export class StaffService {
   }
 
   async searchStaff(query) {
-    const { userId, clinicId, roleId, gender, phoneNumber, email, name, isDisabled, isAcceptInvite } = query;
+    const {
+      userId,
+      clinicId,
+      roleId,
+      gender,
+      phoneNumber,
+      email,
+      name,
+      isDisabled,
+      isAcceptInvite,
+    } = query;
     const staffs = await this.prismaService.staffs.findMany({
       where: {
-        clinicId: clinicId? clinicId : undefined,
-        roleId: (roleId!== undefined && roleId !== null)? roleId : undefined,
-        isDisabled: (isDisabled !== null && isDisabled !== undefined)? 
-                    isDisabled : undefined,
-        isAcceptInvite: (isAcceptInvite !== null && isAcceptInvite !== undefined)? 
-                    isAcceptInvite : undefined,
+        clinicId: clinicId ? clinicId : undefined,
+        roleId: roleId !== undefined && roleId !== null ? roleId : undefined,
+        isDisabled:
+          isDisabled !== null && isDisabled !== undefined
+            ? isDisabled
+            : undefined,
+        isAcceptInvite:
+          isAcceptInvite !== null && isAcceptInvite !== undefined
+            ? isAcceptInvite
+            : undefined,
         AND: [
           {
             users:
@@ -293,6 +307,11 @@ export class StaffService {
                 },
               },
             },
+          },
+        },
+        staffServices: {
+          select: {
+            clinicServices: true,
           },
         },
       },
