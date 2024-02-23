@@ -624,12 +624,13 @@ export class ClinicController {
   @MessagePattern(ClinicCommand.GET_APPOINMENTS)
   async getAppointments(data: any) {
     try {
-      const { clinicId, date, status, doctorId } = data;
+      const { clinicId, date, status, doctorId, puid } = data;
       const appointments = await this.clinicService.getAppointments({
         date,
         status,
         doctorId: +doctorId,
         clinicId,
+        puid,
       });
       return {
         status: HttpStatus.OK,
@@ -1954,14 +1955,16 @@ export class ClinicController {
     patientId?: number;
     doctorId?: number;
     paymentStatus?: number;
+    puid?: string;
   }) {
     try {
-      const { clinicId, patientId, doctorId, paymentStatus } = data;
+      const { clinicId, patientId, doctorId, paymentStatus, puid } = data;
       const medicalRecords = await this.clinicService.findMedicalRecords({
         clinicId,
         patientId,
         doctorId,
         paymentStatus,
+        puid,
       });
       return {
         status: HttpStatus.OK,

@@ -479,12 +479,14 @@ export class ClinicService {
     status,
     clinicId,
     patientId,
+    puid,
   }: {
     doctorId?: number;
     date?: string;
     status?: string;
     patientId?: string;
     clinicId?: string;
+    puid?: string;
   }) {
     const where: any = {
       ...(doctorId ? { doctorId } : {}),
@@ -492,6 +494,7 @@ export class ClinicService {
       ...(status ? { status } : {}),
       ...(patientId ? { patientId } : {}),
       ...(clinicId ? { clinicId } : {}),
+      ...(puid? {patients: {userId: puid}} : {})
     };
     const appointments = await this.prismaService.appointments.findMany({
       where,
@@ -1198,17 +1201,20 @@ export class ClinicService {
     patientId,
     doctorId,
     paymentStatus,
+    puid,
   }: {
     clinicId?: string;
     patientId?: number;
     doctorId?: number;
     paymentStatus?: number;
+    puid?: string;
   }) {
     const where: any = {
       ...(clinicId ? { clinicId } : {}),
       ...(patientId ? { patientId: +patientId } : {}),
       ...(doctorId ? { doctorId: +doctorId } : {}),
       ...(paymentStatus ? { paymentStatus: +paymentStatus } : {}),
+      ...(puid? {patient: {  userId: puid}}: {})
     };
     const medicalRecords = await this.prismaService.medicalRecords.findMany({
       where,
