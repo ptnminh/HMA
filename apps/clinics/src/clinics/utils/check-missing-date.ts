@@ -6,6 +6,7 @@ export interface DataItem {
   numberOfPatients: number;
   numberOfAppointments: number;
   revenue: number;
+  numberOfExaminations: number;
 }
 
 export function checkAndInsertMissingDates(
@@ -26,12 +27,13 @@ export function checkAndInsertMissingDates(
       dateMap[currentDateStr]
         ? {
             ...find(data, { date: currentDateStr }),
-            date: moment(currentDate).format('MMM DD'),
+            date: moment(currentDate).format('MMM DD YYYY'),
           }
         : {
-            date: moment(currentDate).format('MMM DD'),
+            date: moment(currentDate).format('MMM DD YYYY'),
             numberOfPatients: 0,
             numberOfAppointments: 0,
+            numberOfExaminations: 0,
             revenue: 0,
           },
     );

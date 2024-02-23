@@ -1909,6 +1909,15 @@ export class ClinicController {
       }
 
       await this.clinicService.updateMedicalRecord(id, rest);
+      if (rest?.examinationStatus === 3) {
+        await this.clinicService.updateClinicStatistical({
+          date: moment().format('YYYY-MM-DD'),
+          clinicId: patientReception.clinicId,
+          payload: {
+            newExamination: true,
+          },
+        });
+      }
       const medicalRecord = await this.clinicService.findMedicalRecordById(id);
       return {
         status: HttpStatus.OK,
@@ -2282,20 +2291,13 @@ export class ClinicController {
   @MessagePattern(ClinicStatiticsCommand.GET_CLINIC_STATITICS)
   async getStatistical(data: {
     clinicId: string;
-    date?: string;
-    days?: number;
+    startDate?: string;
+    endDate?: string;
   }) {
     try {
-      const { clinicId, date, days } = data;
-      let endDate = '';
-      let startDate = '';
-      if (days) {
-        startDate = moment().subtract(days, 'days').format('YYYY-MM-DD');
-        endDate = moment().format('YYYY-MM-DD');
-      }
+      const { clinicId, startDate, endDate } = data;
       const clinicStatistical = await this.clinicService.findClinicStatistical({
         clinicId,
-        date,
         startDate,
         endDate,
       });
@@ -2309,6 +2311,7 @@ export class ClinicController {
         totalPatients: sumBy(clinicStatistical, 'numberOfPatients'),
         totalAppointments: sumBy(clinicStatistical, 'numberOfAppointments'),
         totalRevenue: sumBy(clinicStatistical, 'revenue'),
+        totalExaminations: sumBy(clinicStatistical, 'numberOfExaminations'),
       };
       return {
         status: HttpStatus.OK,
@@ -2351,6 +2354,7 @@ export class ClinicController {
             numberOfPatients: item.numberOfPatients,
             numberOfAppointments: item.numberOfAppointments,
             revenue: item.revenue,
+            numberOfExaminations: item.numberOfExaminations,
           };
         },
       );

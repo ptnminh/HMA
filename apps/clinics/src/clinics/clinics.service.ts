@@ -494,7 +494,7 @@ export class ClinicService {
       ...(status ? { status } : {}),
       ...(patientId ? { patientId } : {}),
       ...(clinicId ? { clinicId } : {}),
-      ...(puid? {patients: {userId: puid}} : {})
+      ...(puid ? { patients: { userId: puid } } : {}),
     };
     const appointments = await this.prismaService.appointments.findMany({
       where,
@@ -1214,7 +1214,7 @@ export class ClinicService {
       ...(patientId ? { patientId: +patientId } : {}),
       ...(doctorId ? { doctorId: +doctorId } : {}),
       ...(paymentStatus ? { paymentStatus: +paymentStatus } : {}),
-      ...(puid? {patient: {  userId: puid}}: {})
+      ...(puid ? { patient: { userId: puid } } : {}),
     };
     const medicalRecords = await this.prismaService.medicalRecords.findMany({
       where,
@@ -1359,6 +1359,7 @@ export class ClinicService {
       revenue?: number;
       newPatient?: boolean;
       newAppointment?: boolean;
+      newExamination?: boolean;
     };
   }) {
     return this.prismaService.clinicStatistic.upsert({
@@ -1380,6 +1381,9 @@ export class ClinicService {
         ...(payload.revenue && {
           revenue: payload.revenue,
         }),
+        ...(payload.newExamination && {
+          numberOfExaminations: 1,
+        }),
       },
       update: {
         ...(payload.revenue && {
@@ -1394,6 +1398,11 @@ export class ClinicService {
         }),
         ...(payload.newAppointment && {
           numberOfAppointments: {
+            increment: 1,
+          },
+        }),
+        ...(payload.newExamination && {
+          numberOfExaminations: {
             increment: 1,
           },
         }),

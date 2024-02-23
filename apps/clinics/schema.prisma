@@ -506,6 +506,7 @@ model clinicStatistic {
   numberOfPatients     Int      @default(0) @map(name: "number_of_patients")
   revenue              Float    @default(0)
   numberOfAppointments Int      @default(0) @map(name: "number_of_appointments")
+  numberOfExaminations Int      @default(0) @map(name: "number_of_examinations")
   createdAt            DateTime @default(now()) @map(name: "created_at")
   updatedAt            DateTime @default(now()) @updatedAt @map(name: "updated_at")
   clinics              clinics  @relation(fields: [clinicId], references: [id])

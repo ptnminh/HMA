@@ -29,7 +29,6 @@ export class ClinicStatiticsController {
         ClinicStatiticsCommand.GET_CLINIC_STATITICS,
         {
           ...query,
-          ...(query.days && { days: parseInt(query.days) }),
         },
       ),
     );

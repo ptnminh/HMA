@@ -7,15 +7,15 @@ export class GetClinicsQueryDto {
   @IsNotEmpty()
   clinicId: string;
 
-  @ApiProperty({ required: false, example: '2024-02-10' })
+  @ApiProperty({ required: true, example: '2024-02-10' })
   @IsString()
   @IsOptional()
-  date: string;
+  startDate: string;
 
-  @ApiProperty({ required: false, example: 7 })
+  @ApiProperty({ required: true, example: '2024-02-17' })
   @IsString()
   @IsOptional()
-  days: string;
+  endDate: string;
 }
 
 export class GetClinicsByDateQueryDto {
