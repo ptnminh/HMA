@@ -2114,8 +2114,7 @@ export class ClinicController {
   @MessagePattern(PatientReceptionCommand.REQUEST_SERVICE)
   async requestService(data: any) {
     try {
-      const { clinicServiceId, medicalRecordId, serviceName, serviceResult } =
-        data;
+      const { medicalRecordId, serviceName, serviceResult } = data;
       const code = customAlphabet(
         '1234567890abcdefghiklmnouwpqz',
         10,
@@ -2123,7 +2122,6 @@ export class ClinicController {
       const medicalRequestServicePayload: Prisma.clinicRequestServicesUncheckedCreateInput =
         {
           code,
-          clinicServiceId,
           medicalRecordId,
           serviceName,
           serviceResult,
@@ -2159,7 +2157,6 @@ export class ClinicController {
     serviceName?: string;
     serviceResult?: string;
     medicalRecordId?: number;
-    clinicServiceId?: number;
   }) {
     try {
       const { code, ...rest } = data;

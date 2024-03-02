@@ -269,13 +269,6 @@ export class CreateMedicalRecordServiceDto {
 
 export class CreateMedicalRequestServiceDto {
   @ApiProperty({
-    example: 1,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  clinicServiceId: number;
-
-  @ApiProperty({
     example: 'Service name',
   })
   @IsNotEmpty()
@@ -290,13 +283,6 @@ export class CreateMedicalRequestServiceDto {
   serviceResult?: string;
 }
 export class UpdateMedicalRequestServiceDto {
-  @ApiProperty({
-    example: 1,
-  })
-  @IsOptional()
-  @IsNumber()
-  clinicServiceId?: number;
-
   @ApiProperty({
     example: 1,
   })

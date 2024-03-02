@@ -487,14 +487,14 @@ model medicalRecordServices {
 model clinicRequestServices {
   code                  String                 @id
   serviceName           String                 @map(name: "service_name")
-  clinicServiceId       Int                    @map(name: "service_id")
+  clinicServiceId       Int?                   @map(name: "service_id")
   medicalRecordId       Int                    @map(name: "medical_record_id")
   serviceResult         String?                @map(name: "service_result") @db.Text
   createdAt             DateTime               @default(now()) @map(name: "created_at")
   updatedAt             DateTime               @default(now()) @updatedAt @map(name: "updated_at")
   medicalRecord         medicalRecords         @relation(fields: [medicalRecordId], references: [id])
   medicalRecordServices medicalRecordServices?
-  clinicServices        clinicServices         @relation(fields: [clinicServiceId], references: [id])
+  clinicServices        clinicServices?        @relation(fields: [clinicServiceId], references: [id])
 
   @@map("clinic_request_services")
 }
