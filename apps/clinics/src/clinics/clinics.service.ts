@@ -910,9 +910,6 @@ export class ClinicService {
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
     });
   }
 
