@@ -132,6 +132,9 @@ export class StaffService {
       where: {
         isDisabled: false,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -212,6 +215,9 @@ export class StaffService {
       where: {
         staffId,
         isDisabled: false,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
@@ -360,6 +366,9 @@ export class StaffService {
             },
           },
         },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }

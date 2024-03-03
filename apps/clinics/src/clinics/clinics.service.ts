@@ -350,6 +350,9 @@ export class ClinicService {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -425,6 +428,9 @@ export class ClinicService {
             staffId: true,
           },
         },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
@@ -530,6 +536,9 @@ export class ClinicService {
         },
         clinics: true,
         clinicServices: true,
+      },
+      orderBy: {
+        createAt: 'desc',
       },
     });
     return map(appointments, (appointment: any) => {
@@ -901,6 +910,9 @@ export class ClinicService {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -1256,6 +1268,9 @@ export class ClinicService {
         medicalRecordServices: true,
         prescriptionDetail: true,
         usingMedicalSupplies: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
     return map(medicalRecords, (medicalRecord) => {
