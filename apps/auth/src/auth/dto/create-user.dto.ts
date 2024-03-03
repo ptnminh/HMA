@@ -16,6 +16,14 @@ export class RegisterDto {
   isMobile?: boolean;
 
   noActionSendEmail?: boolean;
+
+  type?: string;
+
+  rawPassword?: string;
+
+  uniqueId?: string;
+
+  notificationData?: any;
 }
 
 export class GoogleOauthDTO {

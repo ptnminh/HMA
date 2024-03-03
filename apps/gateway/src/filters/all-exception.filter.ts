@@ -18,10 +18,16 @@ export class AllExceptionFilter implements ExceptionFilter {
         exception?.message ||
         ErrorMessageEnum.INTERNAL_SERVER_ERROR;
 
+
+      const data =
+        exception?.response?.data ||
+        exception?.data ||
+        null;
+
       return response.status(status).json({
         status: false,
         message,
-        data: null,
+        data,
       });
     } catch (error) {
       console.log(error);

@@ -1,12 +1,8 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { JwtAuthGuard } from './guards';
 import { TerminusModule } from '@nestjs/terminus';
-import { Notification, NotificationSchema } from './app.schema';
-import { MongooseModule } from '@nestjs/mongoose';
 import { FirebaseService } from './services';
 import { AllExceptionFilter } from './filters/all-exception.filter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -17,16 +13,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       isGlobal: true,
     }),
     TerminusModule,
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get('DATABASE_MONGO_URL'),
-      }),
-      inject: [ConfigService],
-    }),
-    MongooseModule.forFeature([
-      { name: Notification.name, schema: NotificationSchema },
-    ]),
     ClientsModule.registerAsync([
       {
         name: 'AUTH_SERVICE',

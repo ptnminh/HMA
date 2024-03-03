@@ -70,11 +70,11 @@ export class FirebaseService {
   }) {
     const ref = firebase.database().ref('notifications');
     if (!currentNotiLength) {
-      return ref.child(userId).set({ '1': newData });
+      return ref.child(userId).set({ '0': newData });
     }
     const newKeyRef = ref
       .child(userId)
-      .child((currentNotiLength + 1).toString())
+      .child(currentNotiLength.toString())
       .set(newData);
     return newKeyRef;
   }

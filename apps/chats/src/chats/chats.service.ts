@@ -10,7 +10,7 @@ export class ChatService {
   async createGroup(data: Prisma.groupChatsUncheckedCreateInput) {
     return await this.prismaService.groupChats.create({
       data,
-    })
+    });
   }
 
   async updateGroup(data: Prisma.groupChatsUncheckedUpdateInput, id: number) {
@@ -19,25 +19,25 @@ export class ChatService {
         id,
       },
       data,
-    })
+    });
   }
 
   async createMember(data: Prisma.groupChatMemberUncheckedCreateInput) {
     return await this.prismaService.groupChatMember.create({
       data,
-    })
+    });
   }
 
   async updateMember(
     data: Prisma.groupChatMemberUncheckedUpdateInput,
     id: number,
-    ) {
+  ) {
     return await this.prismaService.groupChatMember.update({
       where: {
-        id
+        id,
       },
       data,
-    })
+    });
   }
 
   async findGroupChatByName(groupName: string) {
@@ -45,8 +45,8 @@ export class ChatService {
       where: {
         groupName,
         isActive: true,
-      }
-    })
+      },
+    });
   }
 
   async findActiveGroupChatById(id: number) {
@@ -58,17 +58,17 @@ export class ChatService {
       include: {
         groupChatMember: {
           where: {
-            isDisabled: false
+            isDisabled: false,
           },
           select: {
             id: true,
             userId: true,
             joinedAt: true,
             isAdmin: true,
-          }
-        }
-      }
-    })
+          },
+        },
+      },
+    });
   }
 
   async findActiveGroupChatByName(groupName: string) {
@@ -77,8 +77,7 @@ export class ChatService {
         groupName,
         isActive: true,
       },
-    })
-
+    });
   }
 
   async getAllGroupChatMember(id: number) {
@@ -99,39 +98,38 @@ export class ChatService {
             email: true,
             firstName: true,
             lastName: true,
-          }
-        }
+            avatar: true,
+          },
+        },
       },
-    })
+    });
   }
-
 
   async findActiveGroupAdmin(groupChatId: number) {
     return this.prismaService.groupChatMember.findFirst({
       where: {
         groupChatId,
         isDisabled: false,
-        isAdmin: true
-      }
-    })
-
+        isAdmin: true,
+      },
+    });
   }
   async findActiveGroupMember(userId: string, groupChatId: number) {
     return this.prismaService.groupChatMember.findFirst({
       where: {
         userId,
         groupChatId,
-        isDisabled: false
-      }
-    })
+        isDisabled: false,
+      },
+    });
   }
 
   async addGroupMember(payload: Prisma.groupChatMemberUncheckedCreateInput) {
     return this.prismaService.groupChatMember.create({
       data: {
-        ...payload
-      }
-    })
+        ...payload,
+      },
+    });
   }
 
   async addGroupAdmin(userId: string, groupChatId: number) {
@@ -140,8 +138,8 @@ export class ChatService {
         userId,
         groupChatId,
         isAdmin: true,
-      }
-    })
+      },
+    });
   }
 
   async deleteGroup(id: number) {
@@ -151,8 +149,8 @@ export class ChatService {
       },
       data: {
         isActive: false,
-      }
-    })
+      },
+    });
   }
 
   async deleteMember(id: number) {
@@ -161,9 +159,9 @@ export class ChatService {
         id,
       },
       data: {
-        isDisabled: true
-      }
-    })
+        isDisabled: true,
+      },
+    });
   }
 
   async findAllActiveGroupChat() {
@@ -172,19 +170,19 @@ export class ChatService {
         isActive: true,
         groupChatMember: {
           some: {
-            isDisabled: false
-          }
-        }
+            isDisabled: false,
+          },
+        },
       },
       select: {
         id: true,
         groupName: true,
-        maxMember:  true,
+        maxMember: true,
         type: true,
         isActive: true,
-        groupChatMember: true
-      }
-    })
+        groupChatMember: true,
+      },
+    });
   }
 
   async findAllActiveGroupChatByUserId(userId: string) {
@@ -194,18 +192,49 @@ export class ChatService {
         groupChatMember: {
           some: {
             userId,
-            isDisabled: false
-          }
+            isDisabled: false,
+          },
         },
       },
       select: {
         id: true,
         groupName: true,
-        maxMember:  true,
+        maxMember: true,
         type: true,
         isActive: true,
         groupChatMember: true,
-      }
-    })
+      },
+    });
+  }
+
+  async findActiveOneOnOneGroupChatByUserList(
+    userId1: string,
+    userId2: string,
+  ) {
+    return this.prismaService.groupChats.findFirst({
+      where: {
+        isActive: true,
+        type: 'one-on-one',
+        AND: [
+          {
+            groupChatMember: {
+              some: {
+                userId: userId1,
+              },
+            },
+          },
+          {
+            groupChatMember: {
+              some: {
+                userId: userId2,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        groupChatMember: true,
+      },
+    });
   }
 }

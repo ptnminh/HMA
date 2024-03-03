@@ -1,36 +1,85 @@
-import { Controller, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus, Inject } from '@nestjs/common';
 import { StaffService } from './staff.service';
-import { MessagePattern } from '@nestjs/microservices';
-import { StaffCommand } from './command';
+import { ClientProxy, MessagePattern } from '@nestjs/microservices';
+import { AuthCommand, ClinicCommand, EVENTS, StaffCommand } from './command';
 import { Prisma } from '@prisma/client';
 import { mapDateToNumber } from 'src/shared';
-import { some } from 'lodash';
+import { map, some, uniqBy } from 'lodash';
+import { isContainSpecialChar } from './utils';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
+import * as moment from 'moment-timezone';
 
 @Controller('staff')
 export class StaffController {
-  constructor(private staffService: StaffService) {}
+  constructor(
+    private staffService: StaffService,
+    @Inject('AUTH_SERVICE') private readonly authServiceClient: ClientProxy,
+    @Inject('CLINIC_SERVICE') private readonly clinicServiceClient: ClientProxy,
+    @Inject('NOTI_SERVICE') private readonly notiService: ClientProxy,
+  ) {}
 
   @MessagePattern(StaffCommand.CREATE_STAFF)
   async createStaff(data: any) {
     try {
-      const { memberId, services, ...rest } = data;
-      const userInClinics = await this.staffService.findUserInClinic(memberId);
-      if (!userInClinics) {
+      const { userInfo, clinicId, roleId, services, ...rest } = data;
+      let userId = data.userId;
+      let uniqueId: string = '';
+      const clinicServiceResponse = await firstValueFrom(
+        this.clinicServiceClient.send(ClinicCommand.GET_CLINIC_DETAIL, {
+          clinicId,
+        }),
+      );
+      if (clinicServiceResponse.status !== HttpStatus.OK) {
         return {
-          message: 'UserInClinic không tồn tại',
+          message: clinicServiceResponse.message,
           status: HttpStatus.BAD_REQUEST,
         };
       }
-      const existedStaff =
-        await this.staffService.findStaffByMemberId(memberId);
-      if (existedStaff) {
-        return {
-          message: 'MemeberId đã tồn tại tồn tại',
-          status: HttpStatus.BAD_REQUEST,
+      if (!userId) {
+        const randomPassword = Math.random().toString(36).slice(-8);
+        uniqueId = randomPassword;
+        const userPayload: Prisma.usersUncheckedCreateInput = {
+          email: userInfo.email,
+          firstName: userInfo?.firstName,
+          lastName: userInfo?.lastName,
+          phone: userInfo?.phone,
+          password: randomPassword,
+          avatar: userInfo?.avatar,
+          isInputPassword: false,
+          gender: userInfo?.gender,
+          address: userInfo?.address,
+          moduleId: 5,
+          emailVerified: false,
+          ...(userInfo.birthday && {
+            birthday: new Date(userInfo.birthday).toISOString(),
+          }),
         };
+        const createUserResponse = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.USER_CREATE, {
+            ...userPayload,
+            type: 'CREATE_STAFF',
+            rawPassword: randomPassword,
+            uniqueId,
+            notificationData: {
+              userId: clinicServiceResponse.data?.owner?.id,
+              content: `${userInfo.firstName} ${userInfo.lastName} đã tham gia phòng khám phòng khám ${clinicServiceResponse.data?.name} lúc`,
+            },
+          }),
+        );
+        if (createUserResponse.status !== HttpStatus.CREATED) {
+          return {
+            message: createUserResponse.message,
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        userId = createUserResponse?.user?.id;
       }
       const payload: Prisma.staffsUncheckedCreateInput = {
-        memberId,
+        userId,
+        roleId,
+        clinicId,
+        isAcceptInvite: userInfo ? false : true,
+        ...(uniqueId ? { uniqueId } : {}),
         ...rest,
       };
       const staff = await this.staffService.createStaff(payload);
@@ -54,6 +103,54 @@ export class StaffController {
         }
       }
       const createdStaff = await this.staffService.findStaffById(staff.id);
+
+      if (Object.keys(userInfo).length === 0) {
+        const getUserResponse = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.USER_GET, {
+            userId,
+          }),
+        );
+        if (getUserResponse.status !== HttpStatus.OK) {
+          return {
+            message: getUserResponse.message,
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        const overriedContent = `${getUserResponse.data.firstName} ${
+          getUserResponse.data.lastName
+        } đã tham gia phòng khám phòng khám ${clinicServiceResponse.data
+          ?.name} lúc ${moment()
+          .tz('Asia/Ho_Chi_Minh')
+          .format('DD/MM/YYYY HH:mm:ss')}`;
+        await lastValueFrom(
+          this.notiService.emit(EVENTS.NOTIFICATION_CREATE, {
+            userId: clinicServiceResponse.data?.owner?.id,
+            content: overriedContent,
+            title: 'Thông báo',
+          }),
+        );
+
+        const getTokens = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.GET_USER_TOKEN, {
+            userId,
+          }),
+        );
+        if (getTokens.status !== HttpStatus.OK) {
+          return {
+            message: getTokens.message,
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+        const tokens = getTokens.data?.map((item) => item.token);
+        await lastValueFrom(
+          this.notiService.emit(EVENTS.NOTIFICATION_PUSH, {
+            tokens,
+            body: overriedContent,
+            title: 'Thông báo',
+          }),
+        );
+      }
+
       return {
         message: 'Tạo staff thành công',
         status: HttpStatus.OK,
@@ -72,22 +169,27 @@ export class StaffController {
   async findStaffById(data: any) {
     try {
       const { id } = data;
-      const staff = await this.staffService.findStaffByMemberId(id);
+      const staff = await this.staffService.findStaffById(id);
       if (!staff) {
         return {
           message: 'Nhân viên không tồn tại',
           status: HttpStatus.BAD_REQUEST,
         };
       }
-      const { userInClinics, ...rest } = staff;
+      delete staff.users.password;
+      const { role, ...rest } = staff;
       return {
         message: 'Tìm kiếm thành công',
         status: HttpStatus.OK,
         data: {
           ...rest,
-          userId: userInClinics.clinicId,
-          clinicId: userInClinics.userId,
-          ...userInClinics.users,
+          role: {
+            id: role.id,
+            name: role.name,
+            permissions: role.rolePermissions.map((value) => {
+              return value.permission;
+            }),
+          },
         },
       };
     } catch (error) {
@@ -134,7 +236,7 @@ export class StaffController {
   @MessagePattern(StaffCommand.UPDATE_STAFF)
   async updateStaff(data: any) {
     try {
-      const { id, services, ...payload } = data;
+      const { id, services, userInfo, ...payload } = data;
       const staff = await this.staffService.findStaffById(id);
       if (!staff) {
         return {
@@ -156,13 +258,42 @@ export class StaffController {
           }
         }
       }
-
-      await this.staffService.updateStaff(id, payload);
+      if (userInfo) {
+        const { birthday, ...rest } = userInfo;
+        const updateUserResponse = await firstValueFrom(
+          this.authServiceClient.send(AuthCommand.UPDATE_USER, {
+            id: staff.users.id,
+            ...rest,
+            birthday: new Date(birthday),
+          }),
+        );
+        if (updateUserResponse.status !== HttpStatus.OK) {
+          return {
+            message: updateUserResponse.message,
+            status: HttpStatus.BAD_REQUEST,
+          };
+        }
+      }
+      const updatedData: Prisma.staffsUncheckedUpdateInput = {
+        ...payload,
+      };
+      await this.staffService.updateStaff(id, updatedData);
       const updatedStaff = await this.staffService.findStaffById(id);
+      delete updatedStaff.clinics;
+      const { role, users, staffServices, ...staffData } = updatedStaff;
+      delete users.password;
+      delete staffData.staffSchedules;
       return {
-        message: 'Cập nhật staff thành công',
         status: HttpStatus.OK,
-        data: updatedStaff,
+        message: 'Cập nhân nhân viên thành công',
+        data: {
+          ...staffData,
+          users,
+          services: staffServices.map((staffService) => {
+            const { clinicServices, ...rest } = staffService;
+            return clinicServices;
+          }),
+        },
       };
     } catch (error) {
       console.log(error);
@@ -256,10 +387,10 @@ export class StaffController {
       }
       const currentSChedules =
         await this.staffService.findScheduleByStaffId(staffId);
-      for (const element of currentSChedules) {
+      for (var element of currentSChedules) {
         await this.staffService.deleteSchedule(element.id);
       }
-      for (const schedule of scheduleList) {
+      for (var schedule of scheduleList) {
         const payload: Prisma.staffSchedulesUncheckedCreateInput = {
           staffId: staffId,
           startTime: schedule['startTime'],
@@ -300,31 +431,6 @@ export class StaffController {
         message: 'Xóa lịch làm việc thành công',
         status: HttpStatus.OK,
         data: null,
-      };
-    } catch (error) {
-      console.log(error);
-      return {
-        message: 'Lỗi hệ thống',
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-      };
-    }
-  }
-
-  @MessagePattern(StaffCommand.FIND_SCHEDULE_BY_ID)
-  async findScheduleById(data: any) {
-    try {
-      const { id } = data;
-      const schedule = await this.staffService.findScheduleById(id);
-      if (!schedule) {
-        return {
-          message: 'Tỉm kiếm lịch làm việc thất bại',
-          status: HttpStatus.BAD_REQUEST,
-        };
-      }
-      return {
-        message: 'Tìm lịch làm việc thành công',
-        status: HttpStatus.OK,
-        data: schedule,
       };
     } catch (error) {
       console.log(error);
@@ -483,6 +589,66 @@ export class StaffController {
         message: 'Lấy danh sách lịch trống thành công',
         status: HttpStatus.OK,
         data: freeSchedule,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        message: 'Lỗi hệ thống',
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+
+  @MessagePattern(StaffCommand.SEARCH_STAFF)
+  async searchStaff(data: any) {
+    try {
+      const { name, ...query } = data;
+      // const isEmpty = Object.values(data).every(
+      //   (value) => value === null || value === '',
+      // );
+      // console.log(query)
+      // if (isEmpty) {
+      //   return {
+      //     status: HttpStatus.BAD_REQUEST,
+      //     message: 'Không có dữ liệu tìm kiếm',
+      //   };
+      // }
+      if (
+        (name && !name.replace(/^\s+|\s+$/g, '')) ||
+        (name && isContainSpecialChar(name))
+      ) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Tên không hợp lệ',
+        };
+      }
+      const staffs = await this.staffService.searchStaff({ name, ...query });
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách thông tin staff thành công',
+        data: staffs.map((value) => {
+          const { users, role, staffServices, ...rest } = value;
+          if (users) delete users.password;
+          const { rolePermissions, ...roleData } = role;
+          return {
+            ...rest,
+            users,
+            role: {
+              ...roleData,
+              permissions: rolePermissions.map((item) => {
+                return item.permission;
+              }),
+            },
+            services: uniqBy(
+              map(
+                staffServices,
+                (staffService) => staffService?.clinicServices,
+              ),
+              'id',
+            ),
+          };
+        }),
       };
     } catch (error) {
       console.log(error);

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { IPlans } from '../interface/plans';
 
 export class UpdatePlanDto {
@@ -25,6 +25,14 @@ export class UpdatePlanDto {
   @IsString()
   @IsOptional()
   description: string;
+
+  @ApiProperty({
+    example: true,
+    description: "The status of the plan"
+  })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: Boolean
 
   @ApiProperty({ example: [1, 2, 3], description: 'The list of option id' })
   @IsOptional()

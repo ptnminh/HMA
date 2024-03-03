@@ -2,7 +2,14 @@ import { PartialType } from '@nestjs/mapped-types';
 import { CreateClinicDto } from './create-clinic.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { IClinics } from '../interface';
-import { IsEmail, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNumber,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+} from 'class-validator';
 
 export class UpdateClinicDto {
   @IsString()
@@ -47,6 +54,27 @@ export class UpdateClinicDto {
     description: 'The description of the Clinic',
   })
   description?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty({
+    example: 'lat',
+  })
+  lat?: number;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty({
+    example: 'long',
+  })
+  long?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  @ApiProperty({
+    example: 'isActive',
+  })
+  isActive?: boolean;
 }
 
 export class UpdateClinicResponse {

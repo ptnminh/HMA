@@ -17,8 +17,6 @@ export enum AuthCommand {
   FIND_USER_BY_EMAIL = 'find_user_by_email',
   FIND_SCHEDULE_BY_ID = 'find_schedule_by_id',
   FIND_SCHEDULE_BY_USER_ID = 'find_schedule_by_user_id',
-  CREATE_SCHEDULE = 'create_schedule',
-  UPDATE_SCHEDULE = 'update_schedule',
-  DELETE_SCHEDULE = 'delete_schedule',
+  UPDATE_USER = 'update_user',
   FIND_ALL_USER_BY_EMAIL = 'find_all_user_by_email',
 }

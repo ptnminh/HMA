@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
 export class UpdateClinicServiceDto {
     @ApiProperty({
@@ -9,6 +10,12 @@ export class UpdateClinicServiceDto {
     @IsString()
     @IsOptional()
     serviceName?: string;
+
+    @ApiProperty({example: true})
+    @IsBoolean()
+    @Type(() => Boolean)
+    @IsOptional()
+    isDisabled?: boolean;
 
     @ApiProperty({
         example: 500000,
@@ -25,4 +32,9 @@ export class UpdateClinicServiceDto {
     @IsString()
     @IsOptional()
     description?: string;
+
+    @ApiProperty({example: 1})
+    @IsNumber()
+    @IsOptional()
+    categoryId?: number
 }

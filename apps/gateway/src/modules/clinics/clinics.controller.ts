@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Inject,
@@ -17,7 +16,6 @@ import {
   CreateClinicDto,
   CreateClinicResponse,
   CreateUserGroupRoleDTO,
-  GetAppointmentsQueryDto,
   GetUsersInClinicResponse,
   ListClinicResponse,
   SubcribePlanDTO,
@@ -28,7 +26,6 @@ import {
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiQuery,
@@ -41,18 +38,20 @@ import { CurrentUser } from 'src/decorators';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { CreateClinicServiceDto } from './dto/create-clinic-service.dto';
 import { UpdateClinicServiceDto } from './dto/update-clinic-service.dto';
-import { CreateAppoimentDto } from '../staff/dto/create-staff.dto';
+import { GetClinicsDto } from './dto/query.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('clinics')
 @ApiTags('Clinics')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('Bearer')
 export class ClinicsController {
   constructor(
     @Inject('CLINIC_SERVICE')
     private readonly clinicServiceClient: ClientProxy,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post()
   @ApiCreatedResponse({ type: CreateClinicResponse })
   async create(
@@ -132,10 +131,14 @@ export class ClinicsController {
 
   @Get()
   @ApiOkResponse({ type: ListClinicResponse })
-  async findAll(@CurrentUser('id') userId: string) {
+  async findAll(
+    @CurrentUser('id') userId: string,
+    @Query() query: GetClinicsDto,
+  ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(ClinicCommand.CLINIC_LIST, {
         userId,
+        query,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {
@@ -154,6 +157,8 @@ export class ClinicsController {
       status: true,
     };
   }
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put(':id')
   @ApiOkResponse({ type: CreateClinicResponse })
   async update(
@@ -183,6 +188,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post(':id/add-user-to-clinic/:userId')
   @ApiOkResponse({ type: CreateClinicResponse })
   async addUserToClinic(
@@ -238,6 +245,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post(':clinicId/subscribe-plan/:planId')
   @ApiOkResponse({ type: SubcribePlanResponse })
   async subscribePlan(@Body() data: SubcribePlanDTO) {
@@ -261,6 +270,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put(':clinicId/subscribe-plan/:subscribePlanId')
   async updateSubscribePlan(
     @Param('clinicId') clinicId: string,
@@ -316,6 +327,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post(':id/create-user-group-role')
   async createUserGroupRole(
     @Body() data: CreateUserGroupRoleDTO,
@@ -343,7 +356,9 @@ export class ClinicsController {
       status: true,
     };
   }
-
+  
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Delete(':id/delete-user-group-role/:userGroupRoleId')
   async deleteUserGroupRole(
     @Param('id') clinicId: string,
@@ -374,6 +389,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put(':id/update-user-group-role/:userGroupRoleId')
   async updateUserGroupRole(
     @Param('id') clinicId: string,
@@ -428,6 +445,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Post(':clinicId/services')
   async createClinicService(
     @Param('clinicId') clinicId: string,
@@ -455,6 +474,8 @@ export class ClinicsController {
       status: true,
     };
   }
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('Bearer')
   @Put('/services/:id')
   async updateClinicService(
     @Param('id') id: string,
@@ -507,13 +528,18 @@ export class ClinicsController {
     };
   }
 
+  @ApiQuery({name: "isDisabled", required: false})
   @Get(':clinicId/services')
-  async findClinicServiceByClinicId(@Param('clinicId') clinicId: string) {
+  async findClinicServiceByClinicId(
+    @Param('clinicId') clinicId: string,
+    @Query('isDisabled') isDisabled: boolean
+  ) {
     const clinicServiceResponse = await firstValueFrom(
       this.clinicServiceClient.send(
         ClinicCommand.GET_CLINIC_SERVICE_BY_CLINIC_ID,
         {
           clinicId,
+          isDisabled
         },
       ),
     );
@@ -534,6 +560,8 @@ export class ClinicsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+@ApiBearerAuth('Bearer')
   @Delete('/services/:id')
   async deleteClinicService(@Param('id') id: string) {
     const clinicServiceResponse = await firstValueFrom(
@@ -558,11 +586,117 @@ export class ClinicsController {
     };
   }
 
-  @Get('/:clinicId/staffs')
-  async findAllStaffInClinic(@Param('clinicId') clinicId: string) {
+  @Get('/categories/:categoryId')
+  async findCategoryById(@Param('categoryId') categoryId: string) {
     const clinicServiceResponse = await firstValueFrom(
-      this.clinicServiceClient.send(ClinicCommand.FIND_ALL_STAFF_IN_CLINIC, {
+      this.clinicServiceClient.send(ClinicCommand.FIND_CATEGORY_BY_ID, {
+        id: +categoryId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Post(':clinicId/categories')
+  async createCategory(@Param('clinicId') clinicId: string, @Body() dto: CreateCategoryDto) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.CREATE_CATEGORY, {
         clinicId,
+        ...dto
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Put('/categories/:categoryId')
+  async updateCategoryById(@Param('categoryId') categoryId: string, @Body() dto: UpdateCategoryDto) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.UPDATE_CATEGORY, {
+        id: +categoryId,
+        ...dto
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @Delete('/categories/:categoryId')
+  async deleteCategoryById(@Param('categoryId') categoryId: string) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.DELETE_CATEGORY, {
+        id: +categoryId,
+      }),
+    );
+    if (clinicServiceResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: clinicServiceResponse.message,
+          data: null,
+          status: false,
+        },
+        clinicServiceResponse.status,
+      );
+    }
+    return {
+      message: clinicServiceResponse.message,
+      data: clinicServiceResponse.data,
+      status: true,
+    };
+  }
+
+  @ApiQuery({name: "name", required: false})
+  @ApiQuery({name: "type", required: false})
+  @Get('/:clinicId/categories/')
+  async searchCategory(
+    @Param('clinicId') clinicId: string,
+    @Query('name') name: string,
+    @Query('type') type: string
+    ) {
+    const clinicServiceResponse = await firstValueFrom(
+      this.clinicServiceClient.send(ClinicCommand.SEARCH_CATEGORY, {
+        clinicId: clinicId,
+        name: name,
+        type: +type,
       }),
     );
     if (clinicServiceResponse.status !== HttpStatus.OK) {

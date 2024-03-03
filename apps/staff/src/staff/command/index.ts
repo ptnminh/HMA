@@ -15,4 +15,21 @@ export enum StaffCommand {
   CREATE_APPOINTMENT = 'CREATE_APPOINTMENT',
   FIND_APPOINTMENT_BY_STAFF_ID = 'FIND_APPOINTMENT_BY_STAFF_ID',
   FIND_FREE_APPOINTMENT_BY_STAFF_ID = 'FIND_FREE_APPOINTMENT_BY_STAFF_ID',
+  SEARCH_STAFF = 'SEARCH_STAFF',
+}
+
+export enum AuthCommand {
+  USER_CREATE = 'user_create',
+  USER_GET = 'user_get',
+  GET_USER_TOKEN = 'get_user_token',
+  UPDATE_USER = 'update_user',
+}
+
+export enum ClinicCommand {
+  GET_CLINIC_DETAIL = 'GET_CLINIC_DETAIL',
+}
+
+export enum EVENTS {
+  NOTIFICATION_CREATE = 'create_realtime_notification',
+  NOTIFICATION_PUSH = 'push_notification',
 }

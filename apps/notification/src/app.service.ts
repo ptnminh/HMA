@@ -1,10 +1,5 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
-import { ClientProxy } from '@nestjs/microservices';
-import { GetResponse, INotificationPayload } from './types';
-import { Notification, NotificationDocument } from './app.schema';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
+import { Injectable, Logger } from '@nestjs/common';
+import { INotificationPayload } from './types';
 import { CreateRealtimeNotificationDto } from './dtos/get-notification.dto';
 import { FirebaseService } from './services';
 import { v4 as uuid } from 'uuid';
@@ -12,14 +7,7 @@ import { v4 as uuid } from 'uuid';
 @Injectable()
 export class AppService {
   private readonly logger = new Logger(AppService.name);
-  constructor(
-    @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
-    @InjectModel(Notification.name)
-    private notificationModel: Model<NotificationDocument>,
-    private firebaseService: FirebaseService,
-  ) {
-    this.authClient.connect();
-  }
+  constructor(private firebaseService: FirebaseService) {}
 
   public async createNotification(data: INotificationPayload): Promise<void> {
     try {
@@ -57,6 +45,7 @@ export class AppService {
           ...payload,
           id,
           sendingTime: new Date().toISOString(),
+          isRead: false,
         },
       });
       return saveNewNotiToUser;

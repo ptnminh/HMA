@@ -196,11 +196,10 @@ export class PaymentService {
         return qs.stringify(data)
     }
 
-
     async findSubcriptionById(id: string) {
-        return this.pismaService.subscriptions.findUnique({
+        return this.pismaService.subscriptions.findFirst({
             where: {
-                id,
+                id: id
             }
         })
     }

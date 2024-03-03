@@ -2,21 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { AppointmentStatus } from 'src/shared';
+import { convertVietnameseString } from './utils';
 
 @Injectable()
 export class StaffService {
   constructor(private prismaService: PrismaService) {}
 
-  async findAllStaff() {
-    return this.prismaService.staffs.findMany({
-      where: {
-        isDisabled: false,
-      },
-      orderBy: {
-        userInClinics: {
-          userId: 'desc',
-        },
-      },
+  async createUser(data: Prisma.usersUncheckedCreateInput) {
+    return this.prismaService.users.create({
+      data,
     });
   }
 
@@ -43,15 +37,52 @@ export class StaffService {
         isDisabled: false,
         id,
       },
-      include: {
+      select: {
+        id: true,
+        specialize: true,
+        experience: true,
+        description: true,
+        isAcceptInvite: true,
+        isDisabled: true,
         staffServices: {
           where: {
             isDisabled: false,
+          },
+          include: {
+            clinicServices: true,
           },
         },
         staffSchedules: {
           where: {
             isDisabled: false,
+          },
+          select: { day: true, startTime: true, endTime: true },
+        },
+        clinics: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            address: true,
+            phone: true,
+          },
+        },
+        users: true,
+        role: {
+          select: {
+            id: true,
+            name: true,
+            rolePermissions: {
+              select: {
+                permission: {
+                  select: {
+                    id: true,
+                    optionName: true,
+                    isServiceOption: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -69,38 +100,19 @@ export class StaffService {
         patients: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        date: 'desc',
-      },
-    });
-  }
-
-  async findStaffByMemberId(memberId: number) {
-    return this.prismaService.staffs.findFirst({
-      where: {
-        isDisabled: false,
-        memberId,
-      },
-      include: {
-        userInClinics: {
-          select: {
-            clinicId: true,
             userId: true,
-            users: {
+            patient: {
               select: {
-                name: true,
+                email: true,
                 firstName: true,
                 lastName: true,
               },
             },
           },
         },
+      },
+      orderBy: {
+        date: 'desc',
       },
     });
   }
@@ -119,12 +131,6 @@ export class StaffService {
     return this.prismaService.staffs.findMany({
       where: {
         isDisabled: false,
-        userInClinics: {
-          userId,
-        },
-      },
-      include: {
-        userInClinics: true,
       },
     });
   }
@@ -163,6 +169,7 @@ export class StaffService {
         day: true,
         startTime: true,
         endTime: true,
+        isDisabled: true,
       },
       orderBy: {
         day: 'asc',
@@ -190,20 +197,12 @@ export class StaffService {
     });
   }
 
-  async findUserInClinic(id: number) {
-    return this.prismaService.userInClinics.findFirst({
-      where: {
-        isDisabled: false,
-        id,
-      },
-    });
-  }
-
   async findClinicServiceById(id: number) {
     return this.prismaService.clinicServices.findFirst({
       where: {
         id,
         isDisabled: false,
+        deletedAt: null,
       },
     });
   }
@@ -238,6 +237,129 @@ export class StaffService {
       data: {
         ...payload,
         status: AppointmentStatus.NOT_CONFIRMED,
+      },
+    });
+  }
+
+  async searchStaff(query) {
+    const {
+      userId,
+      clinicId,
+      roleId,
+      gender,
+      phoneNumber,
+      email,
+      name,
+      isDisabled,
+      isAcceptInvite,
+    } = query;
+    const staffs = await this.prismaService.staffs.findMany({
+      where: {
+        clinicId: clinicId ? clinicId : undefined,
+        roleId: roleId !== undefined && roleId !== null ? roleId : undefined,
+        isDisabled:
+          isDisabled !== null && isDisabled !== undefined
+            ? isDisabled
+            : undefined,
+        isAcceptInvite:
+          isAcceptInvite !== null && isAcceptInvite !== undefined
+            ? isAcceptInvite
+            : undefined,
+        AND: [
+          {
+            users:
+              gender !== undefined && gender !== null ? { gender } : undefined,
+          },
+          {
+            users: phoneNumber
+              ? { phone: { contains: phoneNumber } }
+              : undefined,
+          },
+          {
+            users: userId ? { id: userId } : undefined,
+          },
+          {
+            users: email ? { email: { contains: email } } : undefined,
+          },
+        ],
+      },
+      select: {
+        id: true,
+        experience: true,
+        description: true,
+        specialize: true,
+        clinicId: true,
+        isDisabled: true,
+        isAcceptInvite: true,
+        users: true,
+        role: {
+          select: {
+            id: true,
+            name: true,
+            rolePermissions: {
+              select: {
+                permission: {
+                  select: {
+                    id: true,
+                    optionName: true,
+                    isServiceOption: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        staffServices: {
+          select: {
+            clinicServices: true,
+          },
+        },
+      },
+    });
+
+    const searchWithName = [];
+    if (name) {
+      for (const staff of staffs) {
+        if (staff.users) {
+          const strName =
+            convertVietnameseString(staff.users.firstName) +
+            ' ' +
+            convertVietnameseString(staff.users.lastName);
+          if (strName.includes(convertVietnameseString(name))) {
+            searchWithName.push(staff);
+          }
+        }
+      }
+    }
+    return name ? searchWithName : staffs;
+  }
+
+  async findAllStaff() {
+    return this.prismaService.staffs.findMany({
+      select: {
+        id: true,
+        clinicId: true,
+        experience: true,
+        description: true,
+        specialize: true,
+        users: true,
+        role: {
+          select: {
+            id: true,
+            name: true,
+            rolePermissions: {
+              select: {
+                permission: {
+                  select: {
+                    id: true,
+                    optionName: true,
+                    isServiceOption: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
   }

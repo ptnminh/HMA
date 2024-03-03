@@ -16,6 +16,7 @@ export class AppController {
     try {
       const dynamic_template_data = {
         link: data.link,
+        password: data?.metadata?.password,
       };
       const msg = this.mailService.messageSignUpGenerate(
         [data.email as string],
@@ -26,7 +27,6 @@ export class AppController {
       const originalMessage = context.getMessage();
       channel.ack(originalMessage);
       await this.mailService.send(msg);
-
       return true;
     } catch (error) {
       console.log(

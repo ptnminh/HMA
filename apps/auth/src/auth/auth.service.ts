@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { RegisterDto } from './dto/create-user.dto';
 import { MODULES, hashPassword } from '../shared/';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,23 @@ export class AuthService {
     });
   }
 
-  async updateUser(id: string, data): Promise<any> {
+  async findAllUserByEmail(email: string, emailVerified: string): Promise<any> {
+    let emailVerifiedBool = false;
+    if (emailVerified) {
+      emailVerifiedBool = emailVerified === 'true' ? true : false;
+    }
+    return this.prismaService.users.findFirst({
+      where: {
+        ...(emailVerified ? { emailVerified: emailVerifiedBool } : {}),
+        ...(email ? { email } : {}),
+      },
+    });
+  }
+
+  async updateUser(
+    id: string,
+    data: Prisma.usersUncheckedUpdateInput,
+  ): Promise<any> {
     return this.prismaService.users.update({
       where: {
         id,
@@ -31,33 +48,31 @@ export class AuthService {
         id,
         emailVerified: true,
       },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        emailVerified: true,
-        isInputPassword: true,
+    });
+  }
+
+  async updateStaffInfo(
+    uniqueId: string,
+    payload: Prisma.staffsUncheckedUpdateInput,
+  ) {
+    return this.prismaService.staffs.updateMany({
+      where: {
+        uniqueId,
       },
+      data: payload,
     });
   }
 
   async findUserByEmail(email: string): Promise<any> {
-    return this.prismaService.users.findFirst({
-      where: {
-        email,
-      },
-      select: {
-        id: true,
-        email: true,
-        password: true,
-        isInputPassword: true,
-        emailVerified: true,
-        firstName: true,
-        lastName: true,
-        moduleId: true,
-      },
-    });
+    try {
+      return this.prismaService.users.findFirst({
+        where: {
+          email,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
   async updateUserByEmail(email: string, data): Promise<any> {
     return this.prismaService.users.updateMany({
@@ -152,15 +167,6 @@ export class AuthService {
       where: {
         id,
         emailVerified: true,
-      },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        emailVerified: true,
-        moduleId: true,
-        isInputPassword: true,
       },
     });
   }

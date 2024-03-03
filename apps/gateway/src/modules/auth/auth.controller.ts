@@ -18,7 +18,6 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -26,7 +25,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import {
   RegisterDto,
   RegisterResponse,
@@ -38,7 +37,6 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto, LoginReponse } from './dto/login.dto';
 import { ConfirmDTO, ConfirmReponse } from './dto/confirm.dto';
-import { GoogleOAuthGuard } from 'src/guards/google-oauth.guard';
 import {
   DeleteAccountsResponse,
   GetAccountsResponse,
@@ -55,13 +53,11 @@ import {
   ResetPasswordVerifyResponse,
   addNewPasswordDto,
 } from './dto/reset-password.dto';
-import { Request } from 'express';
 import { FindUserByEmailResponse } from './dto/common.dto';
 import { IsMobile } from 'src/decorators/device.decorator';
-import { Response } from 'express';
 import { ClinicCommand } from '../clinics/command';
-import { ScheduleDto } from './dto/schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { FindUserByEmailDto } from './dto/query.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -190,6 +186,9 @@ export class AuthController {
     const verifyResponse = await firstValueFrom(
       this.authServiceClient.send(AuthCommand.USER_VERIFY, {
         id: decoded.id,
+        uniqueId: decoded?.uniqueId,
+        type: decoded?.type,
+        notificationData: decoded?.notificationData,
       }),
     );
 
@@ -457,7 +456,7 @@ export class AuthController {
     }
     return {
       message: accountResponse.message,
-      data: accountResponse.data,
+      data: accountResponse?.data,
       status: true,
     };
   }
@@ -525,22 +524,19 @@ export class AuthController {
     };
   }
 
-  @Post('change-password')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
+  @Post(':userId/change-password')
   @ApiCreatedResponse({
     type: ChangePasswordReponse,
   })
-  async ChangePassword(@Body() dto: ChangePasswordDto, @Req() req: Request) {
-    const user = req.user;
-    const _dto = {
-      id: user['id'],
-      currentPassword: dto.currentPassword,
-      newPassword: dto.newPassword,
-      isReset: dto.isReset,
-    };
+  async ChangePassword(
+    @Body() dto: ChangePasswordDto,
+    @Param('userId') userId: String,
+  ) {
     const ChangePasswordReponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, _dto),
+      this.authServiceClient.send(AuthCommand.CHANGE_PASSWORD, {
+        id: userId,
+        ...dto,
+      }),
     );
     if (ChangePasswordReponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -613,12 +609,12 @@ export class AuthController {
   @ApiOkResponse({
     type: FindUserByEmailResponse,
   })
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
   @Get('find-user-by-email')
-  async findUserByEmail(@Query('email') email: string) {
+  async findUserByEmail(@Query() query: FindUserByEmailDto) {
     const findUserByEmailResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.FIND_USER_BY_EMAIL, { email }),
+      this.authServiceClient.send(AuthCommand.FIND_USER_BY_EMAIL, {
+        ...query,
+      }),
     );
     if (findUserByEmailResponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -664,144 +660,30 @@ export class AuthController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
-  @Get('/schedule/:id')
-  async findScheduleById(@Query('id') id: string) {
-    const scheduleServiceResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.FIND_SCHEDULE_BY_ID, {
-        id: parseInt(id),
-      }),
-    );
-    if (scheduleServiceResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: scheduleServiceResponse.message,
-          status: false,
-          data: null,
-        },
-        scheduleServiceResponse.status,
-      );
-    }
-    return {
-      message: scheduleServiceResponse.message,
-      data: scheduleServiceResponse.data,
-      status: true,
-    };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
-  @Get('schedule//find-schedule-by-user/:userId')
-  async findScheduleByUserId(@Query('userId') userId: string) {
-    const scheduleServiceResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.FIND_SCHEDULE_BY_USER_ID, {
-        userId,
-      }),
-    );
-    if (scheduleServiceResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: scheduleServiceResponse.message,
-          status: false,
-          data: null,
-        },
-        scheduleServiceResponse.status,
-      );
-    }
-    return {
-      message: scheduleServiceResponse.message,
-      data: scheduleServiceResponse.data,
-      status: true,
-    };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
-  @Delete('/schedule/:id')
-  async deleteSchedule(@Query('id') id: string) {
-    const scheduleServiceResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.DELETE_SCHEDULE, {
-        id: parseInt(id),
-      }),
-    );
-    if (scheduleServiceResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: scheduleServiceResponse.message,
-          status: false,
-          data: null,
-        },
-        scheduleServiceResponse.status,
-      );
-    }
-    return {
-      message: scheduleServiceResponse.message,
-      data: scheduleServiceResponse.data,
-      status: true,
-    };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
-  @Post('schedule/:userId')
-  async createSchedule(
-    @Query('userId') userId: string,
-    @Body() dto: ScheduleDto,
+  @Put('/user/:userId')
+  async updateUser(
+    @Param('userId') userId: string,
+    @Body() dto: UpdateUserDto,
   ) {
-    const data = {
-      userId,
-      day: dto.day,
-      startTime: dto.startTime,
-      endTime: dto.endTime,
-    };
-    const scheduleServiceResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.CREATE_SCHEDULE, { ...data }),
+    const authResponse = await firstValueFrom(
+      this.authServiceClient.send(AuthCommand.UPDATE_USER, {
+        id: userId,
+        ...dto,
+      }),
     );
-    if (scheduleServiceResponse.status !== HttpStatus.OK) {
+    if (authResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
-          message: scheduleServiceResponse.message,
-          status: false,
+          message: authResponse.message,
           data: null,
+          status: false,
         },
-        scheduleServiceResponse.status,
+        authResponse.status,
       );
     }
     return {
-      message: scheduleServiceResponse.message,
-      data: scheduleServiceResponse.data,
-      status: true,
-    };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('Bearer')
-  @Put('/schedule/:id')
-  async updateSchedule(
-    @Query('id') id: string,
-    @Body() dto: UpdateScheduleDto,
-  ) {
-    const data = {
-      id: parseInt(id),
-      ...dto,
-    };
-    const authServiceResponse = await firstValueFrom(
-      this.authServiceClient.send(AuthCommand.UPDATE_SCHEDULE, { ...data }),
-    );
-    if (authServiceResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: authServiceResponse.message,
-          status: false,
-          data: null,
-        },
-        authServiceResponse.status,
-      );
-    }
-    return {
-      message: authServiceResponse.message,
-      data: authServiceResponse.data,
+      message: authResponse.message,
+      data: authResponse.data,
       status: true,
     };
   }

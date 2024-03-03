@@ -258,4 +258,10 @@ export class GetAppointmentsQueryDto {
   @IsOptional()
   @IsString()
   patientId?: string;
+
+  @ApiProperty({
+    example: '6ea2a7a9-bcfe-45db-850c-637492dc48ca',
+    required: false,
+  })
+  puid?: string
 }

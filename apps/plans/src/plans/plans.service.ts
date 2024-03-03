@@ -64,21 +64,20 @@ export class PlanService {
     });
   }
 
-  async findAllPlans() {
+  async findAllPlans(getAll: Boolean) {
     return this.prismaService.plans.findMany({
       where: {
-        planOptions: {
-          some: {
-            option: {
-              isActive: true,
-            }
-          }
-        }
+        isActive: getAll? undefined:true,
       },
       include: {
         planOptions: {
           select: {
             option: true
+          },
+          where: {
+            option: {
+              isActive: getAll? undefined:true
+            }
           }
         }
       }

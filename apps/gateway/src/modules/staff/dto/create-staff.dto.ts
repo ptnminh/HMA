@@ -10,38 +10,90 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-
-export class CreateStaffDto {
+class UserInfo {
   @ApiProperty({
-    example: 1,
-    description: 'Male: 1, Female: 0',
-  })
-  @IsNotEmpty()
-  @IsIn([0, 1])
-  gender: number;
-
-  @ApiProperty({
-    example: '84931231511',
-    description: 'Vietnamese phone number of staff',
-  })
-  @IsPhoneNumber('VN')
-  @IsNotEmpty()
-  phoneNumber: string;
-
-  @ApiProperty({
-    example: 'Đ. Nguyễn Văn Cứ, TP.Hồ Chí Minh',
-    description: 'The address of staff',
+    example: 'email@gmail.com',
   })
   @IsString()
-  @IsNotEmpty()
-  address: string;
+  @IsOptional()
+  email?: string;
 
+  @ApiProperty({
+    example: 'https://www.google.com',
+  })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+
+  @ApiProperty({
+    example: 'John',
+  })
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @ApiProperty({
+    example: 'Doe',
+  })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @ApiProperty({
+    example: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  gender?: number;
+
+  @ApiProperty({
+    example: '0987654321',
+  })
+  @IsOptional()
+  phone?: string;
+
+  @ApiProperty({
+    example: 'address',
+  })
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @ApiProperty({
+    example: '2021-09-01',
+  })
+  @IsOptional()
+  @IsString()
+  birthday?: string;
+}
+export class CreateStaffDto {
   @ApiProperty({
     example: 'Tim mạch',
   })
   @IsString()
   @IsOptional()
   specialize?: string;
+
+  @ApiProperty({
+    example: 'userId',
+  })
+  @IsString()
+  @IsOptional()
+  userId?: string;
+
+  @ApiProperty({
+    example: 'clinicId',
+  })
+  @IsString()
+  @IsOptional()
+  clinicId?: string;
+
+  @ApiProperty({
+    example: 1,
+  })
+  @IsNumber()
+  @IsOptional()
+  roleId?: number;
 
   @ApiProperty({
     example: 1,
@@ -61,6 +113,22 @@ export class CreateStaffDto {
   @IsNumber({}, { each: true })
   @IsOptional()
   services?: number[];
+
+  @ApiProperty({
+    type: UserInfo,
+    example: {
+      email: 'email@gmail.com',
+      avatar: 'https://www.google.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      gender: 0,
+      phone: '0987654321',
+      address: 'address',
+      birthday: '2021-09-01',
+    },
+  })
+  @IsOptional()
+  userInfo?: UserInfo;
 }
 
 export class CreateAppoimentDto {
@@ -82,9 +150,13 @@ export class CreateAppoimentDto {
   @IsNotEmpty()
   doctorId: number;
 
-  @ApiProperty({ example: '01046db1-154f-41af-a2c0-61c6669a3e23' })
-  @IsNotEmpty()
-  patientId: string;
+  @ApiProperty({ example: 1 })
+  @IsOptional()
+  patientId?: number;
+
+  @ApiProperty({ example: 'userId' })
+  @IsOptional()
+  userId?: string;
 
   @ApiProperty({ example: '01046db1-154f-41af-a2c0-61c6669a3e23' })
   @IsNotEmpty()
@@ -93,6 +165,15 @@ export class CreateAppoimentDto {
   @ApiProperty({ example: '2021-09-01' })
   @IsNotEmpty()
   date: string;
+
+  @ApiProperty({ example: 1 })
+  @IsOptional()
+  serviceId?: number;
+
+  @ApiProperty({ example: 'PENDING' })
+  @IsOptional()
+  @IsString()
+  status?: string;
 }
 
 export class UpdateAppointmentDto {
@@ -125,4 +206,13 @@ export class UpdateAppointmentDto {
   @ApiProperty({ example: '2021-09-01' })
   @IsOptional()
   date?: string;
+
+  @ApiProperty({ example: 1 })
+  @IsOptional()
+  serviceId?: number;
+
+  @ApiProperty({ example: 'PENDING' })
+  @IsOptional()
+  @IsString()
+  status?: string;
 }

@@ -46,8 +46,9 @@ export class PaymentController {
                     }
                 }
             }
-            const id = paymentData.subscribePlanId
-            const subscription = await this.paymenService.findSubcriptionById(id)
+            const subcriptionId = paymentData.subscribePlanId
+            const subscription = await this.paymenService.findSubcriptionById(subcriptionId)
+            console.log(subcriptionId)
             if (subscription) {
                 const inputData = {
                     clinicId: subscription.clinicId,
@@ -57,6 +58,8 @@ export class PaymentController {
                     }
                 }
                 await this.delayedUpdateSubcriptions(inputData)
+                console.log(inputData)
+                console.log(1)
             }
             return {
                 status: HttpStatus.OK,
