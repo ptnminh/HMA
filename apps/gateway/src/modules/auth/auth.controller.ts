@@ -171,6 +171,7 @@ export class AuthController {
         HttpStatus.BAD_REQUEST,
       );
     }
+    console.log({...decoded})
 
     // Validate expired token
     const isTokenExpired = Date.now() >= decoded.exp * 1000;
@@ -202,10 +203,15 @@ export class AuthController {
         verifyResponse.status,
       );
     }
+    const mobileUrl = decoded.moduleId === 4
+    ? 'https://clinus.page.link?link=https%3A%2F%2Fclinus.page.link%2Fverify-account-patient'
+    : 'https://clinus.page.link?link=https%3A%2F%2Fclinus.page.link%2Fverify-account'
+    console.log({...decoded})
     const frontEndUrl = this.configService.get<string>('FRONTEND_URL');
     return decoded.isMobile
-      ? res.redirect(
-          'https://clinus.page.link?link=https%3A%2F%2Fclinus.page.link%2Fverify-account',
+      ?
+        res.redirect(
+          mobileUrl
         )
       : res.redirect(`${frontEndUrl}/dang-nhap`);
   }
