@@ -203,7 +203,7 @@ export class AuthController {
         verifyResponse.status,
       );
     }
-    const mobileUrl = decoded.moduleId === 4
+    const mobileUrl = (decoded.moduleId === 4)
     ? 'https://clinus.page.link?link=https%3A%2F%2Fclinus.page.link%2Fverify-account-patient'
     : 'https://clinus.page.link?link=https%3A%2F%2Fclinus.page.link%2Fverify-account'
     console.log({...decoded})
