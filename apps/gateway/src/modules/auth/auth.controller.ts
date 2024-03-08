@@ -203,13 +203,8 @@ export class AuthController {
         verifyResponse.status,
       );
     }
-    // const mobileUrl = (decoded.moduleId === 4)
-    // ? 'https://clinus.page.link?link=https%3A%2F%2Fclinus.page.link%2Fverify-account-patient'
-    // : 'https://clinus.page.link?link=https%3A%2F%2Fclinus.page.link%2Fverify-account'
-    // console.log({...decoded})
     const frontEndUrl = this.configService.get<string>('FRONTEND_URL');
-    return decoded.isMobile
-      ?
+    return isMobile?
         res.redirect(
           'https://clinus.page.link?link=https%3A%2F%2Fclinus.page.link%2Fverify-account',
         )
