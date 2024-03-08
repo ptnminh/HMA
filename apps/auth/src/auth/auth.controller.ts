@@ -74,6 +74,7 @@ export class AuthController {
           type,
           uniqueId,
           notificationData,
+          moduleId: user.moduleId
         },
         {
           secret: jwtSercret,
