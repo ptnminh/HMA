@@ -13,10 +13,11 @@ import { Prisma } from '@prisma/client';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
-import { filter, map, orderBy, sumBy, uniq } from 'lodash';
+import { filter, map, orderBy, sumBy, uniq, flatMap, groupBy } from 'lodash';
 import {
   calculateTimeBefore,
   checkAndInsertMissingDates,
+  checkAndInsertMissingDatesAdmin,
   combineDateAndTime,
   isContainSpecialChar,
   scheduleJob,
@@ -2364,6 +2365,84 @@ export class ClinicController {
         status: HttpStatus.OK,
         message: 'Lấy thông tin thống kê thành công',
         data: newDataWithMissingDates,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(ClinicStatiticsCommand.GET_ADMIN_STATITICS)
+  async getAdminStatistical(data: { startDate?: string; endDate?: string }) {
+    try {
+      const { startDate, endDate } = data;
+      const adminStatistical = await this.clinicService.findAdminStatistical({
+        startDate,
+        endDate,
+      });
+      if (!adminStatistical) {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Thống kê không tồn tại',
+        };
+      }
+      const refactoredData = map(adminStatistical, (item) => {
+        const revenue = item.plans.currentPrice;
+        const date = moment(item.createdAt).format('YYYY-MM-DD');
+        return {
+          clinicId: item.clinicId,
+          revenue,
+          planId: item.planId,
+          date,
+          clinicName: item.clinics?.name,
+        };
+      });
+      const clinicIds = uniq(map(refactoredData, 'clinicId'));
+      const result = {
+        summary: {
+          totalRevenue: sumBy(refactoredData, 'revenue'),
+          totalClinics: clinicIds.length,
+          startDate,
+          endDate,
+        },
+        clinics: groupBy(
+          flatMap(
+            await Promise.all(
+              map(
+                clinicIds,
+                async (clinicId) =>
+                  await this.getStatisticalByDate({
+                    clinicId,
+                    startDate,
+                    endDate,
+                  }).then((response) => {
+                    return {
+                      clinicId,
+                      clinicName: refactoredData.find(
+                        (item) => item.clinicId === clinicId,
+                      )?.clinicName,
+                      totalRevenue: sumBy(response.data, 'revenue'),
+                      data: response.data,
+                    };
+                  }),
+              ),
+            ),
+          ),
+          'clinicName',
+        ),
+        details: checkAndInsertMissingDatesAdmin(
+          startDate,
+          endDate,
+          refactoredData,
+        ),
+      };
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy thông tin thống kê thành công',
+        data: result,
       };
     } catch (error) {
       console.log(error);

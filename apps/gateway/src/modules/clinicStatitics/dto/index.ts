@@ -34,3 +34,15 @@ export class GetClinicsByDateQueryDto {
   @IsOptional()
   endDate: string;
 }
+
+export class GetAdminStatiticsQueryDto {
+  @ApiProperty({ required: true, example: '2024-02-10' })
+  @IsString()
+  @IsOptional()
+  startDate: string;
+
+  @ApiProperty({ required: true, example: '2024-02-17' })
+  @IsString()
+  @IsOptional()
+  endDate: string;
+}

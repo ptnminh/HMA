@@ -1455,6 +1455,30 @@ export class ClinicService {
     });
   }
 
+  async findAdminStatistical({
+    startDate,
+    endDate,
+  }: {
+    startDate?: string;
+    endDate?: string;
+  }) {
+    return this.prismaService.subscriptions.findMany({
+      where: {
+        createdAt: {
+          gte: moment(startDate).toDate(),
+          lte: moment(endDate).toDate(),
+        },
+        status: {
+          in: [2, 3],
+        },
+      },
+      include: {
+        plans: true,
+        clinics: true,
+      },
+    });
+  }
+
   async createInvestmentInvoice(
     data: Prisma.investmentInvoiceUncheckedCreateInput,
   ) {
