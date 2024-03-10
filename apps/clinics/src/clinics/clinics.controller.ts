@@ -13,7 +13,7 @@ import { Prisma } from '@prisma/client';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
-import { filter, map, orderBy, sumBy, uniq, flatMap, groupBy } from 'lodash';
+import { filter, map, orderBy, sumBy, uniq } from 'lodash';
 import {
   calculateTimeBefore,
   checkAndInsertMissingDates,
@@ -2408,30 +2408,25 @@ export class ClinicController {
           startDate,
           endDate,
         },
-        clinics: groupBy(
-          flatMap(
-            await Promise.all(
-              map(
-                clinicIds,
-                async (clinicId) =>
-                  await this.getStatisticalByDate({
-                    clinicId,
-                    startDate,
-                    endDate,
-                  }).then((response) => {
-                    return {
-                      clinicId,
-                      clinicName: refactoredData.find(
-                        (item) => item.clinicId === clinicId,
-                      )?.clinicName,
-                      totalRevenue: sumBy(response.data, 'revenue'),
-                      data: response.data,
-                    };
-                  }),
-              ),
-            ),
+        clinics: await Promise.all(
+          map(
+            clinicIds,
+            async (clinicId) =>
+              await this.getStatisticalByDate({
+                clinicId,
+                startDate,
+                endDate,
+              }).then((response) => {
+                return {
+                  clinicId,
+                  clinicName: refactoredData.find(
+                    (item) => item.clinicId === clinicId,
+                  )?.clinicName,
+                  totalRevenue: sumBy(response.data, 'revenue'),
+                  data: response.data,
+                };
+              }),
           ),
-          'clinicName',
         ),
         details: checkAndInsertMissingDatesAdmin(
           startDate,
