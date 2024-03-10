@@ -87,12 +87,32 @@ export class NotificationController {
   @ApiOkResponse({ type: CreateRealtimeNotificationResponse })
   async pushNotification(@Body() body: PushNotificationDTO) {
     try {
-      const { userId, ...rest } = body;
-      const getTokens = await firstValueFrom(
-        this.authServiceClient.send(NotiCommand.GET_USER_TOKEN, {
-          userId,
-        }),
-      );
+      const { userId, moduleId, ...rest } = body;
+      if (!userId && !moduleId) {
+        throw new HttpException(
+          {
+            message: 'userId hoặc moduleId không được để trống',
+            data: null,
+            status: false,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      let getTokens;
+      if (userId) {
+        getTokens = await firstValueFrom(
+          this.authServiceClient.send(NotiCommand.GET_USER_TOKEN, {
+            userId,
+          }),
+        );
+      } else {
+        getTokens = await firstValueFrom(
+          this.authServiceClient.send(NotiCommand.GET_USER_TOKEN_BY_MODULE_ID, {
+            moduleId,
+          }),
+        );
+      }
+
       if (getTokens.status !== HttpStatus.OK) {
         throw new HttpException(
           {
@@ -125,6 +145,39 @@ export class NotificationController {
     @Body() body: CreateRealtimeNotificationDto,
   ) {
     try {
+      if (body.moduleId) {
+        const getUserIds = await firstValueFrom(
+          this.authServiceClient.send(NotiCommand.GET_USER_TOKEN_BY_MODULE_ID, {
+            moduleId: body.moduleId,
+          }),
+        );
+        if (getUserIds.status !== HttpStatus.OK) {
+          throw new HttpException(
+            {
+              message: getUserIds.message,
+              data: null,
+              status: false,
+            },
+            getUserIds.status,
+          );
+        }
+        const userIds = getUserIds.data?.map((item) => item.userId);
+        return await Promise.all(
+          userIds?.map(
+            async (userId: string) =>
+              await lastValueFrom(
+                this.notificationServiceClient.emit(
+                  NotiCommand.CREATE_REALTIME_NOTIFICATION,
+                  {
+                    content: body.content,
+                    title: body.title,
+                    userId,
+                  },
+                ),
+              ),
+          ),
+        );
+      }
       await lastValueFrom(
         this.notificationServiceClient.emit(
           NotiCommand.CREATE_REALTIME_NOTIFICATION,

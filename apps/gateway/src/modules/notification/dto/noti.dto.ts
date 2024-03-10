@@ -14,9 +14,14 @@ export class CreateUserTokenDTO {
 }
 export class PushNotificationDTO {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   userId: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  moduleId: string;
 
   @IsString()
   @IsNotEmpty()
@@ -44,6 +49,11 @@ export class CreateRealtimeNotificationDto {
   public title: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   public userId: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  moduleId: string;
 }

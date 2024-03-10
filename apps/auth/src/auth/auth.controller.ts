@@ -806,4 +806,22 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.GET_USER_TOKEN_BY_MODULE_ID)
+  async getUserTokenByModuleId(data: { moduleId: number }) {
+    try {
+      const { moduleId } = data;
+      const tokens = await this.authService.getUserTokenByModuleId(moduleId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách token thành công',
+        data: tokens,
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }
