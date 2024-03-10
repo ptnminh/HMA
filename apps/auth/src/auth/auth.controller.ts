@@ -475,6 +475,7 @@ export class AuthController {
           password: email,
           email,
           isInputPassword: false,
+          emailVerified: true,
         };
         user = await this.authService.signUpByEmail(data);
       }
