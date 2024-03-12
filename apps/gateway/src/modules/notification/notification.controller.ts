@@ -147,7 +147,7 @@ export class NotificationController {
     try {
       if (body.moduleId) {
         const getUserIds = await firstValueFrom(
-          this.authServiceClient.send(NotiCommand.GET_USER_TOKEN_BY_MODULE_ID, {
+          this.authServiceClient.send(NotiCommand.GET_USER_BY_MODULE_ID, {
             moduleId: body.moduleId,
           }),
         );
@@ -161,8 +161,8 @@ export class NotificationController {
             getUserIds.status,
           );
         }
-        const userIds = getUserIds.data?.map((item) => item.userId);
-        return await Promise.all(
+        const userIds = getUserIds.data?.map((item) => item.id);
+        await Promise.all(
           userIds?.map(
             async (userId: string) =>
               await lastValueFrom(

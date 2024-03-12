@@ -25,4 +25,5 @@ export enum AuthCommand {
   UPDATE_SCHEDULE = 'update_schedule',
   DELETE_SCHEDULE = 'delete_schedule',
   FIND_ALL_USER_BY_EMAIL = 'find_all_user_by_email',
+  GET_USER_BY_MODULE_ID = 'get_user_by_module_id',
 }

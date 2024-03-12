@@ -252,4 +252,11 @@ export class AuthService {
       },
     });
   }
+  async getUserByModuleId(moduleId: number) {
+    return this.prismaService.users.findMany({
+      where: {
+        moduleId,
+      },
+    });
+  }
 }

@@ -825,4 +825,22 @@ export class AuthController {
       };
     }
   }
+
+  @MessagePattern(AuthCommand.GET_USER_BY_MODULE_ID)
+  async getUserByModuleId(data: { moduleId: number }) {
+    try {
+      const { moduleId } = data;
+      const users = await this.authService.getUserByModuleId(moduleId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách user thành công',
+        data: users,
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
 }
