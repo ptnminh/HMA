@@ -13,7 +13,7 @@ import { Prisma } from '@prisma/client';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import * as moment from 'moment-timezone';
 import { BookingStatus, EVENTS, SUBSCRIPTION_STATUS } from 'src/shared';
-import { filter, map, orderBy, sumBy, uniq } from 'lodash';
+import { filter, groupBy, keys, map, orderBy, sumBy, uniq } from 'lodash';
 import {
   calculateTimeBefore,
   checkAndInsertMissingDates,
@@ -2383,6 +2383,25 @@ export class ClinicController {
         startDate,
         endDate,
       });
+
+      const adminSummaries = await this.clinicService.getAllSubscriptions();
+      const users = await this.clinicService.getAllUsers();
+
+      const totalUsers = users?.length;
+      const totalClinics = uniq(map(adminSummaries, 'clinicId'))?.length;
+      const totalRevenue = sumBy(
+        map(adminSummaries, (item) => ({ revenue: item.plans.currentPrice })),
+        'revenue',
+      );
+      const groupByPlans = groupBy(adminSummaries, 'planId');
+      const planIds = keys(groupByPlans);
+      const plans = map(planIds, (planId) => {
+        const foundPlans = groupByPlans[planId];
+        return {
+          planName: foundPlans[0].plans.planName,
+          total: foundPlans.length,
+        };
+      });
       if (!adminStatistical) {
         return {
           status: HttpStatus.BAD_REQUEST,
@@ -2403,11 +2422,13 @@ export class ClinicController {
       const clinicIds = uniq(map(refactoredData, 'clinicId'));
       const result = {
         summary: {
-          totalRevenue: sumBy(refactoredData, 'revenue'),
-          totalClinics: clinicIds.length,
+          totalRevenue,
+          totalClinics,
+          totalUsers,
           startDate,
           endDate,
         },
+        plans,
         clinics: await Promise.all(
           map(
             clinicIds,

@@ -1479,6 +1479,28 @@ export class ClinicService {
     });
   }
 
+  async getAllSubscriptions() {
+    return this.prismaService.subscriptions.findMany({
+      where: {
+        status: {
+          in: [2, 3],
+        },
+      },
+      include: {
+        plans: true,
+        clinics: true,
+      },
+    });
+  }
+
+  async getAllUsers() {
+    return this.prismaService.users.findMany({
+      where: {
+        emailVerified: true,
+      },
+    });
+  }
+
   async createInvestmentInvoice(
     data: Prisma.investmentInvoiceUncheckedCreateInput,
   ) {
