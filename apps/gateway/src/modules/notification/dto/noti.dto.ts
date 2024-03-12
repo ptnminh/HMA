@@ -21,7 +21,7 @@ export class PushNotificationDTO {
   @IsString()
   @IsOptional()
   @ApiProperty()
-  moduleId: string;
+  moduleId: number;
 
   @IsString()
   @IsNotEmpty()
@@ -55,5 +55,5 @@ export class CreateRealtimeNotificationDto {
   @IsString()
   @IsOptional()
   @ApiProperty()
-  moduleId: string;
+  moduleId: number;
 }
