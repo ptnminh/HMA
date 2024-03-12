@@ -37,6 +37,11 @@ export class PushNotificationDTO {
   @ApiProperty()
   @IsOptional()
   image?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  sendTime?: number;
 }
 
 export class CreateRealtimeNotificationDto {
@@ -56,4 +61,9 @@ export class CreateRealtimeNotificationDto {
   @IsOptional()
   @ApiProperty()
   moduleId: number;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  sendTime?: number;
 }

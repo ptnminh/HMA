@@ -20,6 +20,7 @@ import {
 } from './dto/noti.dto';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { NotiCommand } from './command';
+import { scheduleJob } from 'src/shared/utils';
 
 @Controller('notification')
 @ApiTags('Notification')
@@ -87,7 +88,8 @@ export class NotificationController {
   @ApiOkResponse({ type: CreateRealtimeNotificationResponse })
   async pushNotification(@Body() body: PushNotificationDTO) {
     try {
-      const { userId, moduleId, ...rest } = body;
+      const { userId, moduleId, sendTime, ...rest } = body;
+
       if (!userId && !moduleId) {
         throw new HttpException(
           {
@@ -124,6 +126,17 @@ export class NotificationController {
         );
       }
       const tokens = getTokens.data?.map((item) => item.token);
+      if (sendTime) {
+        const date = new Date(sendTime);
+        scheduleJob(date, async () => {
+          await lastValueFrom(
+            this.notificationServiceClient.emit(NotiCommand.PUSH_NOTIFICATION, {
+              tokens,
+              ...rest,
+            }),
+          );
+        });
+      }
       await lastValueFrom(
         this.notificationServiceClient.emit(NotiCommand.PUSH_NOTIFICATION, {
           tokens,
@@ -162,6 +175,27 @@ export class NotificationController {
           );
         }
         const userIds = getUserIds.data?.map((item) => item.id);
+        if (body.sendTime) {
+          const date = new Date(body.sendTime);
+          scheduleJob(date, async () => {
+            await Promise.all(
+              userIds?.map(
+                async (userId: string) =>
+                  await lastValueFrom(
+                    this.notificationServiceClient.emit(
+                      NotiCommand.CREATE_REALTIME_NOTIFICATION,
+                      {
+                        content: body.content,
+                        title: body.title,
+                        userId,
+                      },
+                    ),
+                  ),
+              ),
+            );
+          });
+        }
+
         await Promise.all(
           userIds?.map(
             async (userId: string) =>
@@ -177,6 +211,10 @@ export class NotificationController {
               ),
           ),
         );
+        return {
+          message: 'Gửi notification thành công',
+          status: true,
+        };
       }
       await lastValueFrom(
         this.notificationServiceClient.emit(
