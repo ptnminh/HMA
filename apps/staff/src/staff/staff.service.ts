@@ -266,7 +266,7 @@ export class StaffService {
         isDisabled:
           isDisabled !== null && isDisabled !== undefined
             ? isDisabled
-            : undefined,
+            : false,
         isAcceptInvite:
           isAcceptInvite !== null && isAcceptInvite !== undefined
             ? isAcceptInvite
