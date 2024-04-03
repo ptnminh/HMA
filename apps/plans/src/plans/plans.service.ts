@@ -49,39 +49,42 @@ export class PlanService {
         planOptions: {
           some: {
             option: {
-              isActive: true
-            }
-          }
-        }
+              isActive: true,
+            },
+          },
+        },
       },
       include: {
         planOptions: {
           select: {
             option: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
-  async findAllPlans(getAll: Boolean) {
+  async findAllPlans(getAll: any) {
     return this.prismaService.plans.findMany({
       where: {
-        isActive: getAll? undefined:true,
+        isActive: getAll ? undefined : true,
       },
       include: {
         planOptions: {
           select: {
-            option: true
+            option: true,
           },
           where: {
             option: {
-              isActive: getAll? undefined:true
-            }
-          }
-        }
-      }
-    })
+              isActive: getAll ? undefined : true,
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   }
   async createPlanOption(planId: number, optionIds: number[]) {
     const data = optionIds.map((optionId) => ({

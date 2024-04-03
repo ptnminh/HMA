@@ -104,7 +104,7 @@ export class StaffController {
       }
       const createdStaff = await this.staffService.findStaffById(staff.id);
 
-      if (Object.keys(userInfo).length === 0) {
+      if (!userInfo) {
         const getUserResponse = await firstValueFrom(
           this.authServiceClient.send(AuthCommand.USER_GET, {
             userId,
@@ -177,19 +177,21 @@ export class StaffController {
         };
       }
       delete staff.users.password;
-      const { role, ...rest } = staff;
+      const { role, clinics, users, ...rest } = staff;
       return {
         message: 'Tìm kiếm thành công',
         status: HttpStatus.OK,
         data: {
           ...rest,
-          role: {
+          clinics: clinics? clinics: null,
+          users: users? users: null,
+          role: role? {
             id: role.id,
             name: role.name,
             permissions: role.rolePermissions.map((value) => {
               return value.permission;
             }),
-          },
+          }: null,
         },
       };
     } catch (error) {
@@ -630,16 +632,16 @@ export class StaffController {
         data: staffs.map((value) => {
           const { users, role, staffServices, ...rest } = value;
           if (users) delete users.password;
-          const { rolePermissions, ...roleData } = role;
           return {
             ...rest,
             users,
-            role: {
-              ...roleData,
-              permissions: rolePermissions.map((item) => {
+            role: role? {
+              id: role.id,
+              name: role.name,
+              permissions: role.rolePermissions.map((item) => {
                 return item.permission;
               }),
-            },
+            }: null,
             services: uniqBy(
               map(
                 staffServices,

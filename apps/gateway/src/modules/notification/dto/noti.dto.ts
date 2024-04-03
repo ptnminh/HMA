@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class CreateUserTokenDTO {
   @IsString()
@@ -14,9 +14,14 @@ export class CreateUserTokenDTO {
 }
 export class PushNotificationDTO {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   userId: string;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  moduleId: number;
 
   @IsString()
   @IsNotEmpty()
@@ -32,6 +37,11 @@ export class PushNotificationDTO {
   @ApiProperty()
   @IsOptional()
   image?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  sendTime?: number;
 }
 
 export class CreateRealtimeNotificationDto {
@@ -44,6 +54,16 @@ export class CreateRealtimeNotificationDto {
   public title: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   public userId: string;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  moduleId: number;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  sendTime?: number;
 }

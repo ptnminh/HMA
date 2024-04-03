@@ -132,6 +132,9 @@ export class StaffService {
       where: {
         isDisabled: false,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -213,6 +216,9 @@ export class StaffService {
         staffId,
         isDisabled: false,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -260,7 +266,7 @@ export class StaffService {
         isDisabled:
           isDisabled !== null && isDisabled !== undefined
             ? isDisabled
-            : undefined,
+            : false,
         isAcceptInvite:
           isAcceptInvite !== null && isAcceptInvite !== undefined
             ? isAcceptInvite
@@ -360,6 +366,9 @@ export class StaffService {
             },
           },
         },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }

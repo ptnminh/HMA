@@ -182,6 +182,9 @@ export class ChatService {
         isActive: true,
         groupChatMember: true,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -203,6 +206,9 @@ export class ChatService {
         type: true,
         isActive: true,
         groupChatMember: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }

@@ -18,10 +18,12 @@ export enum AuthCommand {
   CREATE_USER_TOKEN = 'create_user_token',
   DELETE_USER_TOKEN = 'delete_user_token',
   GET_USER_TOKEN = 'get_user_token',
+  GET_USER_TOKEN_BY_MODULE_ID = 'get_user_token_by_module_id',
   FIND_SCHEDULE_BY_ID = 'find_schedule_by_id',
   FIND_SCHEDULE_BY_USER_ID = 'find_schedule_by_user_id',
   CREATE_SCHEDULE = 'create_schedule',
   UPDATE_SCHEDULE = 'update_schedule',
   DELETE_SCHEDULE = 'delete_schedule',
   FIND_ALL_USER_BY_EMAIL = 'find_all_user_by_email',
+  GET_USER_BY_MODULE_ID = 'get_user_by_module_id',
 }

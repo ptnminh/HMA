@@ -74,6 +74,7 @@ export class AuthController {
           type,
           uniqueId,
           notificationData,
+          moduleId: user.moduleId,
         },
         {
           secret: jwtSercret,
@@ -474,6 +475,7 @@ export class AuthController {
           password: email,
           email,
           isInputPassword: false,
+          emailVerified: true,
         };
         user = await this.authService.signUpByEmail(data);
       }
@@ -797,6 +799,42 @@ export class AuthController {
         status: HttpStatus.OK,
         message: 'Lấy danh sách token thành công',
         data: tokens,
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(AuthCommand.GET_USER_TOKEN_BY_MODULE_ID)
+  async getUserTokenByModuleId(data: { moduleId: number }) {
+    try {
+      const { moduleId } = data;
+      const tokens = await this.authService.getUserTokenByModuleId(moduleId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách token thành công',
+        data: tokens,
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Lỗi hệ thống',
+      };
+    }
+  }
+
+  @MessagePattern(AuthCommand.GET_USER_BY_MODULE_ID)
+  async getUserByModuleId(data: { moduleId: number }) {
+    try {
+      const { moduleId } = data;
+      const users = await this.authService.getUserByModuleId(moduleId);
+      return {
+        status: HttpStatus.OK,
+        message: 'Lấy danh sách user thành công',
+        data: users,
       };
     } catch (error) {
       return {

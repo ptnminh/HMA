@@ -350,6 +350,9 @@ export class ClinicService {
           },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -425,6 +428,9 @@ export class ClinicService {
             staffId: true,
           },
         },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
@@ -530,6 +536,9 @@ export class ClinicService {
         },
         clinics: true,
         clinicServices: true,
+      },
+      orderBy: {
+        createAt: 'desc',
       },
     });
     return map(appointments, (appointment: any) => {
@@ -1257,6 +1266,9 @@ export class ClinicService {
         prescriptionDetail: true,
         usingMedicalSupplies: true,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
     return map(medicalRecords, (medicalRecord) => {
       const { patient, doctor, ...rest }: any = medicalRecord;
@@ -1439,6 +1451,52 @@ export class ClinicService {
               },
             }
           : {}),
+      },
+    });
+  }
+
+  async findAdminStatistical({
+    startDate,
+    endDate,
+  }: {
+    startDate?: string;
+    endDate?: string;
+  }) {
+    return this.prismaService.subscriptions.findMany({
+      where: {
+        createdAt: {
+          gte: moment(startDate).toDate(),
+          lte: moment(endDate).toDate(),
+        },
+        status: {
+          in: [2, 3],
+        },
+      },
+      include: {
+        plans: true,
+        clinics: true,
+      },
+    });
+  }
+
+  async getAllSubscriptions() {
+    return this.prismaService.subscriptions.findMany({
+      where: {
+        status: {
+          in: [2, 3],
+        },
+      },
+      include: {
+        plans: true,
+        clinics: true,
+      },
+    });
+  }
+
+  async getAllUsers() {
+    return this.prismaService.users.findMany({
+      where: {
+        emailVerified: true,
       },
     });
   }

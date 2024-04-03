@@ -242,4 +242,21 @@ export class AuthService {
       },
     });
   }
+
+  async getUserTokenByModuleId(moduleId: number) {
+    return this.prismaService.userDeviceTokens.findMany({
+      where: {
+        users: {
+          moduleId,
+        },
+      },
+    });
+  }
+  async getUserByModuleId(moduleId: number) {
+    return this.prismaService.users.findMany({
+      where: {
+        moduleId,
+      },
+    });
+  }
 }
